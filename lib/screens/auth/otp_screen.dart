@@ -37,9 +37,7 @@ class OTPScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(30),
-                  ),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
                 ),
                 child: Column(
                   children: [
@@ -53,9 +51,7 @@ class OTPScreen extends StatelessWidget {
                             textAlign: TextAlign.center,
                             keyboardType: TextInputType.number,
                             maxLength: 1,
-                            decoration: const InputDecoration(
-                              counterText: "",
-                            ),
+                            decoration: const InputDecoration(counterText: ""),
                           ),
                         ),
                       ),
@@ -69,7 +65,9 @@ class OTPScreen extends StatelessWidget {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
-                          shape: BorderRadius.circular(12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         onPressed: () {},
                         child: const Text("VERIFY"),
@@ -78,7 +76,7 @@ class OTPScreen extends StatelessWidget {
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
