@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:aleeapp/widgets/auth_header.dart';
+import '../../widgets/auth_header.dart';
+import '../../widgets/custom_input.dart';
+import '../../widgets/custom_button.dart';
 
-class SignupScreen extends StatelessWidget {
-  const SignupScreen({super.key});
+class SignUpScreen extends StatelessWidget {
+  const SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
       body: Column(
         children: [
           const AuthHeader(
@@ -17,57 +18,31 @@ class SignupScreen extends StatelessWidget {
 
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  _input("NAME"),
-                  const SizedBox(height: 10),
-                  _input("EMAIL"),
-                  const SizedBox(height: 10),
-                  _input("PASSWORD", isPassword: true),
-                  const SizedBox(height: 10),
-                  _input("RE-TYPE PASSWORD", isPassword: true),
+                  const CustomInput(hint: "NAME"),
+                  const SizedBox(height: 14),
+
+                  const CustomInput(hint: "EMAIL"),
+                  const SizedBox(height: 14),
+
+                  const CustomInput(hint: "PASSWORD", isPassword: true),
+                  const SizedBox(height: 14),
+
+                  const CustomInput(hint: "RE-TYPE PASSWORD", isPassword: true),
 
                   const SizedBox(height: 20),
 
-                  _button("SIGN UP"),
+                  CustomButton(
+                    text: "SIGN UP",
+                    onPressed: () {},
+                  ),
                 ],
               ),
             ),
-          ),
+          )
         ],
-      ),
-    );
-  }
-
-  Widget _input(String hint, {bool isPassword = false}) {
-    return TextField(
-      obscureText: isPassword,
-      decoration: InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: Colors.grey.shade200,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _button(String text) {
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFF7A1A),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        onPressed: () {},
-        child: Text(text),
       ),
     );
   }

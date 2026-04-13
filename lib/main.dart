@@ -1,29 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'screens/splash_screen.dart';
+import 'screens/onboarding/onboarding_screen.dart';
 
 void main() {
-  runApp(
-    const ProviderScope(
-      child: AleeDeliveryApp(),
-    ),
-  );
+  runApp(const MyApp());
 }
 
-class AleeDeliveryApp extends StatelessWidget {
-  const AleeDeliveryApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Alee Delivery',
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: Colors.white,
-        fontFamily: 'Roboto',
-      ),
-      home: const SplashScreen(),
+      home: OnboardingScreen(),
     );
   }
 }
