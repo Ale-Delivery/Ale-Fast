@@ -1,43 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'screens/auth/phone_input_screen.dart';
+import 'screens/splash_screen.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await Supabase.initialize(
-    url: 'YOUR_SUPABASE_URL',
-    anonKey: 'YOUR_SUPABASE_ANON_KEY',
-  );
-
+void main() {
   runApp(
     const ProviderScope(
-      child: DeliveryApp(),
+      child: AleeDeliveryApp(),
     ),
   );
 }
 
-class DeliveryApp extends StatelessWidget {
-  const DeliveryApp({super.key});
+class AleeDeliveryApp extends StatelessWidget {
+  const AleeDeliveryApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const primaryRed = Color(0xFFE60000);
-
     return MaterialApp(
+      title: 'Alee Delivery',
       debugShowCheckedModeBanner: false,
-      title: 'Alee App - Delivery',
       theme: ThemeData(
         useMaterial3: true,
-        primaryColor: primaryRed,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: primaryRed,
-        ),
-        textTheme: GoogleFonts.poppinsTextTheme(),
+        scaffoldBackgroundColor: Colors.white,
+        fontFamily: 'Roboto',
       ),
-      home: const PhoneInputScreen(),
+      home: const SplashScreen(),
     );
   }
 }
