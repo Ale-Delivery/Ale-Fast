@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'auth/login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -20,7 +21,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void nextPage() {
     if (isLastPage) {
-      // මෙතනින් පස්සේ login screen එකට යවන්න පුලුවන්
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
     } else {
       _controller.nextPage(
         duration: const Duration(milliseconds: 500),
@@ -116,10 +120,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       },
                       child: const Text(
                         "Skip",
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.grey, fontSize: 14),
                       ),
                     ),
                 ],
@@ -172,11 +173,7 @@ class OnboardPage extends StatelessWidget {
                 color: const Color(0xFFFFF3E9),
                 borderRadius: BorderRadius.circular(110),
               ),
-              child: Icon(
-                icon,
-                size: 110,
-                color: primaryColor,
-              ),
+              child: Icon(icon, size: 110, color: primaryColor),
             ),
           ),
           const SizedBox(height: 40),
