@@ -1,17 +1,70 @@
-# aleeapp
+# 🍔 Food App — Flutter UI
 
-A new Flutter project.
+## Project Structure
 
-## Getting Started
+```
+lib/
+├── main.dart                          # App entry point
+├── theme/
+│   └── app_theme.dart                 # Colors & theme
+├── screens/
+│   ├── splash_screen.dart             # Animated splash
+│   ├── onboarding_screen.dart         # 3-slide onboarding
+│   ├── login_screen.dart              # Login with social buttons
+│   ├── signup_screen.dart             # Sign up form
+│   ├── verification_screen.dart       # OTP with custom numpad
+│   └── forgot_password_screen.dart    # Forgot password
+└── widgets/
+    └── dark_widgets.dart              # Reusable: DarkTextField, OrangeButton, SocialButton
+```
 
-This project is a starting point for a Flutter application.
+## Setup
 
-A few resources to get you started if this is your first Flutter project:
+### 1. Flutter install කරන්න (නොතිබේ නම්)
+https://docs.flutter.dev/get-started/install
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+### 2. Project create කරන්න
+```bash
+flutter create food_app
+cd food_app
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### 3. Files copy කරන්න
+ඔය zip එකේ files ටික `lib/` folder එකට copy කරන්න, `pubspec.yaml` root එකට.
+
+### 4. Dependencies install කරන්න
+```bash
+flutter pub get
+```
+
+### 5. Run කරන්න
+```bash
+flutter run
+```
+
+## Dependencies
+
+| Package | Use |
+|---------|-----|
+| `google_fonts` | Nunito font |
+| `smooth_page_indicator` | Onboarding dots animation |
+
+## Screen Flow
+
+```
+SplashScreen (3s)
+    └── OnboardingScreen
+            └── LoginScreen ──── ForgotPasswordScreen
+                    │                     └── VerificationScreen
+                    └── SignupScreen
+                            └── VerificationScreen
+```
+
+## Colors
+
+| Name | Hex |
+|------|-----|
+| Orange (primary) | `#FF6B35` |
+| Dark Background | `#1A1A2E` |
+| White | `#FFFFFF` |
+| Light Background | `#F0F2F5` |
