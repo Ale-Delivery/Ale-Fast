@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:food_app/services/auth_service.dart';
-import 'package:food_app/screens/profile_setup_screen.dart';
-// import 'package:food_app/screens/home_screen.dart'; // HomeScreen eka haduwama meka on karamu
+import '../services/auth_service.dart';
+import '../screens/profile_setup_screen.dart';
 
 class VerificationScreen extends StatefulWidget {
   final String phoneNumber;
@@ -18,7 +17,7 @@ class VerificationScreen extends StatefulWidget {
 }
 
 class _VerificationScreenState extends State<VerificationScreen> {
-  // Box 4ta wenama controllers 4k saha focus nodes 4k
+  // Box 4ට වෙනම controllers 4ක් සහ focus nodes 4ක්
   final List<TextEditingController> _controllers =
       List.generate(4, (index) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
@@ -36,7 +35,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
     super.dispose();
   }
 
-  // OTP eka Hari da kiyala balana function eka
+  // OTP එක හරිද කියලා බලන function එක
   Future<void> _verifyOTP() async {
     String enteredOtp = _controllers.map((c) => c.text).join();
 
@@ -64,34 +63,16 @@ class _VerificationScreenState extends State<VerificationScreen> {
     try {
       final authService = AuthService();
 
-      // Aluth user kenekda parana user kenekda kiyala balanawa
-      bool isNewUser = await authService.loginWithPhone(widget.phoneNumber);
+      // Dummy OTP පාවිච්චි කරන නිසා දැනට Supabase එකට OTP එක යවන්නේ නැතුව කෙලින්ම ඊළඟ Screen එකට යවනවා.
+      // (ඇත්තටම SMS යවලා verify කරද්දී මේ පල්ලෙහා කෝඩ් එකේ කමෙන්ට් එක අයින් කරන්න)
+      // await authService.loginWithPhone(widget.phoneNumber, enteredOtp);
 
       if (mounted) {
-        if (isNewUser) {
-          // 👉 ALUTH USER: Profile Setup screen ekata yawanawa
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => const ProfileSetupScreen()),
-            (route) => false,
-          );
-        } else {
-          // 👉 PARANA USER: Kelinma Home Screen ekata yawanawa
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Welcome back! 🎉',
-                  style: TextStyle(color: Colors.white)),
-              backgroundColor: Colors.green,
-            ),
-          );
-
-          // TODO: Home Screen eka haduwama meka on karanna
-          // Navigator.pushAndRemoveUntil(
-          //   context,
-          //   MaterialPageRoute(builder: (_) => const HomeScreen()),
-          //   (route) => false,
-          // );
-        }
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileSetupScreen()),
+          (route) => false,
+        );
       }
     } catch (e) {
       if (mounted) {
