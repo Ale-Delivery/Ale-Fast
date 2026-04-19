@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:food_app/theme/app_theme.dart';
-import 'package:food_app/screens/login_screen.dart';
+// 👇 Aluth file eka import kara
+import 'package:food_app/screens/phone_auth_screen.dart';
 
 class OnboardingItem {
   final String emoji;
@@ -60,13 +61,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      _goToLogin();
+      _goToAuth();
     }
   }
 
-  void _goToLogin() {
+  // 👇 Login wenuwata PhoneAuthScreen ekata yanna wenas kara
+  void _goToAuth() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      MaterialPageRoute(builder: (_) => const PhoneAuthScreen()),
     );
   }
 
@@ -188,7 +190,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                 // Skip button
                 TextButton(
-                  onPressed: _goToLogin,
+                  onPressed: _goToAuth, // 👇 Methanath wenas kara
                   child: Text(
                     'Skip',
                     style: GoogleFonts.nunito(

@@ -1,244 +1,221 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:food_app/theme/app_theme.dart';
-import 'package:food_app/widgets/dark_widgets.dart';
+import 'package:food_app/services/auth_service.dart';
+import 'package:food_app/screens/profile_setup_screen.dart';
+// import 'package:food_app/screens/home_screen.dart'; // HomeScreen eka haduwama meka on karamu
 
 class VerificationScreen extends StatefulWidget {
-  final String email;
-  const VerificationScreen({super.key, this.email = 'example@gmail.com'});
+  final String phoneNumber;
+  final String expectedOtp;
+
+  const VerificationScreen({
+    super.key,
+    required this.phoneNumber,
+    required this.expectedOtp,
+  });
 
   @override
   State<VerificationScreen> createState() => _VerificationScreenState();
 }
 
 class _VerificationScreenState extends State<VerificationScreen> {
-  final List<String> _otp = ['', '', '', ''];
-  int _timerSeconds = 50;
-  Timer? _timer;
+  // Box 4ta wenama controllers 4k saha focus nodes 4k
+  final List<TextEditingController> _controllers =
+      List.generate(4, (index) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
 
-  @override
-  void initState() {
-    super.initState();
-    _startTimer();
-  }
-
-  void _startTimer() {
-    _timer?.cancel();
-    setState(() => _timerSeconds = 50);
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (_timerSeconds == 0) {
-        t.cancel();
-      } else {
-        setState(() => _timerSeconds--);
-      }
-    });
-  }
+  bool _isLoading = false;
 
   @override
   void dispose() {
-    _timer?.cancel();
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    for (var node in _focusNodes) {
+      node.dispose();
+    }
     super.dispose();
   }
 
-  void _onKeyTap(String key) {
+  // OTP eka Hari da kiyala balana function eka
+  Future<void> _verifyOTP() async {
+    String enteredOtp = _controllers.map((c) => c.text).join();
+
+    if (enteredOtp.length < 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter all 4 digits')),
+      );
+      return;
+    }
+
+    if (enteredOtp != widget.expectedOtp) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid OTP Code!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() {
-      if (key == '⌫') {
-        // Remove last filled digit
-        for (int i = 3; i >= 0; i--) {
-          if (_otp[i].isNotEmpty) {
-            _otp[i] = '';
-            break;
-          }
-        }
-      } else {
-        // Fill next empty box
-        for (int i = 0; i < 4; i++) {
-          if (_otp[i].isEmpty) {
-            _otp[i] = key;
-            break;
-          }
+      _isLoading = true;
+    });
+
+    try {
+      final authService = AuthService();
+
+      // Aluth user kenekda parana user kenekda kiyala balanawa
+      bool isNewUser = await authService.loginWithPhone(widget.phoneNumber);
+
+      if (mounted) {
+        if (isNewUser) {
+          // 👉 ALUTH USER: Profile Setup screen ekata yawanawa
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const ProfileSetupScreen()),
+            (route) => false,
+          );
+        } else {
+          // 👉 PARANA USER: Kelinma Home Screen ekata yawanawa
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Welcome back! 🎉',
+                  style: TextStyle(color: Colors.white)),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // TODO: Home Screen eka haduwama meka on karanna
+          // Navigator.pushAndRemoveUntil(
+          //   context,
+          //   MaterialPageRoute(builder: (_) => const HomeScreen()),
+          //   (route) => false,
+          // );
         }
       }
-    });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
-
-  bool get _isComplete => _otp.every((d) => d.isNotEmpty);
 
   @override
   Widget build(BuildContext context) {
+    const primaryColor = Color(0xFFFF7A1A);
+
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      body: Column(
-        children: [
-          // Top content
-          Expanded(
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
+      backgroundColor: const Color(0xFF0F1020),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              "Verification",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "Enter OTP Code sent to ${widget.phoneNumber}",
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+            const SizedBox(height: 30),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(30),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.arrow_back,
-                            color: Colors.white, size: 18),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    Text(
-                      'Verification',
-                      style: GoogleFonts.nunito(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    RichText(
-                      text: TextSpan(
-                        style: GoogleFonts.nunito(
-                            fontSize: 13, color: Colors.white38),
-                        children: [
-                          const TextSpan(
-                              text: 'We have sent a code to your email\n'),
-                          TextSpan(
-                            text: widget.email,
-                            style: const TextStyle(
-                                color: AppTheme.orange,
-                                fontWeight: FontWeight.w700),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-
-                    // OTP Boxes
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(4, (i) {
-                        final filled = _otp[i].isNotEmpty;
-                        return Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 6),
-                          width: 62,
-                          height: 62,
-                          decoration: BoxDecoration(
-                            color: filled
-                                ? AppTheme.orange.withOpacity(0.15)
-                                : Colors.white.withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: filled
-                                  ? AppTheme.orange
-                                  : Colors.white.withOpacity(0.15),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              _otp[i].isEmpty ? '—' : _otp[i],
-                              style: GoogleFonts.nunito(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
-                                color: filled ? Colors.white : Colors.white24,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(
+                        4,
+                        (index) => SizedBox(
+                          width: 50,
+                          child: TextField(
+                            controller: _controllers[index],
+                            focusNode: _focusNodes[index],
+                            textAlign: TextAlign.center,
+                            keyboardType: TextInputType.number,
+                            maxLength: 1,
+                            style: const TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold),
+                            decoration: const InputDecoration(
+                              counterText: "",
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.grey),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: primaryColor, width: 2),
                               ),
                             ),
+                            onChanged: (value) {
+                              if (value.isNotEmpty && index < 3) {
+                                FocusScope.of(context)
+                                    .requestFocus(_focusNodes[index + 1]);
+                              }
+                              if (value.isEmpty && index > 0) {
+                                FocusScope.of(context)
+                                    .requestFocus(_focusNodes[index - 1]);
+                              }
+                            },
                           ),
-                        );
-                      }),
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 20),
-
-                    // Resend timer
-                    Center(
-                      child: _timerSeconds > 0
-                          ? Text(
-                              'Resend in $_timerSeconds sec',
-                              style: GoogleFonts.nunito(
-                                  fontSize: 12, color: Colors.white38),
-                            )
-                          : GestureDetector(
-                              onTap: _startTimer,
-                              child: Text(
-                                'Resend Code',
-                                style: GoogleFonts.nunito(
-                                  fontSize: 12,
-                                  color: AppTheme.orange,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    OrangeButton(
-                      text: 'VERIFY',
-                      onPressed: _isComplete
-                          ? () {
-                              // Navigate to home / success
-                              Navigator.of(context).popUntil(
-                                  (route) => route.isFirst);
-                            }
-                          : () {},
+                    const SizedBox(height: 40),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: _isLoading ? null : _verifyOTP,
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                    color: Colors.white, strokeWidth: 2))
+                            : const Text("VERIFY",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold)),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-          ),
-
-          // Numpad
-          Container(
-            color: Colors.white,
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 2.2,
-              ),
-              itemCount: 12,
-              itemBuilder: (context, index) {
-                final keys = [
-                  '1', '2', '3',
-                  '4', '5', '6',
-                  '7', '8', '9',
-                  '', '0', '⌫',
-                ];
-                final key = keys[index];
-                if (key.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                return InkWell(
-                  onTap: () => _onKeyTap(key),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey[100]!, width: 0.5),
-                    ),
-                    child: Center(
-                      child: Text(
-                        key,
-                        style: GoogleFonts.nunito(
-                          fontSize: key == '⌫' ? 20 : 22,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.darkBg,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
