@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:food_app/theme/app_theme.dart';
 // 👇 Aluth file eka import kara
-import 'package:food_app/screens/phone_auth_screen.dart';
+import 'package:food_app/navigation/buyer_navigator.dart';
 
 class OnboardingItem {
   final String emoji;
@@ -66,11 +66,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   // 👇 Login wenuwata PhoneAuthScreen ekata yanna wenas kara
-  void _goToAuth() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const PhoneAuthScreen()),
-    );
-  }
+  void _goToAuth() => BuyerNavigator.phoneAuth(context, replace: true);
 
   @override
   void dispose() {

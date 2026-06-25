@@ -139,6 +139,152 @@ class CartItem {
   double get total => food.price * quantity;
 }
 
+// ─── Order Status ──────────────────────────────────────────────
+enum OrderStatus {
+  pending('pending'),
+  accepted('accepted'),
+  preparing('preparing'),
+  ready('ready'),
+  onTheWay('on_the_way'),
+  delivered('delivered'),
+  cancelled('cancelled');
+
+  const OrderStatus(this.value);
+  final String value;
+
+  static OrderStatus fromString(String? raw) {
+    return OrderStatus.values.firstWhere(
+      (s) => s.value == raw,
+      orElse: () => OrderStatus.pending,
+    );
+  }
+
+  String get label {
+    switch (this) {
+      case OrderStatus.pending:
+        return 'Waiting for restaurant';
+      case OrderStatus.accepted:
+        return 'Order accepted';
+      case OrderStatus.preparing:
+        return 'Preparing your food';
+      case OrderStatus.ready:
+        return 'Ready for pickup';
+      case OrderStatus.onTheWay:
+        return 'On the way';
+      case OrderStatus.delivered:
+        return 'Delivered';
+      case OrderStatus.cancelled:
+        return 'Cancelled';
+    }
+  }
+
+  int get stepIndex {
+    switch (this) {
+      case OrderStatus.pending:
+        return 0;
+      case OrderStatus.accepted:
+        return 1;
+      case OrderStatus.preparing:
+        return 2;
+      case OrderStatus.ready:
+        return 3;
+      case OrderStatus.onTheWay:
+        return 4;
+      case OrderStatus.delivered:
+        return 5;
+      case OrderStatus.cancelled:
+        return -1;
+    }
+  }
+}
+
+// ─── Order Model ─────────────────────────────────────────────────
+class Order {
+  final String id;
+  final String userId;
+  final String restaurantId;
+  final String restaurantName;
+  final OrderStatus status;
+  final double subtotal;
+  final double deliveryFee;
+  final double total;
+  final String deliveryAddress;
+  final String deliveryPhone;
+  final String? deliveryNotes;
+  final String paymentMethod;
+  final DateTime? createdAt;
+
+  const Order({
+    required this.id,
+    required this.userId,
+    required this.restaurantId,
+    required this.restaurantName,
+    required this.status,
+    required this.subtotal,
+    required this.deliveryFee,
+    required this.total,
+    required this.deliveryAddress,
+    required this.deliveryPhone,
+    this.deliveryNotes,
+    this.paymentMethod = 'cash',
+    this.createdAt,
+  });
+
+  factory Order.fromJson(Map<String, dynamic> json) => Order(
+        id: json['id']?.toString() ?? '',
+        userId: json['user_id']?.toString() ?? '',
+        restaurantId: json['restaurant_id']?.toString() ?? '',
+        restaurantName: json['restaurant_name'] ?? '',
+        status: OrderStatus.fromString(json['status']),
+        subtotal: (json['subtotal'] ?? 0).toDouble(),
+        deliveryFee: (json['delivery_fee'] ?? 0).toDouble(),
+        total: (json['total'] ?? 0).toDouble(),
+        deliveryAddress: json['delivery_address'] ?? '',
+        deliveryPhone: json['delivery_phone'] ?? '',
+        deliveryNotes: json['delivery_notes'],
+        paymentMethod: json['payment_method'] ?? 'cash',
+        createdAt: json['created_at'] != null
+            ? DateTime.tryParse(json['created_at'].toString())
+            : null,
+      );
+}
+
+// ─── Order Item Line ─────────────────────────────────────────────
+class OrderItemLine {
+  final String id;
+  final String orderId;
+  final String? foodItemId;
+  final String name;
+  final double price;
+  final int quantity;
+  final String? selectedSize;
+  final String? imageUrl;
+
+  const OrderItemLine({
+    required this.id,
+    required this.orderId,
+    this.foodItemId,
+    required this.name,
+    required this.price,
+    required this.quantity,
+    this.selectedSize,
+    this.imageUrl,
+  });
+
+  double get lineTotal => price * quantity;
+
+  factory OrderItemLine.fromJson(Map<String, dynamic> json) => OrderItemLine(
+        id: json['id']?.toString() ?? '',
+        orderId: json['order_id']?.toString() ?? '',
+        foodItemId: json['food_item_id']?.toString(),
+        name: json['name'] ?? '',
+        price: (json['price'] ?? 0).toDouble(),
+        quantity: json['quantity'] ?? 1,
+        selectedSize: json['selected_size'],
+        imageUrl: json['image_url'],
+      );
+}
+
 // ─── Offer Model ───────────────────────────────────────────────
 class Offer {
   final String id;

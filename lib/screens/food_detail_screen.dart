@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import '../models/models.dart';
 import '../providers/cart_provider.dart';
 import '../theme/app_theme.dart';
+import '../navigation/buyer_navigator.dart';
 import '../widgets/common_widgets.dart';
-import 'cart_screen.dart';
 
 class FoodDetailScreen extends StatefulWidget {
   final FoodItem food;
@@ -56,10 +56,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                   Stack(
                     children: [
                       GestureDetector(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const CartScreen()),
-                        ),
+                        onTap: () => BuyerNavigator.cart(context),
                         child: Container(
                           margin: const EdgeInsets.all(8),
                           padding: const EdgeInsets.all(8),
@@ -279,13 +276,20 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                         SnackBar(
                           content: const Text('Added to cart!'),
                           backgroundColor: AppColors.orange,
-                          duration: const Duration(seconds: 1),
+                          duration: const Duration(seconds: 3),
+                          behavior: SnackBarBehavior.floating,
+                          margin: const EdgeInsets.only(
+                            bottom: 96,
+                            left: 16,
+                            right: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           action: SnackBarAction(
                             label: 'View Cart',
                             textColor: Colors.white,
-                            onPressed: () => Navigator.push(context,
-                                MaterialPageRoute(
-                                    builder: (_) => const CartScreen())),
+                            onPressed: () => BuyerNavigator.cart(context),
                           ),
                         ),
                       );

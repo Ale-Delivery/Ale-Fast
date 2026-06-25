@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/models.dart';
-import '../services/auth_service.dart';
+import '../services/database_service.dart';
 import '../providers/cart_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';

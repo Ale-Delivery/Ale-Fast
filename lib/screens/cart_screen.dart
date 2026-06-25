@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
+import '../navigation/buyer_navigator.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -85,7 +86,7 @@ class CartScreen extends StatelessWidget {
                                           fontSize: 11,
                                           color: AppColors.grey)),
                                   const SizedBox(height: 4),
-                                  Text('\$${item.total.toStringAsFixed(0)}',
+                                  Text('Rs. ${item.total.toStringAsFixed(0)}',
                                       style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w800,
@@ -139,20 +140,20 @@ class CartScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       _summaryRow('Subtotal',
-                          '\$${cart.subtotal.toStringAsFixed(2)}'),
+                          'Rs. ${cart.subtotal.toStringAsFixed(0)}'),
                       const SizedBox(height: 8),
                       _summaryRow(
                           'Delivery',
                           cart.deliveryFee == 0
                               ? 'Free'
-                              : '\$${cart.deliveryFee.toStringAsFixed(2)}'),
+                              : 'Rs. ${cart.deliveryFee.toStringAsFixed(0)}'),
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
                         child: Divider(),
                       ),
                       _summaryRow(
                         'Total',
-                        '\$${cart.total.toStringAsFixed(2)}',
+                        'Rs. ${cart.total.toStringAsFixed(0)}',
                         bold: true,
                       ),
                       const SizedBox(height: 16),
@@ -160,27 +161,7 @@ class CartScreen extends StatelessWidget {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (_) => AlertDialog(
-                                title: const Text('Order Placed! 🎉'),
-                                content: const Text(
-                                    'Your order has been placed successfully.'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      context.read<CartProvider>().clearCart();
-                                      Navigator.of(context)
-                                        ..pop()
-                                        ..pop();
-                                    },
-                                    child: const Text('OK',
-                                        style: TextStyle(
-                                            color: AppColors.orange)),
-                                  ),
-                                ],
-                              ),
-                            );
+                            BuyerNavigator.deliveryAddress(context);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.orange,
@@ -189,7 +170,7 @@ class CartScreen extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14)),
                           ),
-                          child: const Text('Place Order',
+                          child: const Text('Proceed to Checkout',
                               style: TextStyle(
                                   fontWeight: FontWeight.w800, fontSize: 16)),
                         ),

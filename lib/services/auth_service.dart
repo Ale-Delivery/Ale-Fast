@@ -1,7 +1,23 @@
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
+
+  static String _generateUserId() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    String hex(int b) => b.toRadixString(16).padLeft(2, '0');
+    return '${bytes.sublist(0, 4).map(hex).join()}-'
+        '${bytes.sublist(4, 6).map(hex).join()}-'
+        '${bytes.sublist(6, 8).map(hex).join()}-'
+        '${bytes.sublist(8, 10).map(hex).join()}-'
+        '${bytes.sublist(10, 16).map(hex).join()}';
+  }
 
   // 1. ඇත්තටම OTP verify කරන කොටස
   Future<void> loginWithPhone(String phone, String otp) async {
@@ -25,31 +41,52 @@ class AuthService {
     return dummyOtp; 
   }
 
-  // 3. යූසර්ගේ විස්තර Database එකට Save කරන Function එක
-  Future<void> saveUserProfile({
+  // 3. Profile save — Supabase sync is best-effort; always returns userId for local session.
+  Future<String> saveUserProfile({
     required String name,
     String? email,
     String? gender,
     String? birthday,
+    String? phone,
   }) async {
     final user = _supabase.auth.currentUser;
-    
-    // Dummy login එකක් කරන නිසා දැනට මේක Bypass කරනවා (පස්සේ ඇත්තම login එකක් කරද්දී මේක ඔන් කරමු)
-    // if (user == null) {
-    //   throw Exception("User is not logged in!");
-    // }
+    final userId = user?.id ?? _generateUserId();
+
+    final payload = <String, dynamic>{
+      'id': userId,
+      'name': name,
+    };
+
+    final trimmedEmail = email?.trim();
+    if (trimmedEmail != null && trimmedEmail.isNotEmpty) {
+      payload['email'] = trimmedEmail;
+    }
+    if (gender != null && gender.isNotEmpty) {
+      payload['gender'] = gender;
+    }
+    if (birthday != null && birthday.isNotEmpty) {
+      payload['birthday'] = birthday;
+    }
+    if (phone != null && phone.isNotEmpty) {
+      payload['phone'] = phone;
+    }
 
     try {
-      // 👉 වෙනස් කරපු තැන: 'profiles' වෙනුවට 'Profiles' කියලා දැම්මා
-      await _supabase.from('Profiles').upsert({
-        'id': user?.id ?? 'dummy_user_id_${DateTime.now().millisecondsSinceEpoch}', // Dummy ID එකක් දානවා තාවකාලිකව
-        'name': name,
-        'email': email,
-        'gender': gender,
-        'birthday': birthday,
-      });
+      await _supabase.from('Profiles').upsert(payload);
     } catch (e) {
-      throw Exception('Failed to save profile: $e');
+      // Common when Profiles table is missing columns (birthday, phone) or RLS blocks insert.
+      // App still continues with local profile — run supabase_schema.sql Profiles section.
+      debugPrint('Profile Supabase sync skipped: $e');
+      try {
+        await _supabase.from('Profiles').upsert({
+          'id': userId,
+          'name': name,
+        });
+      } catch (e2) {
+        debugPrint('Profile minimal sync failed: $e2');
+      }
     }
+
+    return userId;
   }
 }

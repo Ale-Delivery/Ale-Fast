@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
-import '../screens/profile_setup_screen.dart';
+import '../services/local_storage_service.dart';
+import '../navigation/buyer_navigator.dart';
 
 class VerificationScreen extends StatefulWidget {
   final String phoneNumber;
@@ -61,18 +61,10 @@ class _VerificationScreenState extends State<VerificationScreen> {
     });
 
     try {
-      final authService = AuthService();
-
-      // Dummy OTP පාවිච්චි කරන නිසා දැනට Supabase එකට OTP එක යවන්නේ නැතුව කෙලින්ම ඊළඟ Screen එකට යවනවා.
-      // (ඇත්තටම SMS යවලා verify කරද්දී මේ පල්ලෙහා කෝඩ් එකේ කමෙන්ට් එක අයින් කරන්න)
-      // await authService.loginWithPhone(widget.phoneNumber, enteredOtp);
+      await LocalStorageService.saveUserPhone(widget.phoneNumber);
 
       if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const ProfileSetupScreen()),
-          (route) => false,
-        );
+        BuyerNavigator.profileSetup(context, clearStack: true);
       }
     } catch (e) {
       if (mounted) {

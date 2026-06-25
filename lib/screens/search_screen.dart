@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../models/models.dart';
-import '../services/auth_service.dart';
-import '../providers/cart_provider.dart';
+import '../navigation/buyer_navigator.dart';
+import '../services/database_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
-import 'food_detail_screen.dart';
-import 'restaurant_view_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -14,6 +11,17 @@ class SearchScreen extends StatefulWidget {
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
+
+Map<String, dynamic> _restaurantMap(Restaurant r) => {
+      'id': r.id,
+      'name': r.name,
+      'image_url': r.imageUrl,
+      'rating': r.rating,
+      'tags': r.category,
+      'category': r.category,
+      'delivery_fee': r.freeDelivery ? 'Free' : 'Paid',
+      'delivery_time': '${r.deliveryMin} min',
+    };
 
 class _SearchScreenState extends State<SearchScreen> {
   final _controller = TextEditingController();
@@ -168,8 +176,8 @@ class _SearchScreenState extends State<SearchScreen> {
         const SizedBox(height: 12),
         ..._suggestedRestaurants.map(
           (r) => GestureDetector(
-            onTap: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => RestaurantViewScreen(restaurant: r))),
+            onTap: () =>
+                BuyerNavigator.restaurantDetails(context, _restaurantMap(r)),
             child: Padding(
               padding: const EdgeInsets.only(bottom: 14),
               child: Row(
@@ -256,10 +264,8 @@ class _SearchScreenState extends State<SearchScreen> {
           const SizedBox(height: 12),
           ..._restaurants.map((r) => RestaurantCard(
                 restaurant: r,
-                onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => RestaurantViewScreen(restaurant: r))),
+                onTap: () =>
+                    BuyerNavigator.restaurantDetails(context, _restaurantMap(r)),
               )),
         ],
         if (_foods.isNotEmpty) ...[
@@ -268,10 +274,7 @@ class _SearchScreenState extends State<SearchScreen> {
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
           ..._foods.map((f) => GestureDetector(
-                onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => FoodDetailScreen(food: f))),
+                onTap: () => BuyerNavigator.foodDetail(context, f),
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(12),

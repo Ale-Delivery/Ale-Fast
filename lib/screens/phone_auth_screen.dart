@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:food_app/services/auth_service.dart';
-import 'package:food_app/screens/verification_screen.dart';
+import 'package:food_app/navigation/buyer_navigator.dart';
 
 class PhoneAuthScreen extends StatefulWidget {
   const PhoneAuthScreen({super.key});
@@ -40,14 +40,10 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
 
       if (mounted) {
         // ඊළඟට Verification Screen එකට යවනවා
-        Navigator.push(
+        BuyerNavigator.verification(
           context,
-          MaterialPageRoute(
-            builder: (_) => VerificationScreen(
-              phoneNumber: phoneNumber,
-              expectedOtp: expectedOtp,
-            ),
-          ),
+          phoneNumber: phoneNumber,
+          expectedOtp: expectedOtp,
         );
       }
     } catch (e) {
