@@ -26,15 +26,16 @@ class Restaurant {
         id: json['id']?.toString() ?? '',
         name: json['name'] ?? '',
         imageUrl: json['image_url'] ?? '',
-        rating: (json['rating'] ?? 0).toDouble(),
+        rating: _toDouble(json['rating']),
         freeDelivery: json['free_delivery'] ?? true,
-        deliveryMin: json['delivery_min'] ?? 20,
+        deliveryMin: _toInt(json['delivery_min'], fallback: 20),
         category: json['category'] ?? '',
         description: json['description'] ?? '',
         address: json['address'] ?? '',
       );
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'name': name,
         'image_url': imageUrl,
         'rating': rating,
@@ -82,10 +83,10 @@ class FoodItem {
         id: json['id']?.toString() ?? '',
         name: json['name'] ?? '',
         imageUrl: json['image_url'] ?? '',
-        price: (json['price'] ?? 0).toDouble(),
-        rating: (json['rating'] ?? 0).toDouble(),
+        price: _toDouble(json['price']),
+        rating: _toDouble(json['rating']),
         freeDelivery: json['free_delivery'] ?? true,
-        deliveryMin: json['delivery_min'] ?? 20,
+        deliveryMin: _toInt(json['delivery_min'], fallback: 20),
         restaurantName: json['restaurant_name'] ?? '',
         restaurantId: json['restaurant_id']?.toString() ?? '',
         category: json['category'] ?? '',
@@ -95,6 +96,7 @@ class FoodItem {
       );
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'name': name,
         'image_url': imageUrl,
         'price': price,
@@ -124,8 +126,12 @@ class FoodCategory {
     this.isSelected = false,
   });
 
-  FoodCategory copyWith({bool? isSelected}) =>
-      FoodCategory(id: id, name: name, emoji: emoji, isSelected: isSelected ?? this.isSelected);
+  FoodCategory copyWith({bool? isSelected}) => FoodCategory(
+        id: id,
+        name: name,
+        emoji: emoji,
+        isSelected: isSelected ?? this.isSelected,
+      );
 }
 
 // ─── Cart Item Model ───────────────────────────────────────────
@@ -134,7 +140,11 @@ class CartItem {
   int quantity;
   String selectedSize;
 
-  CartItem({required this.food, this.quantity = 1, this.selectedSize = '10"'});
+  CartItem({
+    required this.food,
+    this.quantity = 1,
+    this.selectedSize = '10"',
+  });
 
   double get total => food.price * quantity;
 }
@@ -198,7 +208,7 @@ enum OrderStatus {
   }
 }
 
-// ─── Order Model ─────────────────────────────────────────────────
+// ─── Order Model ───────────────────────────────────────────────
 class Order {
   final String id;
   final String userId;
@@ -235,21 +245,37 @@ class Order {
         userId: json['user_id']?.toString() ?? '',
         restaurantId: json['restaurant_id']?.toString() ?? '',
         restaurantName: json['restaurant_name'] ?? '',
-        status: OrderStatus.fromString(json['status']),
-        subtotal: (json['subtotal'] ?? 0).toDouble(),
-        deliveryFee: (json['delivery_fee'] ?? 0).toDouble(),
-        total: (json['total'] ?? 0).toDouble(),
+        status: OrderStatus.fromString(json['status']?.toString()),
+        subtotal: _toDouble(json['subtotal']),
+        deliveryFee: _toDouble(json['delivery_fee']),
+        total: _toDouble(json['total']),
         deliveryAddress: json['delivery_address'] ?? '',
         deliveryPhone: json['delivery_phone'] ?? '',
-        deliveryNotes: json['delivery_notes'],
+        deliveryNotes: json['delivery_notes']?.toString(),
         paymentMethod: json['payment_method'] ?? 'cash',
         createdAt: json['created_at'] != null
             ? DateTime.tryParse(json['created_at'].toString())
             : null,
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'user_id': userId,
+        'restaurant_id': restaurantId,
+        'restaurant_name': restaurantName,
+        'status': status.value,
+        'subtotal': subtotal,
+        'delivery_fee': deliveryFee,
+        'total': total,
+        'delivery_address': deliveryAddress,
+        'delivery_phone': deliveryPhone,
+        'delivery_notes': deliveryNotes,
+        'payment_method': paymentMethod,
+        'created_at': createdAt?.toIso8601String(),
+      };
 }
 
-// ─── Order Item Line ─────────────────────────────────────────────
+// ─── Order Item Line ───────────────────────────────────────────
 class OrderItemLine {
   final String id;
   final String orderId;
@@ -278,10 +304,10 @@ class OrderItemLine {
         orderId: json['order_id']?.toString() ?? '',
         foodItemId: json['food_item_id']?.toString(),
         name: json['name'] ?? '',
-        price: (json['price'] ?? 0).toDouble(),
-        quantity: json['quantity'] ?? 1,
-        selectedSize: json['selected_size'],
-        imageUrl: json['image_url'],
+        price: _toDouble(json['price']),
+        quantity: _toInt(json['quantity'], fallback: 1),
+        selectedSize: json['selected_size']?.toString(),
+        imageUrl: json['image_url']?.toString(),
       );
 }
 
@@ -302,7 +328,20 @@ class Offer {
   factory Offer.fromJson(Map<String, dynamic> json) => Offer(
         id: json['id']?.toString() ?? '',
         code: json['code'] ?? '',
-        discountPercent: json['discount_percent'] ?? 0,
+        discountPercent: _toInt(json['discount_percent']),
         description: json['description'] ?? '',
       );
+}
+
+double _toDouble(dynamic value, {double fallback = 0}) {
+  if (value == null) return fallback;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString()) ?? fallback;
+}
+
+int _toInt(dynamic value, {int fallback = 0}) {
+  if (value == null) return fallback;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value.toString()) ?? fallback;
 }

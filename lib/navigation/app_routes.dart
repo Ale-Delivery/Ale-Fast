@@ -1,4 +1,4 @@
-/// Buyer app route names — matches [BuyerApp Final Flow].
+/// Buyer app route names — matches Buyer App final flow.
 abstract final class AppRoutes {
   static const splash = '/';
   static const onboarding = '/onboarding';

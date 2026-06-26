@@ -30,12 +30,10 @@ class AuthHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-              },
-              child: const Icon(Icons.arrow_back, color: Colors.white),
-              ),
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
 
           const SizedBox(height: 20),
           Text(

@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../models/models.dart';
 
 class DatabaseService {
@@ -19,11 +20,14 @@ class DatabaseService {
         .from('Menu_Items')
         .select()
         .eq('restaurant_id', restaurantId);
+
     return (response as List)
-        .map((item) => foodItemFromMenuRow(
-              Map<String, dynamic>.from(item),
-              restaurantId: restaurantId,
-            ))
+        .map(
+          (item) => foodItemFromMenuRow(
+            Map<String, dynamic>.from(item),
+            restaurantId: restaurantId,
+          ),
+        )
         .toList();
   }
 
@@ -35,18 +39,24 @@ class DatabaseService {
 
     final restaurants = await getRestaurants();
     final matchedRestaurants = restaurants
-        .where((r) =>
-            r.name.toLowerCase().contains(q) ||
-            r.category.toLowerCase().contains(q))
+        .where(
+          (r) =>
+              r.name.toLowerCase().contains(q) ||
+              r.category.toLowerCase().contains(q),
+        )
         .toList();
 
     final foods = <FoodItem>[];
     for (final restaurant in restaurants) {
       final items = await getMenuItems(restaurant.id);
-      foods.addAll(items.where((f) =>
-          f.name.toLowerCase().contains(q) ||
-          f.category.toLowerCase().contains(q) ||
-          f.restaurantName.toLowerCase().contains(q)));
+      foods.addAll(
+        items.where(
+          (f) =>
+              f.name.toLowerCase().contains(q) ||
+              f.category.toLowerCase().contains(q) ||
+              f.restaurantName.toLowerCase().contains(q),
+        ),
+      );
     }
 
     return {'restaurants': matchedRestaurants, 'foods': foods};
@@ -63,8 +73,8 @@ class DatabaseService {
       id: item['id']?.toString() ?? '',
       name: item['name'] ?? '',
       imageUrl: item['image_url'] ?? '',
-      price: (item['price'] ?? 0).toDouble(),
-      rating: (item['rating'] ?? 4.5).toDouble(),
+      price: _toDouble(item['price']),
+      rating: _toDouble(item['rating'], fallback: 4.5),
       freeDelivery: freeDelivery,
       deliveryMin: deliveryMin,
       restaurantName: restaurantName.isNotEmpty
@@ -93,11 +103,16 @@ class DatabaseService {
   }
 
   static int _parseDeliveryMin(Map<String, dynamic> restaurant) {
-    final raw = (restaurant['delivery_time'] ??
-            restaurant['delivery_min'] ??
-            '25')
-        .toString();
+    final raw =
+        (restaurant['delivery_time'] ?? restaurant['delivery_min'] ?? '25')
+            .toString();
     final digits = RegExp(r'\d+').firstMatch(raw);
     return digits != null ? int.parse(digits.group(0)!) : 25;
+  }
+
+  static double _toDouble(dynamic value, {double fallback = 0}) {
+    if (value == null) return fallback;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString()) ?? fallback;
   }
 }

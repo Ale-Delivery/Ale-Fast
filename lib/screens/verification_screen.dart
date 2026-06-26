@@ -17,7 +17,6 @@ class VerificationScreen extends StatefulWidget {
 }
 
 class _VerificationScreenState extends State<VerificationScreen> {
-  // Box 4ට වෙනම controllers 4ක් සහ focus nodes 4ක්
   final List<TextEditingController> _controllers =
       List.generate(4, (index) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
@@ -35,7 +34,6 @@ class _VerificationScreenState extends State<VerificationScreen> {
     super.dispose();
   }
 
-  // OTP එක හරිද කියලා බලන function එක
   Future<void> _verifyOTP() async {
     String enteredOtp = _controllers.map((c) => c.text).join();
 

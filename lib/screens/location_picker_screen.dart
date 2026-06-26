@@ -173,7 +173,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                     width: 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.2),
+                       color: Colors.black.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                   ),

@@ -42,7 +42,7 @@ class OrderService {
     };
 
     final orderResponse =
-        await _client.from('Orders').insert(orderData).select().single();
+        await _client.from('Order').insert(orderData).select().single();
 
     final orderId = orderResponse['id']?.toString() ?? '';
 
@@ -68,7 +68,7 @@ class OrderService {
     if (userId == null) return [];
 
     final response = await _client
-        .from('Orders')
+        .from('Order')
         .select()
         .eq('user_id', userId)
         .order('created_at', ascending: false);
@@ -80,7 +80,7 @@ class OrderService {
 
   static Future<Order?> getOrder(String orderId) async {
     final response =
-        await _client.from('Orders').select().eq('id', orderId).maybeSingle();
+        await _client.from('Order').select().eq('id', orderId).maybeSingle();
     if (response == null) return null;
     return Order.fromJson(Map<String, dynamic>.from(response));
   }
@@ -96,7 +96,7 @@ class OrderService {
 
   static Stream<Order?> watchOrder(String orderId) {
     return _client
-        .from('Orders')
+        .from('Order')
         .stream(primaryKey: ['id'])
         .eq('id', orderId)
         .map((rows) {

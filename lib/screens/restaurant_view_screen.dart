@@ -19,7 +19,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
   List<FoodItem> _foods = [];
   bool _loading = true;
   String _activeTab = 'Burger';
-  final List<String> _tabs = ['Burger', 'Sandwich', 'Pizza', 'Sanwi'];
+  final List<String> _tabs = ['Burger', 'Sandwich', 'Pizza', 'Sandwich'];
 
   @override
   void initState() {
@@ -171,7 +171,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.05),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2))
                           ],

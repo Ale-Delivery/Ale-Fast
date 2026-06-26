@@ -86,7 +86,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                                         fontWeight: FontWeight.w800)),
                                 const SizedBox(height: 4),
                                 Text(
-                                  '#${order.id.substring(0, 8).toUpperCase()}',
+                                  '#${order.id.length >= 8 ? order.id.substring(0, 8).toUpperCase() : order.id.toUpperCase()}',
                                   style: const TextStyle(
                                       color: AppColors.grey, fontSize: 12),
                                 ),

@@ -13,11 +13,9 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
   final TextEditingController _phoneController = TextEditingController();
   bool _isLoading = false;
 
-  // OTP එක යවන Function එක
   Future<void> _sendOtp() async {
     String phoneNumber = _phoneController.text.trim();
 
-    // නම්බර් එකක් ගහලද කියලා චෙක් කරනවා
     if (phoneNumber.isEmpty || phoneNumber.length < 9) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -34,12 +32,10 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
 
     try {
       final authService = AuthService();
-      
-      // Dummy OTP එක යවනවා (AuthService එකෙන්)
+
       String expectedOtp = await authService.sendDummyOTP(phoneNumber);
 
       if (mounted) {
-        // ඊළඟට Verification Screen එකට යවනවා
         BuyerNavigator.verification(
           context,
           phoneNumber: phoneNumber,

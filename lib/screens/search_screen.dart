@@ -31,7 +31,7 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _hasSearched = false;
 
   final List<String> _recentKeywords = [
-    'Burger', 'Sandwich', 'Pizza', 'Sandwich'
+    'Burger', 'Sandwich', 'Pizza', 'Coffee'
   ];
 
   final List<Restaurant> _suggestedRestaurants = const [
@@ -283,7 +283,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 8,
                           offset: const Offset(0, 2))
                     ],

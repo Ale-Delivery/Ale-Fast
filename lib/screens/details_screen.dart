@@ -16,16 +16,11 @@ class DetailsScreen extends StatefulWidget {
 }
 
 class _DetailsScreenState extends State<DetailsScreen> {
-  // මේ කඩේට අදාළ කෑම ටික Supabase එකෙන් ගන්න Function එක
   Future<List<Map<String, dynamic>>> _fetchMenuItems() async {
-    // Menu_Items table එකෙන්, මේ කඩේ ID එකට සමාන කෑම විතරක් ගන්නවා
     final response = await Supabase.instance.client
         .from('Menu_Items')
         .select()
-        .eq(
-            'restaurant_id',
-            widget
-                .restaurant['id']); // ඔයාගේ Restaurants table එකේ id column එක
+        .eq('restaurant_id', widget.restaurant['id']);
     return response;
   }
 
@@ -64,7 +59,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFF7A1A).withOpacity(0.3),
+                  color: const Color(0xFFFF7A1A).withValues(alpha: 0.3),
                   blurRadius: 15,
                   offset: const Offset(0, 8),
                 ),
@@ -122,9 +117,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. කඩේ පින්තූරය
-            Image.network(
+            children: [
+              // Restaurant image
+              Image.network(
               widget.restaurant['image_url'] ?? '',
               height: 300,
               width: double.infinity,
@@ -137,7 +132,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
               ),
             ),
 
-            // 2. කඩේ විස්තර
+            // Restaurant details
             Transform.translate(
               offset: const Offset(0, -30),
               child: Container(
@@ -192,7 +187,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     ),
                     const SizedBox(height: 15),
 
-                    // 3. Supabase එකෙන් එන Menu Items පෙන්වන කොටස
+                    // Menu items from Supabase
                     FutureBuilder<List<Map<String, dynamic>>>(
                       future: _fetchMenuItems(),
                       builder: (context, snapshot) {
@@ -222,7 +217,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         return ListView.builder(
                           shrinkWrap: true,
                           physics:
-                              const NeverScrollableScrollPhysics(), // Scroll වෙන එක නවත්තන්න
+                              const NeverScrollableScrollPhysics(),
                           padding: EdgeInsets.zero,
                           itemCount: menuItems.length,
                           itemBuilder: (context, index) {
@@ -241,14 +236,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                      color: Colors.black.withOpacity(0.03),
+                                       color: Colors.black.withValues(alpha: 0.03),
                                       blurRadius: 10,
                                       offset: const Offset(0, 5)),
                                 ],
                               ),
                               child: Row(
                                 children: [
-                                  // කෑම එකේ පින්තූරය
+                                  // Food image
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(15),
                                     child: Image.network(
@@ -268,7 +263,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: 15),
-                                  // කෑම එකේ විස්තර සහ මිල
+                                  // Food details and price
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:

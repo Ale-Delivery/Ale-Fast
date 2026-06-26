@@ -33,7 +33,7 @@ class OrderPlacedScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
               const SizedBox(height: 12),
               Text(
-                'Your order #${order.id.substring(0, 8).toUpperCase()} has been sent to the restaurant.',
+                'Your order #${order.id.length >= 8 ? order.id.substring(0, 8).toUpperCase() : order.id.toUpperCase()} has been sent to the restaurant.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: AppColors.grey, height: 1.5),
               ),
