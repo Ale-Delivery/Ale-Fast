@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import '../services/local_storage_service.dart';
-import '../theme/app_theme.dart';
 import '../navigation/buyer_navigator.dart';
 
 class DeliveryAddressScreen extends StatefulWidget {
-  /// When false, saves address and returns (e.g. from profile settings).
   final bool proceedToCheckout;
 
   const DeliveryAddressScreen({super.key, this.proceedToCheckout = true});
@@ -34,7 +32,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
       if (!serviceEnabled) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location services are disabled.')),
+            const SnackBar(content: Text('Location services are disabled.'), behavior: SnackBarBehavior.floating),
           );
         }
         setState(() => _isLocating = false);
@@ -47,7 +45,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
         if (permission == LocationPermission.denied) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Location permissions are denied.')),
+              const SnackBar(content: Text('Location permissions are denied.'), behavior: SnackBarBehavior.floating),
             );
           }
           setState(() => _isLocating = false);
@@ -58,7 +56,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
       if (permission == LocationPermission.deniedForever) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location permissions are permanently denied.')),
+            const SnackBar(content: Text('Location permissions are permanently denied.'), behavior: SnackBarBehavior.floating),
           );
         }
         setState(() => _isLocating = false);
@@ -90,13 +88,13 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
         });
         
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location updated successfully!')),
+          const SnackBar(content: Text('Location updated successfully!'), behavior: SnackBarBehavior.floating),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error getting location: $e')),
+          SnackBar(content: Text('Error getting location: $e'), behavior: SnackBarBehavior.floating),
         );
       }
     } finally {
@@ -137,13 +135,13 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
   Future<void> _continue() async {
     if (_addressController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter delivery address')),
+        const SnackBar(content: Text('Please enter delivery address'), behavior: SnackBarBehavior.floating),
       );
       return;
     }
     if (_phoneController.text.trim().length < 9) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid phone number')),
+        const SnackBar(content: Text('Please enter a valid phone number'), behavior: SnackBarBehavior.floating),
       );
       return;
     }
@@ -174,61 +172,93 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
 
   @override
   Widget build(BuildContext context) {
+    const primaryColor = Color(0xFFFF6B35);
+    const darkInk = Color(0xFF1E1E2C);
+
     return Scaffold(
-      backgroundColor: AppColors.lightBg,
+      backgroundColor: const Color(0xFFF9FAFC),
       appBar: AppBar(
-        title: const Text('Delivery Address',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-        leading: const BackButton(),
+        title: const Text(
+          'Delivery Address',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: darkInk),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: darkInk, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.orange))
+          ? const Center(child: CircularProgressIndicator(color: primaryColor))
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Where should we deliver?',
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 20),
-                  _field('Label (e.g. Home, Office)', _labelController),
-                  const SizedBox(height: 16),
-                  _field('Full address', _addressController,
-                      maxLines: 3),
-                  const SizedBox(height: 10),
+                  const Text(
+                    'Where should we deliver?',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: darkInk,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Label Field
+                  _buildField(
+                    label: 'Label (e.g. Home, Office)',
+                    controller: _labelController,
+                    icon: Icons.label_important_outline_rounded,
+                    hintText: 'Home, Office, Apartment...',
+                  ),
+                  const SizedBox(height: 18),
+                  
+                  // Address Field
+                  _buildField(
+                    label: 'Full address',
+                    controller: _addressController,
+                    icon: Icons.location_on_outlined,
+                    hintText: 'Street address, city, postal code',
+                    maxLines: 3,
+                  ),
+                  const SizedBox(height: 14),
+                  
+                  // Location Action Buttons Row
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton.icon(
+                        child: TextButton.icon(
                           onPressed: _isLocating ? null : _getCurrentLocation,
                           icon: _isLocating
                               ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
+                                  width: 14,
+                                  height: 14,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    color: AppColors.orange,
+                                    color: primaryColor,
                                   ),
                                 )
-                              : const Icon(Icons.my_location_rounded, size: 16),
-                          label: const Text(
-                            'Current Location',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                              : const Icon(Icons.my_location_rounded, size: 16, color: primaryColor),
+                          label: Text(
+                            _isLocating ? 'Locating...' : 'Locate Me',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: primaryColor),
                           ),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.orange,
-                            side: const BorderSide(color: AppColors.orange, width: 1.5),
+                          style: TextButton.styleFrom(
+                            backgroundColor: primaryColor.withOpacity(0.08),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: OutlinedButton.icon(
+                        child: TextButton.icon(
                           onPressed: () async {
                             final result = await BuyerNavigator.locationPicker(context);
                             if (result != null && result['address'] != null) {
@@ -237,74 +267,138 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                               });
                             }
                           },
-                          icon: const Icon(Icons.map_rounded, size: 16),
+                          icon: const Icon(Icons.map_outlined, size: 16, color: primaryColor),
                           label: const Text(
                             'Select on Map',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: primaryColor),
                           ),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.orange,
-                            side: const BorderSide(color: AppColors.orange, width: 1.5),
+                          style: TextButton.styleFrom(
+                            backgroundColor: primaryColor.withOpacity(0.08),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  _field('Phone number', _phoneController,
-                      keyboard: TextInputType.phone),
-                  const SizedBox(height: 16),
-                  _field('Delivery notes (optional)', _notesController,
-                      maxLines: 2),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
+                  
+                  // Phone Field
+                  _buildField(
+                    label: 'Recipient Phone number',
+                    controller: _phoneController,
+                    icon: Icons.phone_android_outlined,
+                    hintText: '07X XXX XXXX',
+                    keyboard: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 18),
+                  
+                  // Delivery Notes Field
+                  _buildField(
+                    label: 'Delivery notes (optional)',
+                    controller: _notesController,
+                    icon: Icons.note_alt_outlined,
+                    hintText: 'e.g. Ring bell, leave at the door',
+                    maxLines: 2,
+                  ),
+                  const SizedBox(height: 36),
+                  
+                  // Submit Button
                   SizedBox(
                     width: double.infinity,
+                    height: 54,
                     child: ElevatedButton(
                       onPressed: _continue,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.orange,
+                        backgroundColor: primaryColor,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: 0,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                       child: Text(
-                          widget.proceedToCheckout
-                              ? 'Continue to Checkout'
-                              : 'Save Address',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w800, fontSize: 16)),
+                        widget.proceedToCheckout
+                            ? 'Continue to Checkout'
+                            : 'Save Address',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
                     ),
                   ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
     );
   }
 
-  Widget _field(String label, TextEditingController controller,
-      {int maxLines = 1, TextInputType keyboard = TextInputType.text}) {
+  Widget _buildField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    required String hintText,
+    int maxLines = 1,
+    TextInputType keyboard = TextInputType.text,
+  }) {
+    const primaryColor = Color(0xFFFF6B35);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: const TextStyle(
-                fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.grey)),
+        Text(
+          label.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF9E9EAE),
+            letterSpacing: 1.0,
+          ),
+        ),
         const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          maxLines: maxLines,
-          keyboardType: keyboard,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: TextField(
+            controller: controller,
+            maxLines: maxLines,
+            keyboardType: keyboard,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1E1E2C),
+            ),
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: const TextStyle(
+                color: Color(0xFFC0C0D0),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              prefixIcon: Icon(icon, color: const Color(0xFF9E9EAE), size: 20),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: primaryColor, width: 1.5),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
           ),
         ),

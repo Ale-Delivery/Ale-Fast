@@ -89,4 +89,32 @@ class AuthService {
 
     return userId;
   }
+
+  Future<bool> checkUserExists(String phone) async {
+    try {
+      final response = await _supabase
+          .from('Profiles')
+          .select('id')
+          .eq('phone', phone)
+          .maybeSingle();
+      return response != null;
+    } catch (e) {
+      debugPrint('Error checking user exists: $e');
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getUserProfile(String phone) async {
+    try {
+      final response = await _supabase
+          .from('Profiles')
+          .select()
+          .eq('phone', phone)
+          .maybeSingle();
+      return response;
+    } catch (e) {
+      debugPrint('Error fetching user profile: $e');
+      return null;
+    }
+  }
 }

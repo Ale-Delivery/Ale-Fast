@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/local_storage_service.dart';
+import '../services/auth_service.dart';
 import '../navigation/buyer_navigator.dart';
 
 class VerificationScreen extends StatefulWidget {
@@ -61,8 +62,26 @@ class _VerificationScreenState extends State<VerificationScreen> {
     try {
       await LocalStorageService.saveUserPhone(widget.phoneNumber);
 
+      final authService = AuthService();
+      final bool exists = await authService.checkUserExists(widget.phoneNumber);
+
+      if (exists) {
+        final profile = await authService.getUserProfile(widget.phoneNumber);
+        if (profile != null) {
+          await LocalStorageService.setProfileComplete(
+            userId: profile['id']?.toString() ?? '',
+            name: profile['name']?.toString() ?? 'User',
+            phone: widget.phoneNumber,
+          );
+        }
+      }
+
       if (mounted) {
-        BuyerNavigator.profileSetup(context, clearStack: true);
+        if (exists) {
+          BuyerNavigator.home(context, clearStack: true);
+        } else {
+          BuyerNavigator.profileSetup(context, clearStack: true);
+        }
       }
     } catch (e) {
       if (mounted) {

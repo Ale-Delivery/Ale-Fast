@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/local_storage_service.dart';
 import '../screens/home_screen.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
@@ -40,11 +41,19 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await _authService.saveUserProfile(
+      final phone = await LocalStorageService.getUserPhone();
+      final userId = await _authService.saveUserProfile(
         name: _nameController.text,
         email: _emailController.text,
         gender: _selectedGender!,
         birthday: _selectedDate!.toIso8601String().split('T')[0], // YYYY-MM-DD format
+        phone: phone,
+      );
+
+      await LocalStorageService.setProfileComplete(
+        userId: userId,
+        name: _nameController.text,
+        phone: phone,
       );
 
       if (mounted) {

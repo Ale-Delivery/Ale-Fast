@@ -29,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _query = '';
   int _selectedTab = 0;
   String _deliveryLabel = 'Set delivery address';
+  String _userName = 'User';
 
   final List<Map<String, dynamic>> categories = const [
     {'name': 'All', 'icon': Icons.grid_view_rounded},
@@ -62,8 +63,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadDeliveryLabel() async {
     final saved = await LocalStorageService.getDeliveryAddress();
+    final name = await LocalStorageService.getUserName();
     if (!mounted) return;
     setState(() {
+      if (name != null && name.trim().isNotEmpty) {
+        _userName = name.trim().split(' ').first;
+      }
       _deliveryLabel = saved != null
           ? '${saved['label']}: ${saved['address']}'
           : 'Set delivery address';
@@ -88,7 +93,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _refreshRestaurants() {
-    setState(() => _restaurantsFuture = _fetchRestaurants());
+    final future = _fetchRestaurants();
+    setState(() {
+      _restaurantsFuture = future;
+    });
   }
 
   List<Map<String, dynamic>> _filterRestaurants(
@@ -271,9 +279,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Hey Halal,',
-            style: TextStyle(fontSize: 16, color: _muted),
+          Text(
+            'Hey $_userName,',
+            style: const TextStyle(fontSize: 16, color: _muted),
           ),
           const SizedBox(height: 3),
           const Text(

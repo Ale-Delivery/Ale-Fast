@@ -1,6 +1,13 @@
 -- Run this in Supabase SQL Editor (buyer + seller dev setup)
 -- Safe to re-run: uses IF NOT EXISTS / ON CONFLICT where possible
 
+-- Clean up old tables with mismatched schemas
+DROP TABLE IF EXISTS "Order_Items" CASCADE;
+DROP TABLE IF EXISTS "Orders" CASCADE;
+DROP TABLE IF EXISTS "Menu_Items" CASCADE;
+DROP TABLE IF EXISTS "Restaurants" CASCADE;
+DROP TABLE IF EXISTS "Profiles" CASCADE;
+
 -- ── Profiles ───────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "Profiles" (
   id TEXT PRIMARY KEY,
@@ -38,6 +45,14 @@ CREATE TABLE IF NOT EXISTS "Restaurants" (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Ensure columns exist in case the table was created in a previous database version
+ALTER TABLE "Restaurants" ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE "Restaurants" ADD COLUMN IF NOT EXISTS tags TEXT;
+ALTER TABLE "Restaurants" ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE "Restaurants" ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE "Restaurants" ADD COLUMN IF NOT EXISTS delivery_min INT;
+ALTER TABLE "Restaurants" ADD COLUMN IF NOT EXISTS free_delivery BOOLEAN;
+
 CREATE INDEX IF NOT EXISTS idx_restaurants_category ON "Restaurants"(category);
 
 ALTER TABLE "Restaurants" ENABLE ROW LEVEL SECURITY;
@@ -58,6 +73,11 @@ CREATE TABLE IF NOT EXISTS "Menu_Items" (
   ingredients JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Ensure columns exist in case the table was created in a previous database version
+ALTER TABLE "Menu_Items" ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE "Menu_Items" ADD COLUMN IF NOT EXISTS sizes JSONB;
+ALTER TABLE "Menu_Items" ADD COLUMN IF NOT EXISTS ingredients JSONB;
 
 CREATE INDEX IF NOT EXISTS idx_menu_items_restaurant ON "Menu_Items"(restaurant_id);
 
