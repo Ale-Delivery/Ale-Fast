@@ -1,11 +1,8 @@
-import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
-import '../theme/app_theme.dart';
+import '../services/google_maps_service.dart';
 
 class LocationPickerScreen extends StatefulWidget {
   const LocationPickerScreen({super.key});
@@ -26,7 +23,6 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   // Search variables
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> _searchResults = [];
-  bool _isSearching = false;
 
   @override
   void initState() {
@@ -93,29 +89,13 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
     });
 
     try {
-      final placemarks = await placemarkFromCoordinates(
+      final resolvedAddress = await GoogleMapsService.reverseGeocode(
         target.latitude,
         target.longitude,
       );
-
-      if (placemarks.isNotEmpty && mounted) {
-        final pm = placemarks.first;
-        final parts = [
-          if (pm.name != null && pm.name != pm.street) pm.name,
-          if (pm.street != null) pm.street,
-          if (pm.subLocality != null && pm.subLocality!.isNotEmpty) pm.subLocality,
-          if (pm.locality != null && pm.locality!.isNotEmpty) pm.locality,
-          if (pm.subAdministrativeArea != null && pm.subAdministrativeArea!.isNotEmpty) pm.subAdministrativeArea,
-          if (pm.administrativeArea != null && pm.administrativeArea!.isNotEmpty) pm.administrativeArea,
-        ];
-        
+      if (mounted) {
         setState(() {
-          _address = parts.where((p) => p != null && p.trim().isNotEmpty).join(', ');
-          _isReverseGeocoding = false;
-        });
-      } else if (mounted) {
-        setState(() {
-          _address = 'Colombo, Sri Lanka';
+          _address = resolvedAddress;
           _isReverseGeocoding = false;
         });
       }
@@ -135,56 +115,20 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       return;
     }
 
-    setState(() => _isSearching = true);
-
     try {
-      final client = HttpClient();
-      final uri = Uri.parse('https://nominatim.openstreetmap.org/search?format=json&q=${Uri.encodeComponent(query)}&limit=5');
-      final request = await client.getUrl(uri);
-      request.headers.setUserAgent('aleeapp');
-      final response = await request.close();
-      
-      if (response.statusCode == 200) {
-        final body = await response.transform(utf8.decoder).join();
-        final List data = jsonDecode(body);
-        
-        if (mounted) {
-          setState(() {
-            _searchResults = data.map((item) => {
-              'display_name': item['display_name'].toString(),
-              'lat': double.parse(item['lat'].toString()),
-              'lon': double.parse(item['lon'].toString()),
-            }).toList();
-            _isSearching = false;
-          });
-        }
-        return;
+      final suggestions = await GoogleMapsService.getAutocompleteSuggestions(query);
+      if (mounted) {
+        setState(() {
+          _searchResults = suggestions;
+        });
       }
     } catch (e) {
-      debugPrint('Search request failed, falling back to mock search suggestions: $e');
-    }
-
-    // Fallback: Mock suggestions for Sri Lankan addresses if network is offline / DNS issues
-    final queryLower = query.toLowerCase();
-    final mockLocations = [
-      {'display_name': 'Colombo 03, Western Province, Sri Lanka', 'lat': 6.9128, 'lon': 79.8507},
-      {'display_name': 'Colombo 07, Western Province, Sri Lanka', 'lat': 6.9056, 'lon': 79.8665},
-      {'display_name': 'University of Moratuwa, Bandaranayake Mawatha, Moratuwa, Sri Lanka', 'lat': 6.7969, 'lon': 79.9018},
-      {'display_name': 'Galle Road, Bambalapitiya, Colombo, Sri Lanka', 'lat': 6.8962, 'lon': 79.8553},
-      {'display_name': 'Kandy Road, Kiribathgoda, Western Province, Sri Lanka', 'lat': 6.9749, 'lon': 79.9286},
-      {'display_name': 'Majestic City, Galle Road, Colombo, Sri Lanka', 'lat': 6.8940, 'lon': 79.8547},
-      {'display_name': 'One Galle Face Mall, Colombo, Sri Lanka', 'lat': 6.9275, 'lon': 79.8436},
-      {'display_name': 'Nugegoda, Western Province, Sri Lanka', 'lat': 6.8741, 'lon': 79.8872},
-      {'display_name': 'Kotte, Western Province, Sri Lanka', 'lat': 6.9010, 'lon': 79.9010},
-    ];
-
-    if (mounted) {
-      setState(() {
-        _searchResults = mockLocations
-            .where((loc) => loc['display_name'].toString().toLowerCase().contains(queryLower))
-            .toList();
-        _isSearching = false;
-      });
+      debugPrint('Search request failed: $e');
+      if (mounted) {
+        setState(() {
+          _searchResults = [];
+        });
+      }
     }
   }
 
@@ -344,21 +288,24 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: darkInk),
                           ),
-                          onTap: () {
-                            final lat = item['lat'];
-                            final lon = item['lon'];
-                            final latLng = LatLng(lat, lon);
-                            
+                          onTap: () async {
                             FocusScope.of(context).unfocus();
-                            _searchController.text = item['display_name'];
-                            
-                            setState(() {
-                              _currentCenter = latLng;
-                              _address = item['display_name'];
-                              _searchResults = [];
-                            });
-                            
-                            _mapController.move(latLng, 16);
+                            final coords = await GoogleMapsService.getCoordinatesFromPlace(item);
+                            if (coords != null && mounted) {
+                              final lat = coords['latitude']!;
+                              final lon = coords['longitude']!;
+                              final latLng = LatLng(lat, lon);
+                              
+                              _searchController.text = item['display_name'];
+                              
+                              setState(() {
+                                _currentCenter = latLng;
+                                _address = item['display_name'];
+                                _searchResults = [];
+                              });
+                              
+                              _mapController.move(latLng, 16);
+                            }
                           },
                         );
                       },

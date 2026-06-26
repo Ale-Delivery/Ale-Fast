@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import '../services/local_storage_service.dart';
 import '../navigation/buyer_navigator.dart';
+import '../services/google_maps_service.dart';
 
 class DeliveryAddressScreen extends StatefulWidget {
   final bool proceedToCheckout;
@@ -20,6 +20,24 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
   final _notesController = TextEditingController();
   bool _loading = true;
   bool _isLocating = false;
+
+  List<Map<String, dynamic>> _addressSuggestions = [];
+
+  Future<void> _onAddressChanged(String query) async {
+    if (query.trim().length < 3) {
+      setState(() => _addressSuggestions = []);
+      return;
+    }
+    
+    try {
+      final suggestions = await GoogleMapsService.getAutocompleteSuggestions(query);
+      setState(() {
+        _addressSuggestions = suggestions;
+      });
+    } catch (e) {
+      debugPrint('Error getting address suggestions: $e');
+    }
+  }
 
   Future<void> _getCurrentLocation() async {
     setState(() => _isLocating = true);
@@ -67,24 +85,14 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
         desiredAccuracy: LocationAccuracy.high,
       );
       
-      final placemarks = await placemarkFromCoordinates(
+      final resolvedAddress = await GoogleMapsService.reverseGeocode(
         position.latitude,
         position.longitude,
       );
 
-      if (placemarks.isNotEmpty && mounted) {
-        final pm = placemarks.first;
-        final parts = [
-          if (pm.name != null && pm.name != pm.street) pm.name,
-          if (pm.street != null) pm.street,
-          if (pm.subLocality != null && pm.subLocality!.isNotEmpty) pm.subLocality,
-          if (pm.locality != null && pm.locality!.isNotEmpty) pm.locality,
-          if (pm.subAdministrativeArea != null && pm.subAdministrativeArea!.isNotEmpty) pm.subAdministrativeArea,
-          if (pm.administrativeArea != null && pm.administrativeArea!.isNotEmpty) pm.administrativeArea,
-        ];
-        
+      if (mounted) {
         setState(() {
-          _addressController.text = parts.where((p) => p != null && p.trim().isNotEmpty).join(', ');
+          _addressController.text = resolvedAddress;
         });
         
         ScaffoldMessenger.of(context).showSnackBar(
@@ -223,8 +231,52 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                     controller: _addressController,
                     icon: Icons.location_on_outlined,
                     hintText: 'Street address, city, postal code',
-                    maxLines: 3,
+                    maxLines: 2,
+                    onChanged: _onAddressChanged,
                   ),
+                  
+                  if (_addressSuggestions.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.withOpacity(0.15)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        padding: EdgeInsets.zero,
+                        itemCount: _addressSuggestions.length,
+                        separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                        itemBuilder: (context, index) {
+                          final item = _addressSuggestions[index];
+                          return ListTile(
+                            dense: true,
+                            leading: const Icon(Icons.location_on_outlined, color: primaryColor, size: 18),
+                            title: Text(
+                              item['display_name'],
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: darkInk),
+                            ),
+                            onTap: () {
+                              setState(() {
+                                _addressController.text = item['display_name'];
+                                _addressSuggestions = [];
+                              });
+                              FocusScope.of(context).unfocus();
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 14),
                   
                   // Location Action Buttons Row
@@ -345,6 +397,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
     required String hintText,
     int maxLines = 1,
     TextInputType keyboard = TextInputType.text,
+    ValueChanged<String>? onChanged,
   }) {
     const primaryColor = Color(0xFFFF6B35);
 
@@ -377,6 +430,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
             controller: controller,
             maxLines: maxLines,
             keyboardType: keyboard,
+            onChanged: onChanged,
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
