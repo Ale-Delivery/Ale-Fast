@@ -31,6 +31,9 @@ class _HomeScreenState extends State<HomeScreen> {
   String _deliveryLabel = 'Set delivery address';
   String _userName = 'User';
 
+  late final PageController _offerPageController;
+  ThemeData? _appTheme;
+
   final List<Map<String, dynamic>> categories = const [
     {'name': 'All', 'icon': Icons.grid_view_rounded},
     {'name': 'Burger', 'icon': Icons.lunch_dining_rounded},
@@ -59,6 +62,22 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _restaurantsFuture = _fetchRestaurants();
     _loadDeliveryLabel();
+    _offerPageController = PageController(viewportFraction: 0.9);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _appTheme ??= Theme.of(context).copyWith(
+      textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
+    );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _offerPageController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadDeliveryLabel() async {
@@ -73,12 +92,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ? '${saved['label']}: ${saved['address']}'
           : 'Set delivery address';
     });
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   Future<List<Map<String, dynamic>>> _fetchRestaurants() async {
@@ -142,21 +155,23 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: Theme.of(context).copyWith(
-        textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
-      ),
+      data: _appTheme ?? Theme.of(context),
       child: Scaffold(
         backgroundColor: _surface,
         body: SafeArea(
           bottom: false,
           child: CustomScrollView(
             slivers: [
-              SliverToBoxAdapter(child: _buildHeader()),
-              SliverToBoxAdapter(child: _buildHeroSearch()),
-              SliverToBoxAdapter(child: _buildOfferCarousel()),
-              SliverToBoxAdapter(child: _buildSectionTitle('Categories')),
-              SliverToBoxAdapter(child: _buildCategoryList()),
-              SliverToBoxAdapter(child: _buildSectionTitle('Open Restaurants')),
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  _buildHeader(),
+                  _buildHeroSearch(),
+                  _buildOfferCarousel(),
+                  _buildSectionTitle('Categories'),
+                  _buildCategoryList(),
+                  _buildSectionTitle('Open Restaurants'),
+                ]),
+              ),
               _buildRestaurantSliver(),
               const SliverToBoxAdapter(child: SizedBox(height: 104)),
             ],
@@ -168,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHeader() {
-    final cartCount = context.watch<CartProvider>().itemCount;
+    final cartCount = context.select<CartProvider, int>((c) => c.itemCount);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
@@ -345,10 +360,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildOfferCarousel() {
-    return SizedBox(
+    return RepaintBoundary(
+      child: SizedBox(
       height: 170,
       child: PageView.builder(
-        controller: PageController(viewportFraction: 0.9),
+        controller: _offerPageController,
         itemCount: offers.length,
         itemBuilder: (context, index) {
           final offer = offers[index];
@@ -444,6 +460,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
+    ),
     );
   }
 
@@ -606,7 +623,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBottomNavBar() {
-    return Container(
+    return RepaintBoundary(
+      child: Container(
       padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -665,6 +683,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 }

@@ -5,6 +5,9 @@ import '../services/local_storage_service.dart';
 import '../navigation/buyer_navigator.dart';
 import '../services/google_maps_service.dart';
 
+const _primaryColor = Color(0xFFFF6B35);
+const _darkInk = Color(0xFF1E1E2C);
+
 class DeliveryAddressScreen extends StatefulWidget {
   final bool proceedToCheckout;
 
@@ -15,6 +18,7 @@ class DeliveryAddressScreen extends StatefulWidget {
 }
 
 class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
+
   final _labelController = TextEditingController(text: 'Home');
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -187,26 +191,23 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFFFF6B35);
-    const darkInk = Color(0xFF1E1E2C);
-
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFC),
       appBar: AppBar(
         title: const Text(
           'Delivery Address',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: darkInk),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: _darkInk),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: darkInk, size: 20),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: _darkInk, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: primaryColor))
+          ? const Center(child: CircularProgressIndicator(color: _primaryColor))
           : SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Column(
@@ -217,7 +218,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
-                      color: darkInk,
+                      color: _darkInk,
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -259,7 +260,6 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                       ),
                       constraints: const BoxConstraints(maxHeight: 200),
                       child: ListView.separated(
-                        shrinkWrap: true,
                         padding: EdgeInsets.zero,
                         itemCount: _addressSuggestions.length,
                         separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFEEEEEE)),
@@ -267,10 +267,10 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                           final item = _addressSuggestions[index];
                           return ListTile(
                             dense: true,
-                            leading: const Icon(Icons.location_on_outlined, color: primaryColor, size: 18),
+                            leading: const Icon(Icons.location_on_outlined, color: _primaryColor, size: 18),
                             title: Text(
                               item['display_name'],
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: darkInk),
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _darkInk),
                             ),
                             onTap: () {
                               setState(() {
@@ -298,16 +298,16 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                                   height: 14,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    color: primaryColor,
+                                    color: _primaryColor,
                                   ),
                                 )
-                              : const Icon(Icons.my_location_rounded, size: 16, color: primaryColor),
+                              : const Icon(Icons.my_location_rounded, size: 16, color: _primaryColor),
                           label: Text(
                             _isLocating ? 'Locating...' : 'Locate Me',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: primaryColor),
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: _primaryColor),
                           ),
                           style: TextButton.styleFrom(
-                            backgroundColor: primaryColor.withOpacity(0.08),
+                            backgroundColor: _primaryColor.withOpacity(0.08),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -326,13 +326,13 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                               });
                             }
                           },
-                          icon: const Icon(Icons.map_outlined, size: 16, color: primaryColor),
+                          icon: const Icon(Icons.map_outlined, size: 16, color: _primaryColor),
                           label: const Text(
                             'Select on Map',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: primaryColor),
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: _primaryColor),
                           ),
                           style: TextButton.styleFrom(
-                            backgroundColor: primaryColor.withOpacity(0.08),
+                            backgroundColor: _primaryColor.withOpacity(0.08),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -371,7 +371,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                     child: ElevatedButton(
                       onPressed: _continue,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
+                        backgroundColor: _primaryColor,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -406,8 +406,6 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
     TextInputType keyboard = TextInputType.text,
     ValueChanged<String>? onChanged,
   }) {
-    const primaryColor = Color(0xFFFF6B35);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -457,7 +455,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: primaryColor, width: 1.5),
+                borderSide: const BorderSide(color: _primaryColor, width: 1.5),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),

@@ -3,6 +3,12 @@ import '../services/local_storage_service.dart';
 import '../services/auth_service.dart';
 import '../navigation/buyer_navigator.dart';
 
+const _primaryColor = Color(0xFFFF6B35);
+const _accentColor = Color(0xFFFF8A00);
+const _lightBg = Color(0xFFF9FAFC);
+const _darkInk = Color(0xFF1E1E2C);
+const _textMuted = Color(0xFF7D8491);
+
 class VerificationScreen extends StatefulWidget {
   final String phoneNumber;
   final String expectedOtp;
@@ -18,6 +24,7 @@ class VerificationScreen extends StatefulWidget {
 }
 
 class _VerificationScreenState extends State<VerificationScreen> {
+
   final List<TextEditingController> _controllers =
       List.generate(4, (index) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
@@ -112,14 +119,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFFFF6B35);
-    const accentColor = Color(0xFFFF8A00);
-    const lightBg = Color(0xFFF9FAFC);
-    const darkInk = Color(0xFF1E1E2C);
-    const textMuted = Color(0xFF7D8491);
-
     return Scaffold(
-      backgroundColor: lightBg,
+      backgroundColor: _lightBg,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 30),
@@ -141,7 +142,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     ],
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: darkInk, size: 18),
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: _darkInk, size: 18),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -152,7 +153,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
               const Text(
                 "Verification",
                 style: TextStyle(
-                  color: darkInk,
+                  color: _darkInk,
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.8,
@@ -162,7 +163,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
               RichText(
                 text: TextSpan(
                   style: const TextStyle(
-                    color: textMuted,
+                    color: _textMuted,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                     height: 1.3,
@@ -172,7 +173,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     TextSpan(
                       text: widget.phoneNumber,
                       style: const TextStyle(
-                        color: darkInk,
+                        color: _darkInk,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -214,11 +215,11 @@ class _VerificationScreenState extends State<VerificationScreen> {
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
-                              color: darkInk,
+                              color: _darkInk,
                             ),
                             decoration: InputDecoration(
                               counterText: "",
-                              fillColor: lightBg,
+                              fillColor: _lightBg,
                               filled: true,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
@@ -231,7 +232,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 borderSide: const BorderSide(
-                                  color: primaryColor,
+                                  color: _primaryColor,
                                   width: 2.0,
                                 ),
                               ),
@@ -261,14 +262,14 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [accentColor, primaryColor],
+                            colors: [_accentColor, _primaryColor],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: primaryColor.withOpacity(0.25),
+                              color: _primaryColor.withOpacity(0.25),
                               blurRadius: 12,
                               offset: const Offset(0, 6),
                             ),

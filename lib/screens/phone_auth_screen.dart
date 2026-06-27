@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:food_app/services/auth_service.dart';
 import 'package:food_app/navigation/buyer_navigator.dart';
 
+const _primaryColor = Color(0xFFFF6B35);
+const _accentColor = Color(0xFFFF8A00);
+const _lightBg = Color(0xFFF9FAFC);
+const _darkInk = Color(0xFF1E1E2C);
+const _textMuted = Color(0xFF7D8491);
+
 class PhoneAuthScreen extends StatefulWidget {
   const PhoneAuthScreen({super.key});
 
@@ -10,6 +16,7 @@ class PhoneAuthScreen extends StatefulWidget {
 }
 
 class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
+
   final TextEditingController _phoneController = TextEditingController();
   bool _isLoading = false;
 
@@ -78,14 +85,8 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFFFF6B35);
-    const accentColor = Color(0xFFFF8A00);
-    const lightBg = Color(0xFFF9FAFC);
-    const darkInk = Color(0xFF1E1E2C);
-    const textMuted = Color(0xFF7D8491);
-
     return Scaffold(
-      backgroundColor: lightBg,
+      backgroundColor: _lightBg,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 30),
@@ -100,14 +101,14 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                 height: 60,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [accentColor, primaryColor],
+                    colors: [_accentColor, _primaryColor],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: primaryColor.withOpacity(0.2),
+                      color: _primaryColor.withOpacity(0.2),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     )
@@ -125,7 +126,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
               const Text(
                 "Welcome to Alee",
                 style: TextStyle(
-                  color: darkInk,
+                  color: _darkInk,
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.8,
@@ -135,7 +136,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
               const Text(
                 "Enter your phone number to continue your food journey",
                 style: TextStyle(
-                  color: textMuted,
+                  color: _textMuted,
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                   height: 1.3,
@@ -164,7 +165,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                     const Text(
                       "PHONE NUMBER",
                       style: TextStyle(
-                        color: textMuted,
+                        color: _textMuted,
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.2,
@@ -179,7 +180,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: darkInk,
+                        color: _darkInk,
                         letterSpacing: 1.0,
                       ),
                       decoration: InputDecoration(
@@ -212,7 +213,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w800,
-                                  color: darkInk,
+                                  color: _darkInk,
                                 ),
                               ),
                             ],
@@ -235,7 +236,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: const BorderSide(
-                            color: primaryColor,
+                            color: _primaryColor,
                             width: 1.5,
                           ),
                         ),
@@ -252,14 +253,14 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [accentColor, primaryColor],
+                            colors: [_accentColor, _primaryColor],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: primaryColor.withOpacity(0.25),
+                              color: _primaryColor.withOpacity(0.25),
                               blurRadius: 12,
                               offset: const Offset(0, 6),
                             ),

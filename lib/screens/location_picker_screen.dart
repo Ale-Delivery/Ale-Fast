@@ -4,6 +4,9 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/google_maps_service.dart';
 
+const _primaryColor = Color(0xFFFF6B35);
+const _darkInk = Color(0xFF1E1E2C);
+
 class LocationPickerScreen extends StatefulWidget {
   const LocationPickerScreen({super.key});
 
@@ -12,6 +15,7 @@ class LocationPickerScreen extends StatefulWidget {
 }
 
 class _LocationPickerScreenState extends State<LocationPickerScreen> {
+
   final MapController _mapController = MapController();
   
   static const LatLng _defaultCenter = LatLng(6.9271, 79.8612);
@@ -134,9 +138,6 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFFFF6B35);
-    const darkInk = Color(0xFF1E1E2C);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -145,7 +146,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
         ),
         leading: const BackButton(),
         backgroundColor: Colors.white,
-        foregroundColor: darkInk,
+        foregroundColor: _darkInk,
         elevation: 0,
       ),
       body: Stack(
@@ -184,7 +185,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                 children: [
                   const Icon(
                     Icons.location_on_rounded,
-                    color: primaryColor,
+                    color: _primaryColor,
                     size: 44,
                   ),
                   Container(
@@ -207,7 +208,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
             child: FloatingActionButton(
               onPressed: _determinePosition,
               backgroundColor: Colors.white,
-              foregroundColor: primaryColor,
+              foregroundColor: _primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -237,11 +238,11 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                   child: TextField(
                     controller: _searchController,
                     onChanged: _searchAddress,
-                    style: const TextStyle(fontWeight: FontWeight.w600, color: darkInk),
+                    style: const TextStyle(fontWeight: FontWeight.w600, color: _darkInk),
                     decoration: InputDecoration(
                       hintText: 'Search address or location...',
                       hintStyle: const TextStyle(color: Color(0xFFC0C0D0), fontWeight: FontWeight.w500),
-                      prefixIcon: const Icon(Icons.search_rounded, color: primaryColor),
+                      prefixIcon: const Icon(Icons.search_rounded, color: _primaryColor),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.close_rounded, color: Colors.grey),
@@ -274,19 +275,18 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                       ],
                     ),
                     child: ListView.separated(
-                      shrinkWrap: true,
                       padding: EdgeInsets.zero,
                       itemCount: _searchResults.length,
                       separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFEEEEEE)),
                       itemBuilder: (context, index) {
                         final item = _searchResults[index];
                         return ListTile(
-                          leading: const Icon(Icons.location_on_outlined, color: primaryColor, size: 20),
+                          leading: const Icon(Icons.location_on_outlined, color: _primaryColor, size: 20),
                           title: Text(
                             item['display_name'],
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: darkInk),
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _darkInk),
                           ),
                           onTap: () async {
                             FocusScope.of(context).unfocus();
@@ -341,7 +341,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                     children: [
                       const Icon(
                         Icons.pin_drop_rounded,
-                        color: primaryColor,
+                        color: _primaryColor,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
@@ -363,7 +363,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: darkInk,
+                        color: _darkInk,
                         height: 1.4,
                       ),
                       maxLines: 2,
@@ -385,7 +385,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                               });
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
+                        backgroundColor: _primaryColor,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),

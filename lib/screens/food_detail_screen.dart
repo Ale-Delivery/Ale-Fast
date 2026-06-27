@@ -28,7 +28,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final food = widget.food;
-    final cart = context.watch<CartProvider>();
+    final cartCount = context.select<CartProvider, int>((c) => c.itemCount);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -68,7 +68,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                               color: AppColors.dark, size: 20),
                         ),
                       ),
-                      if (cart.itemCount > 0)
+                      if (cartCount > 0)
                         Positioned(
                           right: 8,
                           top: 8,
@@ -79,7 +79,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                                 color: AppColors.orange,
                                 shape: BoxShape.circle),
                             child: Center(
-                              child: Text('${cart.itemCount}',
+                              child: Text('$cartCount',
                                   style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 8,
@@ -162,6 +162,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                             .map((s) => GestureDetector(
                                   onTap: () => setState(() => _selectedSize = s),
                                   child: AnimatedContainer(
+                                    key: ValueKey(s),
                                     duration: const Duration(milliseconds: 200),
                                     margin: const EdgeInsets.only(right: 10),
                                     padding: const EdgeInsets.symmetric(
@@ -226,7 +227,8 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
             bottom: 0,
             left: 0,
             right: 0,
-            child: Container(
+            child: RepaintBoundary(
+              child: Container(
               padding: EdgeInsets.fromLTRB(20, 16, 20, 32 + MediaQuery.of(context).padding.bottom),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -307,6 +309,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                   ),
                 ],
               ),
+            ),
             ),
           ),
         ],

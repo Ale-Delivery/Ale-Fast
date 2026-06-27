@@ -37,7 +37,8 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
   @override
   Widget build(BuildContext context) {
     final r = widget.restaurant;
-    final cart = context.watch<CartProvider>();
+    final cartCount = context.select<CartProvider, int>((c) => c.itemCount);
+    final cartTotal = context.select<CartProvider, double>((c) => c.total);
 
     return Scaffold(
       backgroundColor: AppColors.lightBg,
@@ -110,6 +111,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
                       itemBuilder: (_, i) => GestureDetector(
                         onTap: () => setState(() => _activeTab = _tabs[i]),
                         child: AnimatedContainer(
+                          key: ValueKey(_tabs[i]),
                           duration: const Duration(milliseconds: 200),
                           margin: const EdgeInsets.only(right: 8),
                           padding: const EdgeInsets.symmetric(
@@ -235,11 +237,11 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
         ],
       ),
       // ── Floating Cart Button ───────────────────────────────
-      floatingActionButton: cart.itemCount > 0
+      floatingActionButton: cartCount > 0
           ? FloatingActionButton.extended(
               backgroundColor: AppColors.orange,
               onPressed: () {},
-              label: Text('${cart.itemCount} items · Rs. ${cart.total.toStringAsFixed(0)}',
+              label: Text('${cartCount} items · Rs. ${cartTotal.toStringAsFixed(0)}',
                   style: const TextStyle(
                       color: Colors.white, fontWeight: FontWeight.w700)),
               icon: const Icon(Icons.shopping_cart_outlined,

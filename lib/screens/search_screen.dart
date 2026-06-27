@@ -25,6 +25,7 @@ Map<String, dynamic> _restaurantMap(Restaurant r) => {
 
 class _SearchScreenState extends State<SearchScreen> {
   final _controller = TextEditingController();
+  final ValueNotifier<bool> _hasText = ValueNotifier(false);
   bool _searching = false;
   List<Restaurant> _restaurants = [];
   List<FoodItem> _foods = [];
@@ -90,6 +91,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void dispose() {
     _controller.dispose();
+    _hasText.dispose();
     super.dispose();
   }
 
@@ -106,17 +108,21 @@ class _SearchScreenState extends State<SearchScreen> {
             hintText: 'Pizza',
             hintStyle: const TextStyle(color: AppColors.grey),
             border: InputBorder.none,
-            suffixIcon: _controller.text.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.clear, size: 18),
-                    onPressed: () {
-                      _controller.clear();
-                      _search('');
-                    })
-                : null,
+            suffixIcon: ValueListenableBuilder<bool>(
+              valueListenable: _hasText,
+              builder: (_, hasText, __) => hasText
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, size: 18),
+                      onPressed: () {
+                        _controller.clear();
+                        _hasText.value = false;
+                        _search('');
+                      })
+                  : const SizedBox.shrink(),
+            ),
           ),
           onChanged: (v) {
-            setState(() {});
+            _hasText.value = v.isNotEmpty;
             _search(v);
           },
         ),
