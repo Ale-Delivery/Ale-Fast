@@ -227,12 +227,12 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
             left: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+              padding: EdgeInsets.fromLTRB(20, 16, 20, 32 + MediaQuery.of(context).padding.bottom),
               decoration: BoxDecoration(
                 color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
+                        color: Colors.black.withOpacity(0.08),
                         blurRadius: 20,
                         offset: const Offset(0, -5))
                   ],
@@ -240,7 +240,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
               child: Row(
                 children: [
                   // Price
-                  Text('\$${(food.price * _quantity).toStringAsFixed(0)}',
+                  Text('Rs. ${(food.price * _quantity).toStringAsFixed(0)}',
                       style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
@@ -278,8 +278,8 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                           backgroundColor: AppColors.orange,
                           duration: const Duration(seconds: 3),
                           behavior: SnackBarBehavior.floating,
-                          margin: const EdgeInsets.only(
-                            bottom: 96,
+                          margin: EdgeInsets.only(
+                            bottom: 96 + MediaQuery.of(context).padding.bottom,
                             left: 16,
                             right: 16,
                           ),

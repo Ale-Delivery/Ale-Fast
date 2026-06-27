@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/local_storage_service.dart';
@@ -22,21 +23,26 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
   bool _isLocating = false;
 
   List<Map<String, dynamic>> _addressSuggestions = [];
+  Timer? _debounceTimer;
 
   Future<void> _onAddressChanged(String query) async {
+    _debounceTimer?.cancel();
     if (query.trim().length < 3) {
       setState(() => _addressSuggestions = []);
       return;
     }
-    
-    try {
-      final suggestions = await GoogleMapsService.getAutocompleteSuggestions(query);
-      setState(() {
-        _addressSuggestions = suggestions;
-      });
-    } catch (e) {
-      debugPrint('Error getting address suggestions: $e');
-    }
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () async {
+      try {
+        final suggestions = await GoogleMapsService.getAutocompleteSuggestions(query);
+        if (mounted) {
+          setState(() {
+            _addressSuggestions = suggestions;
+          });
+        }
+      } catch (e) {
+        debugPrint('Error getting address suggestions: $e');
+      }
+    });
   }
 
   Future<void> _getCurrentLocation() async {
@@ -133,6 +139,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _labelController.dispose();
     _addressController.dispose();
     _phoneController.dispose();

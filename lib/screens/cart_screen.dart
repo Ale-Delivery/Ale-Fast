@@ -59,7 +59,7 @@ class CartScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
+                                color: Colors.black.withOpacity(0.05),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2))
                           ],
@@ -127,12 +127,12 @@ class CartScreen extends StatelessWidget {
 
                 // ── Order Summary ──────────────────────────────
                 Container(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 36),
+                  padding: EdgeInsets.fromLTRB(20, 20, 20, 36 + MediaQuery.of(context).padding.bottom),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
+                          color: Colors.black.withOpacity(0.08),
                           blurRadius: 20,
                           offset: const Offset(0, -5))
                     ],

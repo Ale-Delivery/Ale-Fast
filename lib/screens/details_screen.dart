@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../navigation/buyer_navigator.dart';
 import '../providers/cart_provider.dart';
 import '../services/database_service.dart';
+import '../widgets/common_widgets.dart';
 
 class DetailsScreen extends StatefulWidget {
   final Map<String, dynamic> restaurant;
@@ -16,12 +17,20 @@ class DetailsScreen extends StatefulWidget {
 }
 
 class _DetailsScreenState extends State<DetailsScreen> {
+  late Future<List<Map<String, dynamic>>> _menuItemsFuture;
+
   Future<List<Map<String, dynamic>>> _fetchMenuItems() async {
     final response = await Supabase.instance.client
         .from('Menu_Items')
         .select()
         .eq('restaurant_id', widget.restaurant['id']);
     return response;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _menuItemsFuture = _fetchMenuItems();
   }
 
   @override
@@ -59,7 +68,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFF7A1A).withValues(alpha: 0.3),
+                  color: const Color(0xFFFF7A1A).withOpacity(0.3),
                   blurRadius: 15,
                   offset: const Offset(0, 8),
                 ),
@@ -119,17 +128,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Restaurant image
-              Image.network(
-              widget.restaurant['image_url'] ?? '',
+              AppNetworkImage(
+              url: widget.restaurant['image_url'] ?? '',
               height: 300,
               width: double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                height: 300,
-                color: Colors.grey[300],
-                child:
-                    const Icon(Icons.restaurant, size: 100, color: Colors.grey),
-              ),
             ),
 
             // Restaurant details
@@ -189,7 +192,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
                     // Menu items from Supabase
                     FutureBuilder<List<Map<String, dynamic>>>(
-                      future: _fetchMenuItems(),
+                      future: _menuItemsFuture,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -236,7 +239,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                       color: Colors.black.withValues(alpha: 0.03),
+                                       color: Colors.black.withOpacity(0.03),
                                       blurRadius: 10,
                                       offset: const Offset(0, 5)),
                                 ],
@@ -244,24 +247,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               child: Row(
                                 children: [
                                   // Food image
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(15),
-                                    child: Image.network(
-                                      item['image_url'] ?? '',
+                                    AppNetworkImage(
+                                      url: item['image_url'] ?? '',
                                       height: 80,
                                       width: 80,
                                       fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              Container(
-                                        height: 80,
-                                        width: 80,
-                                        color: Colors.grey[200],
-                                        child: const Icon(Icons.fastfood,
-                                            color: Colors.grey),
-                                      ),
+                                      borderRadius: BorderRadius.circular(15),
                                     ),
-                                  ),
                                   const SizedBox(width: 15),
                                   // Food details and price
                                   Expanded(

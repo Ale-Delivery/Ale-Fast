@@ -48,9 +48,10 @@ class AuthService {
     String? gender,
     String? birthday,
     String? phone,
+    String? existingUserId,
   }) async {
     final user = _supabase.auth.currentUser;
-    final userId = user?.id ?? _generateUserId();
+    final userId = existingUserId ?? user?.id ?? _generateUserId();
 
     final payload = <String, dynamic>{
       'id': userId,
@@ -74,17 +75,8 @@ class AuthService {
     try {
       await _supabase.from('Profiles').upsert(payload);
     } catch (e) {
-      // Common when Profiles table is missing columns (birthday, phone) or RLS blocks insert.
-      // App still continues with local profile — run supabase_schema.sql Profiles section.
-      debugPrint('Profile Supabase sync skipped: $e');
-      try {
-        await _supabase.from('Profiles').upsert({
-          'id': userId,
-          'name': name,
-        });
-      } catch (e2) {
-        debugPrint('Profile minimal sync failed: $e2');
-      }
+      debugPrint('Profile Supabase sync error: $e');
+      rethrow;
     }
 
     return userId;

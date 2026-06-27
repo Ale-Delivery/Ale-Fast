@@ -30,14 +30,15 @@ class _SplashScreenState extends State<SplashScreen>
     );
     _controller.forward();
 
-    Future.delayed(const Duration(seconds: 3), () async {
-      if (!mounted) return;
-      final hasProfile = await LocalStorageService.isProfileComplete();
-      if (!mounted) return;
-      if (hasProfile) {
-        BuyerNavigator.home(context, clearStack: true);
-      } else {
-        BuyerNavigator.onboarding(context, replace: true);
+    _controller.addStatusListener((status) async {
+      if (status == AnimationStatus.completed && mounted) {
+        final hasProfile = await LocalStorageService.isProfileComplete();
+        if (!mounted) return;
+        if (hasProfile) {
+          BuyerNavigator.home(context, clearStack: true);
+        } else {
+          BuyerNavigator.onboarding(context, replace: true);
+        }
       }
     });
   }

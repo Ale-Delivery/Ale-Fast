@@ -171,7 +171,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
+                                color: Colors.black.withOpacity(0.05),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2))
                           ],
@@ -201,7 +201,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
                                     fontSize: 10,
                                   ),
                                   const SizedBox(height: 6),
-                                  Text('\$${food.price.toInt()}',
+                                  Text('Rs. ${food.price.toInt()}',
                                       style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w800,
@@ -239,7 +239,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
           ? FloatingActionButton.extended(
               backgroundColor: AppColors.orange,
               onPressed: () {},
-              label: Text('${cart.itemCount} items · \$${cart.total.toStringAsFixed(0)}',
+              label: Text('${cart.itemCount} items · Rs. ${cart.total.toStringAsFixed(0)}',
                   style: const TextStyle(
                       color: Colors.white, fontWeight: FontWeight.w700)),
               icon: const Icon(Icons.shopping_cart_outlined,

@@ -50,7 +50,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Could not place order: $e'),
+            content: const Text('Could not place order. Please check your connection and try again.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -127,7 +127,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+            padding: EdgeInsets.fromLTRB(20, 16, 20, 32 + MediaQuery.of(context).padding.bottom),
             color: Colors.white,
             child: Column(
               children: [

@@ -124,23 +124,17 @@ class _HomeScreenState extends State<HomeScreen> {
   void _handleTabTap(int index) {
     setState(() => _selectedTab = index);
     switch (index) {
-      case 0:
-        break;
       case 1:
-        BuyerNavigator.search(context).then((_) => setState(() => _selectedTab = 0));
+        BuyerNavigator.search(context).then((_) => _loadDeliveryLabel());
         break;
       case 2:
-        BuyerNavigator.cart(context).then((_) => setState(() => _selectedTab = 0));
+        BuyerNavigator.cart(context).then((_) => _loadDeliveryLabel());
         break;
       case 3:
-        BuyerNavigator.orderHistory(context)
-            .then((_) => setState(() => _selectedTab = 0));
+        BuyerNavigator.orderHistory(context).then((_) => _loadDeliveryLabel());
         break;
       case 4:
-        BuyerNavigator.profile(context).then((_) {
-          setState(() => _selectedTab = 0);
-          _loadDeliveryLabel();
-        });
+        BuyerNavigator.profile(context).then((_) => _loadDeliveryLabel());
         break;
     }
   }
@@ -305,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     border: Border.all(color: const Color(0xFFEDEFF3)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
+                        color: Colors.black.withOpacity(0.04),
                         blurRadius: 18,
                         offset: const Offset(0, 10),
                       ),
@@ -370,7 +364,7 @@ class _HomeScreenState extends State<HomeScreen> {
               borderRadius: BorderRadius.circular(22),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.12),
+                  color: Colors.black.withOpacity(0.12),
                   blurRadius: 20,
                   offset: const Offset(0, 12),
                 ),
@@ -388,8 +382,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.black.withValues(alpha: 0.7),
-                        Colors.black.withValues(alpha: 0.12),
+                        Colors.black.withOpacity(0.7),
+                        Colors.black.withOpacity(0.12),
                       ],
                     ),
                   ),
@@ -417,7 +411,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.86),
+                          color: Colors.white.withOpacity(0.86),
                           fontSize: 12,
                           height: 1.25,
                         ),
@@ -619,7 +613,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 24,
             offset: const Offset(0, -8),
           ),
@@ -706,7 +700,7 @@ class _RestaurantCard extends StatelessWidget {
               border: Border.all(color: const Color(0xFFEDEFF3)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
+                  color: Colors.black.withOpacity(0.04),
                   blurRadius: 18,
                   offset: const Offset(0, 10),
                 ),
@@ -751,7 +745,7 @@ class _RestaurantCard extends StatelessWidget {
                         width: 38,
                         height: 38,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.94),
+                          color: Colors.white.withOpacity(0.94),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.favorite_border_rounded,

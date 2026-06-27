@@ -98,7 +98,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
+                                color: Colors.black.withOpacity(0.05),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -129,7 +129,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                         horizontal: 8, vertical: 3),
                                     decoration: BoxDecoration(
                                       color: _statusColor(order.status)
-                                          .withValues(alpha: 0.15),
+                                          .withOpacity(0.15),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(

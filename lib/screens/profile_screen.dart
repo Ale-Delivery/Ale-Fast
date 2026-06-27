@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/local_storage_service.dart';
 import '../services/auth_service.dart';
 import '../navigation/buyer_navigator.dart';
+import 'profile_setup_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,6 +18,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _gender;
   String? _birthday;
   String? _addressLabel;
+  String? _userId;
   bool _isLoading = true;
 
   @override
@@ -31,6 +33,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final phone = await LocalStorageService.getUserPhone();
     final address = await LocalStorageService.getDeliveryAddress();
     
+    final savedUserId = await LocalStorageService.getUserId();
+
     if (phone != null) {
       final authService = AuthService();
       final profile = await authService.getUserProfile(phone);
@@ -42,6 +46,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _gender = profile['gender'];
           _birthday = profile['birthday'];
           _addressLabel = address?['label'];
+          _userId = profile['id']?.toString() ?? savedUserId;
           _isLoading = false;
         });
         return;
@@ -52,6 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _name = name ?? 'Guest';
         _phone = phone;
+        _userId = savedUserId;
         _addressLabel = address?['label'];
         _isLoading = false;
       });
@@ -227,8 +233,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
 
                   // --- Menu / Actions Section ---
-                  _buildSectionHeader('Preferences'),
+                  _buildSectionHeader('Account'),
                   const SizedBox(height: 12),
+                  _buildMenuTile(
+                    icon: Icons.edit_outlined,
+                    title: 'Edit Profile',
+                    subtitle: 'Update your personal info',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ProfileSetupScreen(
+                            existingUserId: _userId,
+                            existingName: _name,
+                            existingEmail: _email,
+                            existingGender: _gender,
+                            existingBirthday: _birthday,
+                          ),
+                        ),
+                      ).then((_) => _load());
+                    },
+                  ),
                   _buildMenuTile(
                     icon: Icons.receipt_long_rounded,
                     title: 'Order History',

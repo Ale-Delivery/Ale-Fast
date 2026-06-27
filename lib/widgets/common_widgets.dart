@@ -113,7 +113,7 @@ class RestaurantCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
+                color: Colors.black.withOpacity(0.06),
                 blurRadius: 10,
                 offset: const Offset(0, 4))
           ],
@@ -182,7 +182,7 @@ class FoodCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
+              color: Colors.black.withOpacity(0.06),
               blurRadius: 8,
               offset: const Offset(0, 3))
           ],
@@ -212,14 +212,14 @@ class FoodCard extends StatelessWidget {
                       style: const TextStyle(
                           fontSize: 13, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 2),
-                  Text('Starting  \$${food.price.toInt()}',
+                  Text('Starting  Rs. ${food.price.toInt()}',
                       style: const TextStyle(
                           fontSize: 11, color: AppColors.grey)),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('\$${food.price.toInt()}',
+                      Text('Rs. ${food.price.toInt()}',
                           style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
@@ -269,7 +269,7 @@ class CategoryChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: Colors.black.withOpacity(0.05),
                 blurRadius: 6,
                 offset: const Offset(0, 2))
           ],

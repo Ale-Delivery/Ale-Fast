@@ -4,19 +4,35 @@ import '../services/local_storage_service.dart';
 import '../screens/home_screen.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
-  const ProfileSetupScreen({super.key});
+  final String? existingUserId;
+  final String? existingName;
+  final String? existingEmail;
+  final String? existingGender;
+  final String? existingBirthday;
+
+  const ProfileSetupScreen({
+    super.key,
+    this.existingUserId,
+    this.existingName,
+    this.existingEmail,
+    this.existingGender,
+    this.existingBirthday,
+  });
 
   @override
   State<ProfileSetupScreen> createState() => _ProfileSetupScreenState();
 }
 
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
-  final _nameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   String? _selectedGender;
   DateTime? _selectedDate;
   final _authService = AuthService();
   bool _isLoading = false;
+
+  bool get _isEditing => widget.existingUserId != null;
 
   final List<Map<String, dynamic>> _genderOptions = [
     {'value': 'Male', 'icon': Icons.male_rounded, 'label': 'Male'},
@@ -33,13 +49,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
+            colorScheme: const ColorScheme.light(
               primary: Color(0xFFFF6B35),
               onPrimary: Colors.white,
-              surface: Color(0xFF1E1E2C),
-              onSurface: Colors.white,
+              surface: Colors.white,
+              onSurface: Color(0xFF1E1E2C),
             ),
-            dialogBackgroundColor: const Color(0xFF131324),
+            dialogBackgroundColor: Colors.white,
           ),
           child: child!,
         );
@@ -51,10 +67,32 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   Future<void> _saveProfile() async {
-    if (_nameController.text.trim().isEmpty || _selectedGender == null || _selectedDate == null) {
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    
+    if (firstName.isEmpty || lastName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please fill all required fields'),
+          content: Text('Please enter your first and last name'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    // Only require gender/birthday if they are shown (not editing, or editing with existing value)
+    if ((!_isEditing || _selectedGender != null) && _selectedGender == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select your gender'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if ((!_isEditing || _selectedDate != null) && _selectedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select your birthday'),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -65,25 +103,32 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
     try {
       final phone = await LocalStorageService.getUserPhone();
+      final fullName = "$firstName $lastName";
+      
       final userId = await _authService.saveUserProfile(
-        name: _nameController.text.trim(),
+        name: fullName,
         email: _emailController.text.trim(),
         gender: _selectedGender!,
-        birthday: _selectedDate!.toIso8601String().split('T')[0], // YYYY-MM-DD format
+        birthday: _selectedDate!.toIso8601String().split('T')[0],
         phone: phone,
+        existingUserId: widget.existingUserId,
       );
 
       await LocalStorageService.setProfileComplete(
         userId: userId,
-        name: _nameController.text.trim(),
+        name: fullName,
         phone: phone,
       );
 
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
+        if (_isEditing) {
+          Navigator.pop(context);
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -101,8 +146,28 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.existingName != null) {
+      final parts = widget.existingName!.split(' ');
+      _firstNameController.text = parts.first;
+      _lastNameController.text = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+    }
+    if (widget.existingEmail != null) {
+      _emailController.text = widget.existingEmail!;
+    }
+    if (widget.existingGender != null) {
+      _selectedGender = widget.existingGender!;
+    }
+    if (widget.existingBirthday != null) {
+      _selectedDate = DateTime.tryParse(widget.existingBirthday!);
+    }
+  }
+
+  @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
     super.dispose();
   }
@@ -111,25 +176,47 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFFFF6B35);
     const accentColor = Color(0xFFFF8A00);
-    const darkBg = Color(0xFF0F1020);
-    const cardBg = Color(0xFF1E1E2C);
-    const textMuted = Color(0xFF8E8E9E);
+    const lightBg = Color(0xFFF9FAFC);
+    const cardBg = Colors.white;
+    const darkInk = Color(0xFF1E1E2C);
+    const textMuted = Color(0xFF7D8491);
 
     return Scaffold(
-      backgroundColor: darkBg,
+      backgroundColor: lightBg,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
+              // Back button
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Icon(Icons.arrow_back_ios_new_rounded, color: darkInk, size: 18),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
               // Header
-              const Text(
-                "Complete Profile",
+              Text(
+                _isEditing ? "Edit Profile" : "Complete Profile",
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
+                  color: darkInk,
+                  fontSize: 30,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.5,
                 ),
@@ -143,29 +230,57 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 36),
 
-              // Full Name Field
-              _buildFieldLabel("FULL NAME"),
-              _buildTextField(
-                controller: _nameController,
-                hintText: "Enter your full name",
-                icon: Icons.person_outline_rounded,
+              // First Name & Last Name Row
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFieldLabel("FIRST NAME"),
+                        _buildTextField(
+                          controller: _firstNameController,
+                          hintText: "First name",
+                          icon: Icons.person_outline_rounded,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFieldLabel("LAST NAME"),
+                        _buildTextField(
+                          controller: _lastNameController,
+                          hintText: "Last name",
+                          icon: Icons.person_outline_rounded,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
 
-              // Email Field
-              _buildFieldLabel("EMAIL (OPTIONAL)"),
-              _buildTextField(
-                controller: _emailController,
-                hintText: "Enter your email address",
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 24),
+              // Email Field — show if not editing, or if editing and has value
+              if (!_isEditing || (widget.existingEmail != null && widget.existingEmail!.isNotEmpty)) ...[
+                _buildFieldLabel("EMAIL (OPTIONAL)"),
+                _buildTextField(
+                  controller: _emailController,
+                  hintText: "Enter your email address",
+                  icon: Icons.email_outlined,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 24),
+              ],
 
-              // Gender Selector
-              _buildFieldLabel("GENDER"),
+              // Gender Selector — show if not editing, or if editing and has value
+              if (!_isEditing || _selectedGender != null) ...[
+                _buildFieldLabel("GENDER"),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: _genderOptions.map((opt) {
@@ -180,26 +295,33 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         decoration: BoxDecoration(
-                          color: isSelected ? primaryColor.withOpacity(0.12) : cardBg,
+                          color: isSelected ? primaryColor.withOpacity(0.08) : cardBg,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: isSelected ? primaryColor : Colors.transparent,
+                            color: isSelected ? primaryColor : Colors.grey.withOpacity(0.15),
                             width: 1.5,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.02),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               opt['icon'],
-                              color: isSelected ? primaryColor : Colors.white70,
+                              color: isSelected ? primaryColor : darkInk.withOpacity(0.7),
                               size: 24,
                             ),
                             const SizedBox(height: 8),
                             Text(
                               opt['label'],
                               style: TextStyle(
-                                color: isSelected ? Colors.white : textMuted,
+                                color: isSelected ? primaryColor : darkInk.withOpacity(0.8),
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -212,9 +334,11 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 }).toList(),
               ),
               const SizedBox(height: 24),
+              ], // close gender conditional
 
-              // Birthday Field
-              _buildFieldLabel("BIRTHDAY"),
+              // Birthday Field — show if not editing, or if editing and has value
+              if (!_isEditing || _selectedDate != null) ...[
+                _buildFieldLabel("BIRTHDAY"),
               GestureDetector(
                 onTap: () => _selectDate(context),
                 child: Container(
@@ -222,6 +346,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   decoration: BoxDecoration(
                     color: cardBg,
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.withOpacity(0.15)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
@@ -233,7 +365,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                               ? "Select your birthday"
                               : _selectedDate.toString().split(' ')[0],
                           style: TextStyle(
-                            color: _selectedDate == null ? textMuted : Colors.white,
+                            color: _selectedDate == null ? textMuted : darkInk,
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                           ),
@@ -245,6 +377,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 ),
               ),
               const SizedBox(height: 48),
+              ], // close birthday conditional
 
               // Submit Button
               SizedBox(
@@ -260,7 +393,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: primaryColor.withOpacity(0.3),
+                        color: primaryColor.withOpacity(0.25),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
@@ -309,7 +442,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       child: Text(
         label,
         style: const TextStyle(
-          color: Color(0xFF8E8E9E),
+          color: Color(0xFF7D8491),
           fontSize: 11,
           fontWeight: FontWeight.w800,
           letterSpacing: 1.0,
@@ -324,33 +457,51 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
   }) {
-    const cardBg = Color(0xFF1E1E2C);
+    const cardBg = Colors.white;
     const primaryColor = Color(0xFFFF6B35);
+    const darkInk = Color(0xFF1E1E2C);
 
     return Container(
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
         style: const TextStyle(
-          color: Colors.white,
+          color: darkInk,
           fontSize: 15,
           fontWeight: FontWeight.w600,
         ),
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: const TextStyle(
-            color: Color(0xFF5E5E6E),
+            color: Color(0xFF9E9EAE),
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
-          prefixIcon: Icon(icon, color: const Color(0xFF5E5E6E), size: 22),
+          prefixIcon: Icon(icon, color: const Color(0xFF9E9EAE), size: 22),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none,
+            borderSide: BorderSide(
+              color: Colors.grey.withOpacity(0.15),
+              width: 1.0,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(
+              color: Colors.grey.withOpacity(0.15),
+              width: 1.0,
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
