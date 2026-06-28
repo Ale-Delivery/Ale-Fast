@@ -109,4 +109,47 @@ class AuthService {
       return null;
     }
   }
+
+  Future<void> saveDeliveryAddress({
+    required String userId,
+    required String label,
+    required String address,
+    required String phone,
+  }) async {
+    debugPrint('[saveDeliveryAddress] userId=$userId label=$label address=$address phone=$phone');
+    try {
+      final payload = {
+        'delivery_label': label,
+        'delivery_address': address,
+        'delivery_phone': phone,
+      };
+      final response = await _supabase
+          .from('Profiles')
+          .update(payload)
+          .eq('id', userId)
+          .select();
+      debugPrint('[saveDeliveryAddress] update response: $response');
+    } catch (e) {
+      debugPrint('[saveDeliveryAddress] error: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>?> getDeliveryAddress(String userId) async {
+    try {
+      final response = await _supabase
+          .from('Profiles')
+          .select('delivery_address, delivery_label, delivery_phone')
+          .eq('id', userId)
+          .maybeSingle();
+      if (response != null &&
+          response['delivery_address'] != null &&
+          (response['delivery_address'] as String).isNotEmpty) {
+        return response;
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error fetching delivery address: $e');
+      return null;
+    }
+  }
 }

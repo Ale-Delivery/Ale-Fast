@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/local_storage_service.dart';
 import '../services/auth_service.dart';
 import '../navigation/buyer_navigator.dart';
+import '../screens/delivery_address_screen.dart';
 
 const _primaryColor = Color(0xFFFF6B35);
 const _accentColor = Color(0xFFFF8A00);
@@ -88,12 +89,34 @@ class _VerificationScreenState extends State<VerificationScreen> {
             name: profile['name']?.toString() ?? 'User',
             phone: widget.phoneNumber,
           );
+
+          // Load delivery address from Supabase into local storage
+          final supabaseAddr = await authService.getDeliveryAddress(
+            profile['id']?.toString() ?? '',
+          );
+          if (supabaseAddr != null) {
+            await LocalStorageService.saveDeliveryAddress(
+              label: supabaseAddr['delivery_label']?.toString() ?? 'Home',
+              address: supabaseAddr['delivery_address']?.toString() ?? '',
+              phone: supabaseAddr['delivery_phone']?.toString() ?? '',
+            );
+          }
         }
       }
 
       if (mounted) {
         if (exists) {
-          BuyerNavigator.home(context, clearStack: true);
+          final hasAddress = await LocalStorageService.getDeliveryAddress();
+          if (hasAddress == null) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => const DeliveryAddressScreen(proceedToCheckout: false),
+              ),
+              (_) => false,
+            );
+          } else {
+            BuyerNavigator.home(context, clearStack: true);
+          }
         } else {
           BuyerNavigator.profileSetup(context, clearStack: true);
         }

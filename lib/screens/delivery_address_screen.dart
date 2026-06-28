@@ -2,8 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/local_storage_service.dart';
+import '../services/auth_service.dart';
 import '../navigation/buyer_navigator.dart';
 import '../services/google_maps_service.dart';
+import '../screens/home_screen.dart';
 
 const _primaryColor = Color(0xFFFF6B35);
 const _darkInk = Color(0xFF1E1E2C);
@@ -171,10 +173,29 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
       phone: _phoneController.text.trim(),
     );
 
+    // Also save to Supabase for persistence across logins
+    try {
+      final userId = await LocalStorageService.getUserId();
+      if (userId != null) {
+        final authService = AuthService();
+        await authService.saveDeliveryAddress(
+          userId: userId,
+          label: _labelController.text.trim(),
+          address: _addressController.text.trim(),
+          phone: _phoneController.text.trim(),
+        );
+      }
+    } catch (e) {
+      debugPrint('Supabase address save failed (local save OK): $e');
+    }
+
     if (!mounted) return;
 
     if (!widget.proceedToCheckout) {
-      Navigator.pop(context, true);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
       return;
     }
 

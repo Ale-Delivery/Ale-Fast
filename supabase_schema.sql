@@ -16,6 +16,9 @@ CREATE TABLE IF NOT EXISTS "Profiles" (
   gender TEXT,
   birthday DATE,
   phone TEXT,
+  delivery_address TEXT,
+  delivery_label TEXT DEFAULT 'Home',
+  delivery_phone TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -23,6 +26,9 @@ ALTER TABLE "Profiles" ADD COLUMN IF NOT EXISTS birthday DATE;
 ALTER TABLE "Profiles" ADD COLUMN IF NOT EXISTS phone TEXT;
 ALTER TABLE "Profiles" ADD COLUMN IF NOT EXISTS gender TEXT;
 ALTER TABLE "Profiles" ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE "Profiles" ADD COLUMN IF NOT EXISTS delivery_address TEXT;
+ALTER TABLE "Profiles" ADD COLUMN IF NOT EXISTS delivery_label TEXT DEFAULT 'Home';
+ALTER TABLE "Profiles" ADD COLUMN IF NOT EXISTS delivery_phone TEXT;
 
 ALTER TABLE "Profiles" ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on Profiles" ON "Profiles";
