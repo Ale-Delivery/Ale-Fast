@@ -170,7 +170,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                                     decoration: BoxDecoration(
                                       color: _selectedSize == s
                                           ? AppColors.orange
-                                          : AppColors.lightBg,
+                                          : AppColors.bg,
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Text(s,
@@ -203,7 +203,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                                     width: 44,
                                     height: 44,
                                     decoration: BoxDecoration(
-                                      color: AppColors.lightBg,
+                                      color: AppColors.bg,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Center(
@@ -324,7 +324,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: AppColors.lightBg,
+          color: AppColors.bg,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, size: 16, color: AppColors.dark),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:food_app/theme/app_theme.dart';
 import 'package:food_app/navigation/buyer_navigator.dart';
 import 'package:food_app/services/local_storage_service.dart';
@@ -52,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.white,
+      backgroundColor: AppColors.white,
       body: Stack(
         children: [
           // Bottom wave decoration
@@ -66,7 +65,7 @@ class _SplashScreenState extends State<SplashScreen>
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0xFFFFF3EE), Color(0xFFFFE0CC)],
+                  colors: [AppColors.orangeLight, Color(0xFFFFE0CC)],
                 ),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(200),
@@ -88,17 +87,18 @@ class _SplashScreenState extends State<SplashScreen>
                     // Logo Text
                     RichText(
                       text: TextSpan(
-                        style: GoogleFonts.nunito(
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
                           fontSize: 48,
                           fontWeight: FontWeight.w800,
-                          color: AppTheme.darkBg,
+                          color: AppColors.ink,
                           letterSpacing: -1,
                         ),
                         children: const [
                           TextSpan(text: 'F'),
                           TextSpan(
                             text: 'oo',
-                            style: TextStyle(color: AppTheme.orange),
+                            style: TextStyle(color: AppColors.orange),
                           ),
                           TextSpan(text: 'd'),
                         ],
@@ -107,9 +107,9 @@ class _SplashScreenState extends State<SplashScreen>
                     const SizedBox(height: 8),
                     Text(
                       'FOOD DELIVERY',
-                      style: GoogleFonts.nunito(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[400],
+                        color: AppColors.muted,
                         letterSpacing: 3,
                         fontWeight: FontWeight.w600,
                       ),
@@ -119,7 +119,7 @@ class _SplashScreenState extends State<SplashScreen>
                       width: 50,
                       height: 3,
                       decoration: BoxDecoration(
-                        color: AppTheme.orange,
+                        color: AppColors.orange,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),

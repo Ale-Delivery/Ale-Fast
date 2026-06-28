@@ -143,7 +143,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final cart = context.watch<CartProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.lightBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text('Checkout',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
@@ -195,7 +195,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         textCapitalization: TextCapitalization.characters,
                         decoration: InputDecoration(
                           hintText: 'Enter promo code',
-                          hintStyle: const TextStyle(color: AppColors.grey, fontSize: 14),
+                          hintStyle: const TextStyle(color: AppColors.muted, fontSize: 14),
                           filled: true,
                           fillColor: Colors.white,
                           border: OutlineInputBorder(
@@ -361,7 +361,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               children: [
                 Text(title,
                     style: const TextStyle(
-                        fontSize: 11, color: AppColors.grey, fontWeight: FontWeight.w600)),
+                        fontSize: 11, color: AppColors.muted, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 4),
                 Text(subtitle,
                     style: const TextStyle(
@@ -396,11 +396,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         onTap: enabled ? () => setState(() => _paymentMethod = value) : null,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         tileColor: selected ? AppColors.orangeLight : Colors.white,
-        leading: Icon(icon, color: selected ? AppColors.orange : AppColors.grey),
+        leading: Icon(icon, color: selected ? AppColors.orange : AppColors.muted),
         title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
         trailing: selected
             ? const Icon(Icons.check_circle, color: AppColors.orange)
-            : const Icon(Icons.circle_outlined, color: AppColors.grey),
+            : const Icon(Icons.circle_outlined, color: AppColors.muted),
       ),
     );
   }
@@ -417,7 +417,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: bold ? 18 : 13,
-                color: bold ? AppColors.orange : AppColors.dark)),
+                color: bold ? AppColors.orange : AppColors.ink)),
       ],
     );
   }

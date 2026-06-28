@@ -131,7 +131,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text('Order History',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
@@ -152,7 +152,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                               fontSize: 18, fontWeight: FontWeight.w700)),
                       SizedBox(height: 6),
                       Text('Your orders will appear here',
-                          style: TextStyle(color: AppColors.grey)),
+                          style: TextStyle(color: AppColors.muted)),
                     ],
                   ),
                 )
@@ -275,7 +275,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                     Text(date,
                                         style: const TextStyle(
                                             fontSize: 11,
-                                            color: AppColors.grey)),
+                                            color: AppColors.muted)),
                                 ],
                               ),
                             ],

@@ -7,9 +7,10 @@ import '../services/auth_service.dart';
 import '../navigation/buyer_navigator.dart';
 import '../services/google_maps_service.dart';
 import '../screens/home_screen.dart';
+import '../theme/app_theme.dart';
 
-const _primaryColor = Color(0xFFFF6B35);
-const _darkInk = Color(0xFF1E1E2C);
+const _primaryColor = AppColors.orange;
+const _darkInk = AppColors.ink;
 
 class DeliveryAddressScreen extends StatefulWidget {
   final bool proceedToCheckout;
@@ -258,7 +259,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text(
           'Delivery Address',
@@ -422,13 +423,13 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
 
                   // Saved Addresses Section
                   if (_savedAddresses.isNotEmpty) ...[
-                    const Text(
-                      'SAVED ADDRESSES',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF9E9EAE),
-                        letterSpacing: 1.0,
+                      const Text(
+                        'SAVED ADDRESSES',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.hint,
+                          letterSpacing: 1.0,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -466,7 +467,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       fontSize: 12,
-                                      color: Color(0xFF7D8491),
+                                      color: AppColors.muted,
                                     ),
                                   ),
                                 ],
@@ -543,7 +544,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
           style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF9E9EAE),
+            color: AppColors.hint,
             letterSpacing: 1.0,
           ),
         ),
@@ -568,16 +569,16 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1E1E2C),
+              color: AppColors.ink,
             ),
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: const TextStyle(
-                color: Color(0xFFC0C0D0),
+                color: AppColors.hint,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
-              prefixIcon: Icon(icon, color: const Color(0xFF9E9EAE), size: 20),
+              prefixIcon: Icon(icon, color: AppColors.hint, size: 20),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,

@@ -19,10 +19,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  static const _primary = Color(0xFFFF6B35);
-  static const _ink = Color(0xFF1E1E2C);
-  static const _muted = Color(0xFF7D8491);
-  static const _surface = Color(0xFFF7F8FA);
+  static const _primary = AppColors.orange;
+  static const _ink = AppColors.ink;
+  static const _muted = AppColors.muted;
+  static const _surface = AppColors.bg;
 
   final TextEditingController _searchController = TextEditingController();
   late Future<List<Map<String, dynamic>>> _restaurantsFuture;

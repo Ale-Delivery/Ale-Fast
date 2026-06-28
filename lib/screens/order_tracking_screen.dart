@@ -78,7 +78,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text('Track Order',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
@@ -119,7 +119,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                                 Text(
                                   '#${order.id.length >= 8 ? order.id.substring(0, 8).toUpperCase() : order.id.toUpperCase()}',
                                   style: const TextStyle(
-                                      color: AppColors.grey, fontSize: 12),
+                                      color: AppColors.muted, fontSize: 12),
                                 ),
                                 const SizedBox(height: 12),
                                 Container(
@@ -231,20 +231,20 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: done ? AppColors.orange : AppColors.greyLight,
+                  color: done ? AppColors.orange : AppColors.border,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   done ? Icons.check : Icons.circle_outlined,
                   size: 16,
-                  color: done ? Colors.white : AppColors.grey,
+                  color: done ? Colors.white : AppColors.muted,
                 ),
               ),
               if (!isLast)
                 Expanded(
                   child: Container(
                     width: 2,
-                    color: done ? AppColors.orange : AppColors.greyLight,
+                    color: done ? AppColors.orange : AppColors.border,
                   ),
                 ),
             ],
@@ -259,10 +259,10 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                   Text(title,
                       style: TextStyle(
                           fontWeight: FontWeight.w800,
-                          color: active ? AppColors.orange : AppColors.dark)),
+                          color: active ? AppColors.orange : AppColors.ink)),
                   Text(subtitle,
                       style: const TextStyle(
-                          fontSize: 12, color: AppColors.grey)),
+                          fontSize: 12, color: AppColors.muted)),
                 ],
               ),
             ),

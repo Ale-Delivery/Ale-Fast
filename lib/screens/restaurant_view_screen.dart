@@ -41,7 +41,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
     final cartTotal = context.select<CartProvider, double>((c) => c.total);
 
     return Scaffold(
-      backgroundColor: AppColors.lightBg,
+      backgroundColor: AppColors.bg,
       body: CustomScrollView(
         slivers: [
           // ── Hero ────────────────────────────────────────────
@@ -57,12 +57,12 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.arrow_back, color: AppColors.dark),
+                child: const Icon(Icons.arrow_back, color: AppColors.ink),
               ),
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.more_horiz, color: AppColors.dark),
+                icon: const Icon(Icons.more_horiz, color: AppColors.ink),
                 onPressed: () {},
               ),
             ],
@@ -92,7 +92,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
                   const SizedBox(height: 6),
                   Text(r.description,
                       style: const TextStyle(
-                          fontSize: 12, color: AppColors.grey, height: 1.6)),
+                          fontSize: 12, color: AppColors.muted, height: 1.6)),
                   const SizedBox(height: 10),
                   InfoRow(
                     rating: r.rating,
@@ -119,7 +119,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
                           decoration: BoxDecoration(
                             color: _activeTab == _tabs[i]
                                 ? AppColors.orange
-                                : AppColors.lightBg,
+                                : AppColors.bg,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(_tabs[i],
@@ -128,7 +128,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
                                 fontWeight: FontWeight.w700,
                                 color: _activeTab == _tabs[i]
                                     ? Colors.white
-                                    : AppColors.dark,
+                                    : AppColors.ink,
                               )),
                         ),
                       ),
@@ -149,7 +149,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
             const SliverFillRemaining(
               child: Center(
                 child: Text('No items found',
-                    style: TextStyle(color: AppColors.grey)),
+                    style: TextStyle(color: AppColors.muted)),
               ),
             )
           else

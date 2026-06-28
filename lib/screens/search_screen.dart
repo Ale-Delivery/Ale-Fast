@@ -98,7 +98,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         leading: const BackButton(),
         title: TextField(
@@ -166,7 +166,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.lightBg,
+                        color: AppColors.bg,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(k,

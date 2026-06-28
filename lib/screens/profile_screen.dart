@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/local_storage_service.dart';
 import '../services/auth_service.dart';
 import '../navigation/buyer_navigator.dart';
+import '../theme/app_theme.dart';
 import 'profile_setup_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -93,29 +94,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFFFF6B35);
-    const darkInk = Color(0xFF1E1E2C);
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        title: const Text(
+          title: const Text(
           'My Profile',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: darkInk),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.ink),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: darkInk, size: 20),
+          leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.ink, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: primaryColor))
+          ? const Center(child: CircularProgressIndicator(color: AppColors.orange))
           : RefreshIndicator(
               onRefresh: _load,
-              color: primaryColor,
+              color: AppColors.orange,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -125,14 +123,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF1E1E2C), Color(0xFF2E2E44)],
+                        colors: [AppColors.darkCard, AppColors.darkEnd],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF1E1E2C).withOpacity(0.2),
+                          color: AppColors.darkCard.withOpacity(0.2),
                           blurRadius: 15,
                           offset: const Offset(0, 8),
                         ),
@@ -145,11 +143,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           height: 72,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFFF8C61), Color(0xFFFF6B35)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
+                            gradient: AppGradients.avatar,
                             border: Border.all(color: Colors.white.withOpacity(0.2), width: 3),
                           ),
                           child: Center(
@@ -293,11 +287,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     height: 52,
                     child: TextButton.icon(
                       onPressed: _logout,
-                      icon: const Icon(Icons.logout_rounded, color: Colors.redAccent, size: 20),
+                      icon: const Icon(Icons.logout_rounded, color: AppColors.red, size: 20),
                       label: const Text(
                         'Log out',
                         style: TextStyle(
-                          color: Colors.redAccent,
+                          color: AppColors.red,
                           fontWeight: FontWeight.w800,
                           fontSize: 16,
                         ),
@@ -323,7 +317,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       style: const TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w800,
-        color: Color(0xFF9E9EAE),
+        color: AppColors.hint,
         letterSpacing: 1.5,
       ),
     );
@@ -340,7 +334,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: const Color(0xFFF3F4F6),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: const Color(0xFF7D8491), size: 18),
+            child: Icon(icon, color: AppColors.muted, size: 18),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -349,12 +343,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF9D9DAF), fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 11, color: AppColors.hint, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 3),
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 14, color: Color(0xFF1E1E2C), fontWeight: FontWeight.w700),
+                  style: const TextStyle(fontSize: 14, color: AppColors.ink, fontWeight: FontWeight.w700),
                 ),
               ],
             ),
@@ -370,8 +364,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String subtitle,
     required VoidCallback onTap,
   }) {
-    const primaryColor = Color(0xFFFF6B35);
-    const darkInk = Color(0xFF1E1E2C);
+    const primaryColor = AppColors.orange;
+    const darkInk = AppColors.ink;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -411,13 +405,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             subtitle,
             style: const TextStyle(
               fontSize: 13,
-              color: Color(0xFF888898),
+              color: AppColors.muted,
             ),
           ),
         ),
         trailing: const Icon(
           Icons.arrow_forward_ios_rounded,
-          color: Color(0xFFC0C0D0),
+          color: AppColors.hint,
           size: 16,
         ),
         onTap: onTap,

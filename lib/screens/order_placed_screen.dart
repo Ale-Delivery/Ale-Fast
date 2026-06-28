@@ -11,7 +11,7 @@ class OrderPlacedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBg,
+      backgroundColor: AppColors.bg,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -35,7 +35,7 @@ class OrderPlacedScreen extends StatelessWidget {
               Text(
                 'Your order #${order.id.length >= 8 ? order.id.substring(0, 8).toUpperCase() : order.id.toUpperCase()} has been sent to the restaurant.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.grey, height: 1.5),
+                style: const TextStyle(color: AppColors.muted, height: 1.5),
               ),
               const SizedBox(height: 8),
               Text(

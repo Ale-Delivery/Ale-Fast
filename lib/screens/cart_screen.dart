@@ -13,7 +13,7 @@ class CartScreen extends StatelessWidget {
     final cart = context.watch<CartProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.lightBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text('My Cart',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
@@ -39,7 +39,7 @@ class CartScreen extends StatelessWidget {
                           fontSize: 18, fontWeight: FontWeight.w700)),
                   SizedBox(height: 8),
                   Text('Add some delicious food!',
-                      style: TextStyle(color: AppColors.grey)),
+                      style: TextStyle(color: AppColors.muted)),
                 ],
               ),
             )
@@ -84,7 +84,7 @@ class CartScreen extends StatelessWidget {
                                   Text(item.selectedSize,
                                       style: const TextStyle(
                                           fontSize: 11,
-                                          color: AppColors.grey)),
+                                          color: AppColors.muted)),
                                   const SizedBox(height: 4),
                                   Text('Rs. ${item.total.toStringAsFixed(0)}',
                                       style: const TextStyle(
@@ -191,12 +191,12 @@ class CartScreen extends StatelessWidget {
             style: TextStyle(
                 fontSize: bold ? 16 : 13,
                 fontWeight: bold ? FontWeight.w800 : FontWeight.w500,
-                color: bold ? AppColors.dark : AppColors.grey)),
+                color: bold ? AppColors.ink : AppColors.muted)),
         Text(value,
             style: TextStyle(
                 fontSize: bold ? 18 : 13,
                 fontWeight: FontWeight.w800,
-                color: bold ? AppColors.orange : AppColors.dark)),
+                color: bold ? AppColors.orange : AppColors.ink)),
       ],
     );
   }
@@ -208,7 +208,7 @@ class CartScreen extends StatelessWidget {
         width: 28,
         height: 28,
         decoration: BoxDecoration(
-          color: AppColors.lightBg,
+          color: AppColors.bg,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, size: 14),

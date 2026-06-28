@@ -3,9 +3,10 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/google_maps_service.dart';
+import '../theme/app_theme.dart';
 
-const _primaryColor = Color(0xFFFF6B35);
-const _darkInk = Color(0xFF1E1E2C);
+const _primaryColor = AppColors.orange;
+const _darkInk = AppColors.ink;
 
 class LocationPickerScreen extends StatefulWidget {
   const LocationPickerScreen({super.key});
@@ -241,7 +242,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                     style: const TextStyle(fontWeight: FontWeight.w600, color: _darkInk),
                     decoration: InputDecoration(
                       hintText: 'Search address or location...',
-                      hintStyle: const TextStyle(color: Color(0xFFC0C0D0), fontWeight: FontWeight.w500),
+                      hintStyle: const TextStyle(color: AppColors.hint, fontWeight: FontWeight.w500),
                       prefixIcon: const Icon(Icons.search_rounded, color: _primaryColor),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
