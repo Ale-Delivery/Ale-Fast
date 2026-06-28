@@ -705,29 +705,19 @@ class _RestaurantCard extends StatelessWidget {
         (restaurant['delivery_time'] ?? restaurant['delivery_min'] ?? '25 min')
             .toString();
 
-    return Padding(
+    return RepaintBoundary(
+      child: Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
       child: Material(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           borderRadius: BorderRadius.circular(22),
           onTap: onTap,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: const Color(0xFFEDEFF3)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 18,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Stack(
                   children: [
@@ -743,8 +733,6 @@ class _RestaurantCard extends StatelessWidget {
                       errorWidget: (_, __, ___) => Container(
                         height: 154,
                         color: const Color(0xFFEDEFF3),
-                        child: const Icon(Icons.restaurant_rounded,
-                            size: 44, color: Color(0xFF9AA0AA)),
                       ),
                     ),
                     Positioned(
@@ -755,20 +743,6 @@ class _RestaurantCard extends StatelessWidget {
                         label: deliveryTime,
                         color: Colors.white,
                         foreground: const Color(0xFF1E1E2C),
-                      ),
-                    ),
-                    Positioned(
-                      top: 12,
-                      right: 12,
-                      child: Container(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.94),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.favorite_border_rounded,
-                            color: Color(0xFFFF6B35), size: 20),
                       ),
                     ),
                   ],

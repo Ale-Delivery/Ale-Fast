@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS "Restaurants" (
   tags TEXT,
   description TEXT,
   address TEXT,
+  owner_id TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -58,6 +59,7 @@ ALTER TABLE "Restaurants" ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE "Restaurants" ADD COLUMN IF NOT EXISTS address TEXT;
 ALTER TABLE "Restaurants" ADD COLUMN IF NOT EXISTS delivery_min INT;
 ALTER TABLE "Restaurants" ADD COLUMN IF NOT EXISTS free_delivery BOOLEAN;
+ALTER TABLE "Restaurants" ADD COLUMN IF NOT EXISTS owner_id TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_restaurants_category ON "Restaurants"(category);
 

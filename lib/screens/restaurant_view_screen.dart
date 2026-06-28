@@ -165,18 +165,14 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
                         MaterialPageRoute(
                             builder: (_) => FoodDetailScreen(food: food)),
                       ),
-                      child: Container(
+                      child: RepaintBoundary(
+                        child: Container(
                         margin: const EdgeInsets.only(bottom: 14),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2))
-                          ],
+                          border: Border.all(color: const Color(0xFFF0F0F0)),
                         ),
                         child: Row(
                           children: [
@@ -225,6 +221,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
                             ),
                           ],
                         ),
+                      ),
                       ),
                     );
                   },
