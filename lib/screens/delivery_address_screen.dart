@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/local_storage_service.dart';
 import '../services/auth_service.dart';
 import '../navigation/buyer_navigator.dart';
@@ -27,6 +28,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
   final _notesController = TextEditingController();
   bool _loading = true;
   bool _isLocating = false;
+  List<Map<String, dynamic>> _savedAddresses = [];
 
   List<Map<String, dynamic>> _addressSuggestions = [];
   Timer? _debounceTimer;
@@ -140,7 +142,50 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
     } else if (userPhone != null) {
       _phoneController.text = userPhone;
     }
+
+    await _loadSavedAddresses();
+
     if (mounted) setState(() => _loading = false);
+  }
+
+  Future<void> _loadSavedAddresses() async {
+    try {
+      final userId = await LocalStorageService.getUserId();
+      if (userId == null) return;
+      final response = await Supabase.instance.client
+          .from('Saved_Addresses')
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+      if (mounted) {
+        setState(() => _savedAddresses = List<Map<String, dynamic>>.from(response));
+      }
+    } catch (e) {
+      debugPrint('Error loading saved addresses: $e');
+    }
+  }
+
+  void _selectSavedAddress(Map<String, dynamic> address) {
+    setState(() {
+      _labelController.text = address['label'] ?? 'Home';
+      _addressController.text = address['address'] ?? '';
+      _phoneController.text = address['phone'] ?? '';
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Selected ${address['label']} address'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Future<void> _deleteSavedAddress(String id) async {
+    try {
+      await Supabase.instance.client.from('Saved_Addresses').delete().eq('id', id);
+      await _loadSavedAddresses();
+    } catch (e) {
+      debugPrint('Error deleting address: $e');
+    }
   }
 
   @override
@@ -374,7 +419,70 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                     keyboard: TextInputType.phone,
                   ),
                   const SizedBox(height: 18),
-                  
+
+                  // Saved Addresses Section
+                  if (_savedAddresses.isNotEmpty) ...[
+                    const Text(
+                      'SAVED ADDRESSES',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF9E9EAE),
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ..._savedAddresses.map((addr) => Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFEDEFF3)),
+                      ),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () => _selectSavedAddress(addr),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.location_on_outlined, color: _primaryColor, size: 18),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    addr['label'] ?? 'Home',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                      color: _darkInk,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    addr['address'] ?? '',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF7D8491),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                              onPressed: () => _deleteSavedAddress(addr['id']),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )),
+                    const SizedBox(height: 18),
+                  ],
+
                   // Delivery Notes Field
                   _buildField(
                     label: 'Delivery notes (optional)',

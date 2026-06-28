@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/models.dart';
+import '../providers/cart_provider.dart';
 import '../services/order_service.dart';
 import '../theme/app_theme.dart';
 import '../navigation/buyer_navigator.dart';
@@ -31,6 +34,54 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         _orders = orders;
         _loading = false;
       });
+    }
+  }
+
+  Future<void> _reorder(Order order) async {
+    try {
+      final items = await OrderService.getOrderItems(order.id);
+      if (items.isEmpty || !mounted) return;
+
+      final cart = context.read<CartProvider>();
+      cart.clearCart();
+
+      for (final item in items) {
+        if (item.foodItemId == null) continue;
+        final response = await Supabase.instance.client
+            .from('Menu_Items')
+            .select()
+            .eq('id', item.foodItemId!)
+            .maybeSingle();
+        if (response == null) continue;
+
+        final food = FoodItem.fromJson(Map<String, dynamic>.from(response));
+        cart.addItem(food, size: item.selectedSize ?? 'Regular');
+        if (cart.items.length > 1) {
+          final lastItem = cart.items.last;
+          while (lastItem.quantity < item.quantity) {
+            cart.addItem(food, size: item.selectedSize ?? 'Regular');
+          }
+        }
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${items.length} item(s) added to cart'),
+            backgroundColor: AppColors.green,
+          ),
+        );
+        BuyerNavigator.cart(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not reorder. Items may be unavailable.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -198,6 +249,27 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                             ),
                                           ),
                                   if (order.status == OrderStatus.pending || order.status == OrderStatus.accepted)
+                                    const SizedBox(width: 8),
+                                  if (order.status == OrderStatus.delivered)
+                                    GestureDetector(
+                                      onTap: () => _reorder(order),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.orange.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: const Text(
+                                          'Reorder',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.orange,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  if (order.status == OrderStatus.delivered)
                                     const SizedBox(width: 8),
                                   if (date.isNotEmpty)
                                     Text(date,

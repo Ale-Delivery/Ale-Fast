@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedTab = 0;
   String _deliveryLabel = 'Set delivery address';
   String _userName = 'User';
+  StreamSubscription? _orderSub;
 
   late final PageController _offerPageController;
   ThemeData? _appTheme;
@@ -63,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _restaurantsFuture = _fetchRestaurants();
     _loadDeliveryLabel();
     _offerPageController = PageController(viewportFraction: 0.9);
+    _subscribeToOrders();
   }
 
   @override
@@ -75,9 +79,58 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _orderSub?.cancel();
     _searchController.dispose();
     _offerPageController.dispose();
     super.dispose();
+  }
+
+  void _subscribeToOrders() {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
+
+    _orderSub?.cancel();
+    _orderSub = Supabase.instance.client
+        .from('Orders')
+        .stream(primaryKey: ['id'])
+        .eq('user_id', userId)
+        .order('created_at', ascending: false)
+        .limit(5)
+        .listen((rows) {
+      if (!mounted || rows.isEmpty) return;
+      final latest = rows.first;
+      final status = latest['status']?.toString() ?? '';
+      if (status == 'delivered' || status == 'cancelled' || status == 'pending') return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                status == 'preparing' || status == 'ready'
+                    ? Icons.check_circle
+                    : Icons.info_outline,
+                color: Colors.white,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Order ${latest['restaurant_name'] ?? ''}: ${status[0].toUpperCase()}${status.substring(1)}',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+                  backgroundColor: status == 'ready'
+                      ? AppColors.green
+                      : status == 'preparing'
+                          ? AppColors.orange
+                          : const Color(0xFF3B82F6),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    });
   }
 
   Future<void> _loadDeliveryLabel() async {
