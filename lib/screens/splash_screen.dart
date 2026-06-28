@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:food_app/theme/app_theme.dart';
-import 'package:food_app/screens/onboarding_screen.dart';
+import 'package:food_app/navigation/buyer_navigator.dart';
+import 'package:food_app/services/local_storage_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -29,11 +30,15 @@ class _SplashScreenState extends State<SplashScreen>
     );
     _controller.forward();
 
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-        );
+    _controller.addStatusListener((status) async {
+      if (status == AnimationStatus.completed && mounted) {
+        final hasProfile = await LocalStorageService.isProfileComplete();
+        if (!mounted) return;
+        if (hasProfile) {
+          BuyerNavigator.home(context, clearStack: true);
+        } else {
+          BuyerNavigator.onboarding(context, replace: true);
+        }
       }
     });
   }

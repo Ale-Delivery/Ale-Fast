@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
+
 import '../models/models.dart';
 
 class CartProvider extends ChangeNotifier {
   final List<CartItem> _items = [];
 
-  List<CartItem> get items => _items;
+  List<CartItem> get items => List.unmodifiable(_items);
 
   int get itemCount => _items.fold(0, (sum, i) => sum + i.quantity);
 
@@ -16,26 +17,31 @@ class CartProvider extends ChangeNotifier {
 
   void addItem(FoodItem food, {String size = '10"'}) {
     final idx = _items.indexWhere(
-        (i) => i.food.id == food.id && i.selectedSize == size);
+      (i) => i.food.id == food.id && i.selectedSize == size,
+    );
+
     if (idx >= 0) {
       _items[idx].quantity++;
     } else {
       _items.add(CartItem(food: food, selectedSize: size));
     }
+
     notifyListeners();
   }
 
   void removeItem(String foodId, String size) {
     final idx = _items.indexWhere(
-        (i) => i.food.id == foodId && i.selectedSize == size);
+      (i) => i.food.id == foodId && i.selectedSize == size,
+    );
+
     if (idx >= 0) {
       if (_items[idx].quantity > 1) {
         _items[idx].quantity--;
       } else {
         _items.removeAt(idx);
       }
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   void clearCart() {

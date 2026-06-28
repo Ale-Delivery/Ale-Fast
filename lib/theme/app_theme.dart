@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// ─────────────────────────────────────────
-/// COLORS
-/// ─────────────────────────────────────────
 class AppColors {
   static const Color orange = Color(0xFFFF6B35);
   static const Color orangeLight = Color(0xFFFFF3EE);
@@ -17,11 +14,7 @@ class AppColors {
   static const Color green = Color(0xFF4CAF50);
 }
 
-/// ─────────────────────────────────────────
-/// THEME
-/// ─────────────────────────────────────────
 class AppTheme {
-  /// 👉 FIX: expose colors through AppTheme (important)
   static const Color orange = AppColors.orange;
   static const Color white = AppColors.white;
   static const Color darkBg = AppColors.darkBg;
@@ -50,13 +43,4 @@ class AppTheme {
           ),
         ),
       );
-}
-
-/// ─────────────────────────────────────────
-/// CONSTANTS (Supabase etc.)
-/// ─────────────────────────────────────────
-class AppConstants {
-  // ✅ Aluth Supabase Project URL eka
-  static const String supabaseUrl = 'https://uhliuwcpqpztjlujvqax.supabase.co';
-  static const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVobGl1d2NwcXB6dGpsdWp2cWF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1Njc0NDAsImV4cCI6MjA5MjE0MzQ0MH0.qusVnUomSERG_m3-zqqasmfR8zKoSMriICBND9zuP-Q';
 }

@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
+import '../services/local_storage_service.dart';
 import '../services/auth_service.dart';
-import '../screens/profile_setup_screen.dart';
+import '../navigation/buyer_navigator.dart';
+import '../screens/delivery_address_screen.dart';
+
+const _primaryColor = Color(0xFFFF6B35);
+const _accentColor = Color(0xFFFF8A00);
+const _lightBg = Color(0xFFF9FAFC);
+const _darkInk = Color(0xFF1E1E2C);
+const _textMuted = Color(0xFF7D8491);
 
 class VerificationScreen extends StatefulWidget {
   final String phoneNumber;
@@ -17,7 +25,7 @@ class VerificationScreen extends StatefulWidget {
 }
 
 class _VerificationScreenState extends State<VerificationScreen> {
-  // Box 4ට වෙනම controllers 4ක් සහ focus nodes 4ක්
+
   final List<TextEditingController> _controllers =
       List.generate(4, (index) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
@@ -35,13 +43,15 @@ class _VerificationScreenState extends State<VerificationScreen> {
     super.dispose();
   }
 
-  // OTP එක හරිද කියලා බලන function එක
   Future<void> _verifyOTP() async {
     String enteredOtp = _controllers.map((c) => c.text).join();
 
     if (enteredOtp.length < 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter all 4 digits')),
+        const SnackBar(
+          content: Text('Please enter all 4 digits'),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -51,6 +61,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
         const SnackBar(
           content: Text('Invalid OTP Code!'),
           backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
@@ -61,23 +72,63 @@ class _VerificationScreenState extends State<VerificationScreen> {
     });
 
     try {
-      final authService = AuthService();
+      await LocalStorageService.saveUserPhone(widget.phoneNumber);
 
-      // Dummy OTP පාවිච්චි කරන නිසා දැනට Supabase එකට OTP එක යවන්නේ නැතුව කෙලින්ම ඊළඟ Screen එකට යවනවා.
-      // (ඇත්තටම SMS යවලා verify කරද්දී මේ පල්ලෙහා කෝඩ් එකේ කමෙන්ට් එක අයින් කරන්න)
-      // await authService.loginWithPhone(widget.phoneNumber, enteredOtp);
+      final authService = AuthService();
+      // Only call real Supabase verifyOTP for non-dummy OTP
+      if (widget.expectedOtp != '1234') {
+        await authService.loginWithPhone(widget.phoneNumber, widget.expectedOtp);
+      }
+      final bool exists = await authService.checkUserExists(widget.phoneNumber);
+
+      if (exists) {
+        final profile = await authService.getUserProfile(widget.phoneNumber);
+        if (profile != null) {
+          await LocalStorageService.setProfileComplete(
+            userId: profile['id']?.toString() ?? '',
+            name: profile['name']?.toString() ?? 'User',
+            phone: widget.phoneNumber,
+          );
+
+          // Load delivery address from Supabase into local storage
+          final supabaseAddr = await authService.getDeliveryAddress(
+            profile['id']?.toString() ?? '',
+          );
+          if (supabaseAddr != null) {
+            await LocalStorageService.saveDeliveryAddress(
+              label: supabaseAddr['delivery_label']?.toString() ?? 'Home',
+              address: supabaseAddr['delivery_address']?.toString() ?? '',
+              phone: supabaseAddr['delivery_phone']?.toString() ?? '',
+            );
+          }
+        }
+      }
 
       if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const ProfileSetupScreen()),
-          (route) => false,
-        );
+        if (exists) {
+          final hasAddress = await LocalStorageService.getDeliveryAddress();
+          if (hasAddress == null) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => const DeliveryAddressScreen(proceedToCheckout: false),
+              ),
+              (_) => false,
+            );
+          } else {
+            BuyerNavigator.home(context, clearStack: true);
+          }
+        } else {
+          BuyerNavigator.profileSetup(context, clearStack: true);
+        }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } finally {
@@ -91,50 +142,93 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFFFF7A1A);
-
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1020),
+      backgroundColor: _lightBg,
       body: SafeArea(
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.pop(context),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 30),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: _darkInk, size: 18),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "Verification",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
+              const SizedBox(height: 32),
+              
+              // Header
+              const Text(
+                "Verification",
+                style: TextStyle(
+                  color: _darkInk,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.8,
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              "Enter OTP Code sent to ${widget.phoneNumber}",
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-            const SizedBox(height: 30),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(30),
-                decoration: const BoxDecoration(
+              const SizedBox(height: 8),
+              RichText(
+                text: TextSpan(
+                  style: const TextStyle(
+                    color: _textMuted,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    height: 1.3,
+                  ),
+                  children: [
+                    const TextSpan(text: "Enter the 4-digit OTP Code sent to "),
+                    TextSpan(
+                      text: widget.phoneNumber,
+                      style: const TextStyle(
+                        color: _darkInk,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 50),
+
+              // White Box container
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+                decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    )
+                  ]
                 ),
                 child: Column(
                   children: [
+                    // Digit code input cells
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: List.generate(
                         4,
                         (index) => SizedBox(
-                          width: 50,
+                          width: 56,
+                          height: 58,
                           child: TextField(
                             controller: _controllers[index],
                             focusNode: _focusNodes[index],
@@ -142,16 +236,30 @@ class _VerificationScreenState extends State<VerificationScreen> {
                             keyboardType: TextInputType.number,
                             maxLength: 1,
                             style: const TextStyle(
-                                fontSize: 24, fontWeight: FontWeight.bold),
-                            decoration: const InputDecoration(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              color: _darkInk,
+                            ),
+                            decoration: InputDecoration(
                               counterText: "",
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.grey),
+                              fillColor: _lightBg,
+                              filled: true,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide.none,
                               ),
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: primaryColor, width: 2),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide.none,
                               ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: _primaryColor,
+                                  width: 2.0,
+                                ),
+                              ),
+                              contentPadding: EdgeInsets.zero,
                             ),
                             onChanged: (value) {
                               if (value.isNotEmpty && index < 3) {
@@ -167,35 +275,65 @@ class _VerificationScreenState extends State<VerificationScreen> {
                         ),
                       ),
                     ),
+                    
                     const SizedBox(height: 40),
+                    
+                    // Verify Button
                     SizedBox(
                       width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      height: 54,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [_accentColor, _primaryColor],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: _primaryColor.withOpacity(0.25),
+                              blurRadius: 12,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                         ),
-                        onPressed: _isLoading ? null : _verifyOTP,
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2))
-                            : const Text("VERIFY",
-                                style: TextStyle(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          onPressed: _isLoading ? null : _verifyOTP,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.bold)),
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : const Text(
+                                  "VERIFY",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

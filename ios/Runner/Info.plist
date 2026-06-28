@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Alee App needs location access to find your delivery address and show nearby restaurants.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Alee App needs location access to track your order deliveries in real time.</string>
 </dict>
 </plist>

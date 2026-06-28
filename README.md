@@ -99,8 +99,10 @@ flutter run
 | `restaurants` | Restaurant data |
 | `food_items` | Menu items |
 | `offers` | Promo codes & discounts |
-| `orders` | User orders |
-| `order_items` | Items per order |
+| `Orders` | User orders (status: `pending` → seller accepts) |
+| `Order_Items` | Items per order |
+
+Run `supabase_schema.sql` in Supabase SQL Editor to create order tables.
 
 ---
 
