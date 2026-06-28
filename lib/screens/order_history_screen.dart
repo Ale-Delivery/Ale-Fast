@@ -15,6 +15,7 @@ class OrderHistoryScreen extends StatefulWidget {
 class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   List<Order> _orders = [];
   bool _loading = true;
+  String? _cancellingId;
 
   @override
   void initState() {
@@ -30,6 +31,36 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         _orders = orders;
         _loading = false;
       });
+    }
+  }
+
+  Future<void> _cancelOrder(Order order) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Cancel order?', style: TextStyle(fontWeight: FontWeight.w800)),
+        content: const Text('Are you sure you want to cancel this order?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('No, keep it', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Yes, cancel', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true || !mounted) return;
+
+    setState(() => _cancellingId = order.id);
+    try {
+      await OrderService.cancelOrder(order.id);
+      await _load();
+    } finally {
+      if (mounted) setState(() => _cancellingId = null);
     }
   }
 
@@ -142,6 +173,32 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                     ),
                                   ),
                                   const Spacer(),
+                                  if (order.status == OrderStatus.pending || order.status == OrderStatus.accepted)
+                                    _cancellingId == order.id
+                                        ? const SizedBox(
+                                            width: 16, height: 16,
+                                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.red),
+                                          )
+                                        : GestureDetector(
+                                            onTap: () => _cancelOrder(order),
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                              decoration: BoxDecoration(
+                                                color: Colors.red.withOpacity(0.1),
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              child: const Text(
+                                                'Cancel',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                  if (order.status == OrderStatus.pending || order.status == OrderStatus.accepted)
+                                    const SizedBox(width: 8),
                                   if (date.isNotEmpty)
                                     Text(date,
                                         style: const TextStyle(

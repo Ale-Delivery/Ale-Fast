@@ -94,6 +94,14 @@ class OrderService {
         .toList();
   }
 
+  /// Buyer can cancel if order is pending or accepted (before restaurant starts preparing).
+  static Future<void> cancelOrder(String orderId) async {
+    await _client
+        .from('Orders')
+        .update({'status': OrderStatus.cancelled.value})
+        .eq('id', orderId);
+  }
+
   static Stream<Order?> watchOrder(String orderId) {
     return _client
         .from('Orders')
