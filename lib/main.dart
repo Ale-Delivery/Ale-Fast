@@ -6,6 +6,7 @@ import 'constants/app_constants.dart';
 import 'models/models.dart';
 import 'navigation/app_routes.dart';
 import 'providers/cart_provider.dart';
+import 'providers/theme_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/phone_auth_screen.dart';
@@ -37,6 +38,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: const FoodApp(),
     ),
@@ -48,14 +50,16 @@ class FoodApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Food App',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      initialRoute: AppRoutes.splash,
-      routes: {
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        return MaterialApp(
+          title: 'Food App',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeProvider.themeMode,
+          initialRoute: AppRoutes.splash,
+          routes: {
         // ── Parameterless screens ──────────────────────────────
         AppRoutes.splash: (_) => const SplashScreen(),
         AppRoutes.onboarding: (_) => const OnboardingScreen(),
@@ -72,6 +76,8 @@ class FoodApp extends StatelessWidget {
       onUnknownRoute: (_) => MaterialPageRoute(
         builder: (_) => const SplashScreen(),
       ),
+        );
+      },
     );
   }
 
