@@ -51,7 +51,9 @@ class FoodApp extends StatelessWidget {
     return MaterialApp(
       title: 'Food App',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.theme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       initialRoute: AppRoutes.splash,
       routes: {
         // ── Parameterless screens ──────────────────────────────

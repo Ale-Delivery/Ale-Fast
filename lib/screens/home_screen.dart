@@ -10,6 +10,8 @@ import '../navigation/buyer_navigator.dart';
 import '../providers/cart_provider.dart';
 import '../services/local_storage_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/modern/glass_card.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -362,9 +364,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   height: 56,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFEDEFF3)),
+                    border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.04),
@@ -378,6 +380,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     textInputAction: TextInputAction.search,
                     onChanged: (value) => setState(() => _query = value),
                     onSubmitted: (_) => FocusScope.of(context).unfocus(),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                     decoration: InputDecoration(
                       hintText: 'Search dishes, restaurants',
                       hintStyle: const TextStyle(color: _muted, fontSize: 14),
@@ -393,6 +396,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               },
                             ),
                       border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(vertical: 17),
                     ),
                   ),
@@ -498,10 +503,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Order now',
                       style: TextStyle(
-                        color: _ink,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 12,
                         fontWeight: FontWeight.w800,
                       ),
@@ -577,14 +582,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             label: Text(category['name'] as String),
             selectedColor: _primary,
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             side: BorderSide(
-              color: isSelected ? _primary : const Color(0xFFEDEFF3),
+              color: isSelected ? _primary : Theme.of(context).dividerColor.withOpacity(0.1),
             ),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
             labelStyle: TextStyle(
-              color: isSelected ? Colors.white : _ink,
+              color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),
@@ -657,11 +662,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _roundButton(
     IconData icon, {
     required VoidCallback onTap,
-    Color color = Colors.white,
-    Color iconColor = _ink,
+    Color? color,
+    Color? iconColor,
   }) {
     return Material(
-      color: color,
+      color: color ?? Theme.of(context).colorScheme.surface,
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
@@ -669,74 +674,75 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SizedBox(
           width: 46,
           height: 46,
-          child: Icon(icon, color: iconColor, size: 21),
+          child: Icon(icon, color: iconColor ?? Theme.of(context).colorScheme.onSurface, size: 21),
         ),
       ),
     );
   }
 
   Widget _buildBottomNavBar() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return RepaintBoundary(
       child: Container(
-      padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 24,
-            offset: const Offset(0, -8),
-          ),
-        ],
-      ),
-      child: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          indicatorColor: AppColors.orangeLight,
-          labelTextStyle: WidgetStateProperty.resolveWith(
-            (states) => TextStyle(
-              color: states.contains(WidgetState.selected) ? _primary : _muted,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        child: NavigationBar(
-          height: 62,
-          elevation: 0,
-          selectedIndex: _selectedTab,
-          backgroundColor: Colors.transparent,
-          onDestinationSelected: _handleTabTap,
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home_rounded, color: _primary),
-              label: 'Home',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.search_rounded),
-              selectedIcon: Icon(Icons.search, color: _primary),
-              label: 'Search',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.shopping_bag_outlined),
-              selectedIcon: Icon(Icons.shopping_bag_rounded, color: _primary),
-              label: 'Cart',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.receipt_long_outlined),
-              selectedIcon: Icon(Icons.receipt_long, color: _primary),
-              label: 'Orders',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.person_outline_rounded),
-              selectedIcon: Icon(Icons.person_rounded, color: _primary),
-              label: 'Profile',
+        padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          boxShadow: [
+            BoxShadow(
+              color: isDark ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.08),
+              blurRadius: 24,
+              offset: const Offset(0, -8),
             ),
           ],
         ),
+        child: NavigationBarTheme(
+          data: NavigationBarThemeData(
+            indicatorColor: isDark ? AppColors.orange.withOpacity(0.2) : AppColors.orangeLight,
+            labelTextStyle: WidgetStateProperty.resolveWith(
+              (states) => TextStyle(
+                color: states.contains(WidgetState.selected) ? _primary : _muted,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          child: NavigationBar(
+            height: 62,
+            elevation: 0,
+            selectedIndex: _selectedTab,
+            backgroundColor: Colors.transparent,
+            onDestinationSelected: _handleTabTap,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home_rounded, color: _primary),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.search_rounded),
+                selectedIcon: Icon(Icons.search, color: _primary),
+                label: 'Search',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.shopping_bag_outlined),
+                selectedIcon: Icon(Icons.shopping_bag_rounded, color: _primary),
+                label: 'Cart',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.receipt_long_outlined),
+                selectedIcon: Icon(Icons.receipt_long, color: _primary),
+                label: 'Orders',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person_outline_rounded),
+                selectedIcon: Icon(Icons.person_rounded, color: _primary),
+                label: 'Profile',
+              ),
+            ],
+          ),
+        ),
       ),
-    ),
     );
   }
 }
@@ -760,113 +766,111 @@ class _RestaurantCard extends StatelessWidget {
 
     return RepaintBoundary(
       child: Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
-      child: Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(22),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: GlassCard(
           onTap: onTap,
+          padding: EdgeInsets.zero,
           child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Stack(
-                  children: [
-                    CachedNetworkImage(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    child: CachedNetworkImage(
                       imageUrl: (restaurant['image_url'] ?? '').toString(),
                       height: 154,
                       width: double.infinity,
                       fit: BoxFit.cover,
                       placeholder: (_, __) => Container(
                         height: 154,
-                        color: const Color(0xFFEDEFF3),
+                        color: Theme.of(context).colorScheme.surface,
                       ),
                       errorWidget: (_, __, ___) => Container(
                         height: 154,
-                        color: const Color(0xFFEDEFF3),
+                        color: Theme.of(context).colorScheme.surface,
                       ),
                     ),
-                    Positioned(
-                      top: 12,
-                      left: 12,
-                      child: _Pill(
-                        icon: Icons.access_time_rounded,
-                        label: deliveryTime,
-                        color: Colors.white,
-                        foreground: const Color(0xFF1E1E2C),
+                  ),
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: _Pill(
+                      icon: Icons.access_time_rounded,
+                      label: deliveryTime,
+                      color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8),
+                      foreground: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            restaurant['name'] ?? 'Unknown Restaurant',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(Icons.chevron_right_rounded,
+                            color: Theme.of(context).textTheme.bodySmall?.color),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      (restaurant['tags'] ?? 'Fresh food nearby').toString(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                       ),
+                    ),
+                    const SizedBox(height: 14),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: [
+                        _Pill(
+                          icon: Icons.star_rounded,
+                          label: rating,
+                          color: AppColors.orange.withOpacity(0.1),
+                          foreground: AppColors.orange,
+                        ),
+                        _Pill(
+                          icon: Icons.delivery_dining_rounded,
+                          label: deliveryFee,
+                          color: AppColors.blue.withOpacity(0.1),
+                          foreground: AppColors.blue,
+                        ),
+                        _Pill(
+                          icon: Icons.verified_rounded,
+                          label: 'Open now',
+                          color: AppColors.green.withOpacity(0.1),
+                          foreground: AppColors.green,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              restaurant['name'] ?? 'Unknown Restaurant',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF1E1E2C),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.chevron_right_rounded,
-                              color: Color(0xFF7D8491)),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        (restaurant['tags'] ?? 'Fresh food nearby').toString(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Color(0xFF7D8491),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 8,
-                        children: [
-                          _Pill(
-                            icon: Icons.star_rounded,
-                            label: rating,
-                            color: const Color(0xFFFFF8E1),
-                            foreground: const Color(0xFFB77900),
-                          ),
-                          _Pill(
-                            icon: Icons.delivery_dining_rounded,
-                            label: deliveryFee,
-                            color: const Color(0xFFFFF3EE),
-                            foreground: const Color(0xFFFF6B35),
-                          ),
-                          const _Pill(
-                            icon: Icons.verified_rounded,
-                            label: 'Open now',
-                            color: Color(0xFFEAF8EF),
-                            foreground: Color(0xFF299653),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ),
+        ).animate().fade(duration: 400.ms).slideY(begin: 0.1, duration: 400.ms, curve: Curves.easeOutCubic),
       ),
     );
   }
