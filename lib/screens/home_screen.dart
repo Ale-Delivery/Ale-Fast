@@ -219,6 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 delegate: SliverChildListDelegate([
                   _buildHeader(),
                   _buildHeroSearch(),
+                  _buildServicesRow(),
                   _buildOfferCarousel(),
                   _buildSectionTitle('Categories'),
                   _buildCategoryList(),
@@ -411,6 +412,91 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildServicesRow() {
+    final services = [
+      {
+        'icon': Icons.directions_bike_rounded,
+        'title': 'Rides',
+        'subtitle': 'Quick bike & tuk rides',
+        'gradient': [const Color(0xFF00C6FF), const Color(0xFF0078FF)],
+      },
+      {
+        'icon': Icons.restaurant_rounded,
+        'title': 'Food',
+        'subtitle': 'Your favourite meals',
+        'gradient': [const Color(0xFFFF6B35), const Color(0xFFFF416C)],
+      },
+      {
+        'icon': Icons.inventory_2_rounded,
+        'title': 'Parcel',
+        'subtitle': 'Send anything fast',
+        'gradient': [const Color(0xFF6C5CE7), const Color(0xFFA55EEA)],
+      },
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+      child: Row(
+        children: List.generate(services.length, (i) {
+          final s = services[i];
+          return Expanded(
+            child: GestureDetector(
+              onTap: () {
+                // TODO: Navigate to Rides / Food / Parcel screens
+              },
+              child: Container(
+                margin: EdgeInsets.only(right: i < 2 ? 12 : 0),
+                padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: s['gradient'] as List<Color>,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: (s['gradient'] as List<Color>).first.withOpacity(0.25),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      s['icon'] as IconData,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      s['title'] as String,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      s['subtitle'] as String,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.85),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
