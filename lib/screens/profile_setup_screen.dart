@@ -2,13 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/local_storage_service.dart';
 import '../screens/delivery_address_screen.dart';
-
-const _primaryColor = Color(0xFFFF6B35);
-const _accentColor = Color(0xFFFF8A00);
-const _lightBg = Color(0xFFF9FAFC);
-const _cardBg = Colors.white;
-const _darkInk = Color(0xFF1E1E2C);
-const _textMuted = Color(0xFF7D8491);
+import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   final String? existingUserId;
@@ -58,10 +53,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFFFF6B35),
+              primary: AppColors.orange,
               onPrimary: Colors.white,
               surface: Colors.white,
-              onSurface: Color(0xFF1E1E2C),
+              onSurface: AppColors.ink,
             ),
             dialogBackgroundColor: Colors.white,
           ),
@@ -185,7 +180,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _lightBg,
+      backgroundColor: context.scaffoldBg,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
@@ -197,7 +192,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 onTap: () => Navigator.pop(context),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.surfaceColor,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -207,9 +202,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       )
                     ],
                   ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Icon(Icons.arrow_back_ios_new_rounded, color: _darkInk, size: 18),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Icon(Icons.arrow_back_ios_new_rounded, color: context.textPrimary, size: 18),
                   ),
                 ),
               ),
@@ -218,17 +213,17 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               Text(
                 _isEditing ? "Edit Profile" : "Complete Profile",
                 style: TextStyle(
-                  color: _darkInk,
+                  color: context.textPrimary,
                   fontSize: 30,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 "Let us know you better to deliver your cravings.",
                 style: TextStyle(
-                  color: _textMuted,
+                  color: context.textMuted,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -298,10 +293,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         decoration: BoxDecoration(
-                          color: isSelected ? _primaryColor.withOpacity(0.08) : _cardBg,
+                          color: isSelected ? AppColors.orange.withOpacity(0.08) : context.surfaceColor,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: isSelected ? _primaryColor : Colors.grey.withOpacity(0.15),
+                            color: isSelected ? AppColors.orange : Colors.grey.withOpacity(0.15),
                             width: 1.5,
                           ),
                           boxShadow: [
@@ -317,14 +312,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                           children: [
                             Icon(
                               opt['icon'],
-                              color: isSelected ? _primaryColor : _darkInk.withOpacity(0.7),
+                              color: isSelected ? AppColors.orange : context.textPrimary.withOpacity(0.7),
                               size: 24,
                             ),
                             const SizedBox(height: 8),
                             Text(
                               opt['label'],
                               style: TextStyle(
-                                color: isSelected ? _primaryColor : _darkInk.withOpacity(0.8),
+                                color: isSelected ? AppColors.orange : context.textPrimary.withOpacity(0.8),
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -347,7 +342,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   decoration: BoxDecoration(
-                    color: _cardBg,
+                    color: context.surfaceColor,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.grey.withOpacity(0.15)),
                     boxShadow: [
@@ -360,7 +355,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.cake_outlined, color: _textMuted, size: 22),
+                      Icon(Icons.cake_outlined, color: context.textMuted, size: 22),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -368,13 +363,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                               ? "Select your birthday"
                               : _selectedDate.toString().split(' ')[0],
                           style: TextStyle(
-                            color: _selectedDate == null ? _textMuted : _darkInk,
+                            color: _selectedDate == null ? context.textMuted : context.textPrimary,
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
-                      const Icon(Icons.calendar_month_rounded, color: _primaryColor, size: 20),
+                      const Icon(Icons.calendar_month_rounded, color: AppColors.orange, size: 20),
                     ],
                   ),
                 ),
@@ -389,14 +384,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [_accentColor, _primaryColor],
+                      colors: [Color(0xFFFF8A00), AppColors.orange],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: _primaryColor.withOpacity(0.25),
+                        color: AppColors.orange.withOpacity(0.25),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
@@ -444,8 +439,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
       child: Text(
         label,
-        style: const TextStyle(
-          color: Color(0xFF7D8491),
+        style: TextStyle(
+          color: context.textMuted,
           fontSize: 11,
           fontWeight: FontWeight.w800,
           letterSpacing: 1.0,
@@ -462,7 +457,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: _cardBg,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -475,19 +470,19 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
-        style: const TextStyle(
-          color: _darkInk,
+        style: TextStyle(
+          color: context.textPrimary,
           fontSize: 15,
           fontWeight: FontWeight.w600,
         ),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: const TextStyle(
-            color: Color(0xFF9E9EAE),
+          hintStyle: TextStyle(
+            color: context.textHint,
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
-          prefixIcon: Icon(icon, color: const Color(0xFF9E9EAE), size: 22),
+          prefixIcon: Icon(icon, color: context.textHint, size: 22),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(
@@ -504,7 +499,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: _primaryColor, width: 1.5),
+            borderSide: const BorderSide(color: AppColors.orange, width: 1.5),
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),

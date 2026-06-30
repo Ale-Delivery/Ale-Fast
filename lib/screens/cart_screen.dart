@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 import '../widgets/common_widgets.dart';
 import '../navigation/buyer_navigator.dart';
 
@@ -13,7 +14,7 @@ class CartScreen extends StatelessWidget {
     final cart = context.watch<CartProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.lightBg,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
         title: const Text('My Cart',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
@@ -28,18 +29,18 @@ class CartScreen extends StatelessWidget {
         ],
       ),
       body: cart.items.isEmpty
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('🛒', style: TextStyle(fontSize: 64)),
-                  SizedBox(height: 16),
-                  Text('Your cart is empty',
+                  const Text('🛒', style: TextStyle(fontSize: 64)),
+                  const SizedBox(height: 16),
+                  const Text('Your cart is empty',
                       style: TextStyle(
                           fontSize: 18, fontWeight: FontWeight.w700)),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text('Add some delicious food!',
-                      style: TextStyle(color: AppColors.grey)),
+                      style: TextStyle(color: context.textMuted)),
                 ],
               ),
             )
@@ -55,7 +56,7 @@ class CartScreen extends StatelessWidget {
                         margin: const EdgeInsets.only(bottom: 14),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.surfaceColor,
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
@@ -82,9 +83,9 @@ class CartScreen extends StatelessWidget {
                                           fontSize: 13,
                                           fontWeight: FontWeight.w700)),
                                   Text(item.selectedSize,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                           fontSize: 11,
-                                          color: AppColors.grey)),
+                                          color: context.textMuted)),
                                   const SizedBox(height: 4),
                                   Text('Rs. ${item.total.toStringAsFixed(0)}',
                                       style: const TextStyle(
@@ -96,7 +97,7 @@ class CartScreen extends StatelessWidget {
                             ),
                             Row(
                               children: [
-                                _qtyBtn(
+                                _qtyBtn(context,
                                   Icons.remove,
                                   () => context.read<CartProvider>().removeItem(
                                       item.food.id, item.selectedSize),
@@ -109,7 +110,7 @@ class CartScreen extends StatelessWidget {
                                           fontSize: 16,
                                           fontWeight: FontWeight.w800)),
                                 ),
-                                _qtyBtn(
+                                _qtyBtn(context,
                                   Icons.add,
                                   () => context
                                       .read<CartProvider>()
@@ -129,7 +130,7 @@ class CartScreen extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.fromLTRB(20, 20, 20, 36 + MediaQuery.of(context).padding.bottom),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.surfaceColor,
                     boxShadow: [
                       BoxShadow(
                           color: Colors.black.withOpacity(0.08),
@@ -139,10 +140,10 @@ class CartScreen extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      _summaryRow('Subtotal',
+                      _summaryRow(context, 'Subtotal',
                           'Rs. ${cart.subtotal.toStringAsFixed(0)}'),
                       const SizedBox(height: 8),
-                      _summaryRow(
+                      _summaryRow(context,
                           'Delivery',
                           cart.deliveryFee == 0
                               ? 'Free'
@@ -151,7 +152,7 @@ class CartScreen extends StatelessWidget {
                         padding: EdgeInsets.symmetric(vertical: 12),
                         child: Divider(),
                       ),
-                      _summaryRow(
+                      _summaryRow(context,
                         'Total',
                         'Rs. ${cart.total.toStringAsFixed(0)}',
                         bold: true,
@@ -183,7 +184,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _summaryRow(String label, String value, {bool bold = false}) {
+  Widget _summaryRow(BuildContext context, String label, String value, {bool bold = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -191,24 +192,24 @@ class CartScreen extends StatelessWidget {
             style: TextStyle(
                 fontSize: bold ? 16 : 13,
                 fontWeight: bold ? FontWeight.w800 : FontWeight.w500,
-                color: bold ? AppColors.dark : AppColors.grey)),
+                color: bold ? context.textPrimary : context.textMuted)),
         Text(value,
             style: TextStyle(
                 fontSize: bold ? 18 : 13,
                 fontWeight: FontWeight.w800,
-                color: bold ? AppColors.orange : AppColors.dark)),
+                color: bold ? AppColors.orange : context.textPrimary)),
       ],
     );
   }
 
-  Widget _qtyBtn(IconData icon, VoidCallback onTap) {
+  Widget _qtyBtn(BuildContext context, IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 28,
         height: 28,
         decoration: BoxDecoration(
-          color: AppColors.lightBg,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, size: 14),

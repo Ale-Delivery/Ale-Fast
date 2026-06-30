@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 
 // ─── Network Image with shimmer ───────────────────────────────
 class AppNetworkImage extends StatelessWidget {
@@ -73,22 +74,22 @@ class InfoRow extends StatelessWidget {
             style: TextStyle(
                 fontSize: fontSize,
                 fontWeight: FontWeight.w700,
-                color: AppColors.dark)),
+                color: context.textPrimary)),
         const SizedBox(width: 10),
         Icon(Icons.delivery_dining_rounded,
-            color: freeDelivery ? AppColors.green : AppColors.grey,
+            color: freeDelivery ? AppColors.green : context.textMuted,
             size: fontSize + 3),
         const SizedBox(width: 2),
         Text(freeDelivery ? 'Free' : 'Paid',
             style: TextStyle(
                 fontSize: fontSize,
-                color: freeDelivery ? AppColors.green : AppColors.grey)),
+                color: freeDelivery ? AppColors.green : context.textMuted)),
         const SizedBox(width: 10),
         Icon(Icons.access_time_rounded,
-            color: AppColors.grey, size: fontSize + 3),
+            color: context.textMuted, size: fontSize + 3),
         const SizedBox(width: 2),
         Text('$deliveryMin min',
-            style: TextStyle(fontSize: fontSize, color: AppColors.grey)),
+            style: TextStyle(fontSize: fontSize, color: context.textMuted)),
       ],
     );
   }
@@ -109,7 +110,7 @@ class RestaurantCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -139,8 +140,8 @@ class RestaurantCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     restaurant.category,
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.grey),
+                    style: TextStyle(
+                        fontSize: 12, color: context.textMuted),
                   ),
                   const SizedBox(height: 8),
                   InfoRow(
@@ -178,7 +179,7 @@ class FoodCard extends StatelessWidget {
         width: 155,
         margin: const EdgeInsets.only(right: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
           BoxShadow(
@@ -213,8 +214,8 @@ class FoodCard extends StatelessWidget {
                           fontSize: 13, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 2),
                   Text('Starting  Rs. ${food.price.toInt()}',
-                      style: const TextStyle(
-                          fontSize: 11, color: AppColors.grey)),
+                      style: TextStyle(
+                          fontSize: 11, color: context.textMuted)),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -265,7 +266,7 @@ class CategoryChip extends StatelessWidget {
         margin: const EdgeInsets.only(right: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: category.isSelected ? AppColors.orange : Colors.white,
+          color: category.isSelected ? AppColors.orange : context.surfaceColor,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -284,7 +285,7 @@ class CategoryChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: category.isSelected ? Colors.white : AppColors.dark,
+                color: category.isSelected ? Colors.white : context.textPrimary,
               ),
             ),
           ],
@@ -363,7 +364,7 @@ class ShimmerList extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 16),
             height: height,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.surfaceColor,
               borderRadius: BorderRadius.circular(16),
             ),
           ),

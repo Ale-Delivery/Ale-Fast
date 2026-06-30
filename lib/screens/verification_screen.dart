@@ -3,12 +3,8 @@ import '../services/local_storage_service.dart';
 import '../services/auth_service.dart';
 import '../navigation/buyer_navigator.dart';
 import '../screens/delivery_address_screen.dart';
-
-const _primaryColor = Color(0xFFFF6B35);
-const _accentColor = Color(0xFFFF8A00);
-const _lightBg = Color(0xFFF9FAFC);
-const _darkInk = Color(0xFF1E1E2C);
-const _textMuted = Color(0xFF7D8491);
+import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 
 class VerificationScreen extends StatefulWidget {
   final String phoneNumber;
@@ -143,7 +139,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _lightBg,
+      backgroundColor: context.scaffoldBg,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 30),
@@ -154,7 +150,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                 alignment: Alignment.centerLeft,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.surfaceColor,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -165,7 +161,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     ],
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: _darkInk, size: 18),
+                    icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textPrimary, size: 18),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -173,10 +169,10 @@ class _VerificationScreenState extends State<VerificationScreen> {
               const SizedBox(height: 32),
               
               // Header
-              const Text(
+              Text(
                 "Verification",
                 style: TextStyle(
-                  color: _darkInk,
+                  color: context.textPrimary,
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.8,
@@ -185,8 +181,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
               const SizedBox(height: 8),
               RichText(
                 text: TextSpan(
-                  style: const TextStyle(
-                    color: _textMuted,
+                  style: TextStyle(
+                    color: context.textMuted,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                     height: 1.3,
@@ -195,8 +191,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     const TextSpan(text: "Enter the 4-digit OTP Code sent to "),
                     TextSpan(
                       text: widget.phoneNumber,
-                      style: const TextStyle(
-                        color: _darkInk,
+                      style: TextStyle(
+                        color: context.textPrimary,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -209,7 +205,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.surfaceColor,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
@@ -235,14 +231,14 @@ class _VerificationScreenState extends State<VerificationScreen> {
                             textAlign: TextAlign.center,
                             keyboardType: TextInputType.number,
                             maxLength: 1,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
-                              color: _darkInk,
+                              color: context.textPrimary,
                             ),
                             decoration: InputDecoration(
                               counterText: "",
-                              fillColor: _lightBg,
+                              fillColor: context.inputBg,
                               filled: true,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
@@ -255,7 +251,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 borderSide: const BorderSide(
-                                  color: _primaryColor,
+                                  color: AppColors.orange,
                                   width: 2.0,
                                 ),
                               ),
@@ -285,14 +281,14 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [_accentColor, _primaryColor],
+                            colors: [Color(0xFFFF8A00), AppColors.orange],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: _primaryColor.withOpacity(0.25),
+                              color: AppColors.orange.withOpacity(0.25),
                               blurRadius: 12,
                               offset: const Offset(0, 6),
                             ),

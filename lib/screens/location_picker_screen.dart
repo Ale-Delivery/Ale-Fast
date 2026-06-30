@@ -3,9 +3,10 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/google_maps_service.dart';
+import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 
-const _primaryColor = Color(0xFFFF6B35);
-const _darkInk = Color(0xFF1E1E2C);
+const _primaryColor = AppColors.orange;
 
 class LocationPickerScreen extends StatefulWidget {
   const LocationPickerScreen({super.key});
@@ -145,8 +146,8 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
         ),
         leading: const BackButton(),
-        backgroundColor: Colors.white,
-        foregroundColor: _darkInk,
+        backgroundColor: context.cardBg,
+        foregroundColor: context.textPrimary,
         elevation: 0,
       ),
       body: Stack(
@@ -225,7 +226,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.surfaceColor,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
@@ -238,10 +239,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                   child: TextField(
                     controller: _searchController,
                     onChanged: _searchAddress,
-                    style: const TextStyle(fontWeight: FontWeight.w600, color: _darkInk),
+                    style: TextStyle(fontWeight: FontWeight.w600, color: context.textPrimary),
                     decoration: InputDecoration(
                       hintText: 'Search address or location...',
-                      hintStyle: const TextStyle(color: Color(0xFFC0C0D0), fontWeight: FontWeight.w500),
+                      hintStyle: TextStyle(color: context.textHint, fontWeight: FontWeight.w500),
                       prefixIcon: const Icon(Icons.search_rounded, color: _primaryColor),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
@@ -264,7 +265,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                     margin: const EdgeInsets.only(top: 8),
                     constraints: const BoxConstraints(maxHeight: 220),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.surfaceColor,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
@@ -286,7 +287,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                             item['display_name'],
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _darkInk),
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: context.textPrimary),
                           ),
                           onTap: () async {
                             FocusScope.of(context).unfocus();
@@ -322,10 +323,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
             right: 0,
             child: Container(
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 36),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                boxShadow: [
+              decoration: BoxDecoration(
+                color: context.surfaceColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 15,
@@ -360,10 +361,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                     height: 48,
                     child: Text(
                       _address,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: _darkInk,
+                        color: context.textPrimary,
                         height: 1.4,
                       ),
                       maxLines: 2,

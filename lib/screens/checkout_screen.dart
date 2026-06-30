@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/cart_provider.dart';
 import '../services/order_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 import '../navigation/buyer_navigator.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -26,6 +28,81 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   String _paymentMethod = 'cash';
   bool _placing = false;
+  final _promoController = TextEditingController();
+  String? _appliedPromoCode;
+  int _discountPercent = 0;
+  String? _promoError;
+  bool _checkingPromo = false;
+
+  @override
+  void dispose() {
+    _promoController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _applyPromo() async {
+    final code = _promoController.text.trim().toUpperCase();
+    if (code.isEmpty) return;
+
+    setState(() {
+      _checkingPromo = true;
+      _promoError = null;
+    });
+
+    try {
+      final offer = await Supabase.instance.client
+          .from('Offers')
+          .select()
+          .eq('code', code)
+          .eq('is_active', true)
+          .maybeSingle();
+
+      if (offer == null) {
+        setState(() {
+          _promoError = 'Invalid promo code';
+          _checkingPromo = false;
+        });
+        return;
+      }
+
+      final maxUses = offer['max_uses'] as int? ?? 100;
+      final usedCount = offer['used_count'] as int? ?? 0;
+      if (usedCount >= maxUses) {
+        setState(() {
+          _promoError = 'This code has expired';
+          _checkingPromo = false;
+        });
+        return;
+      }
+
+      setState(() {
+        _appliedPromoCode = code;
+        _discountPercent = offer['discount_percent'] as int? ?? 0;
+        _promoError = null;
+        _checkingPromo = false;
+      });
+    } catch (e) {
+      setState(() {
+        _promoError = 'Could not validate promo code';
+        _checkingPromo = false;
+      });
+    }
+  }
+
+  void _removePromo() {
+    setState(() {
+      _appliedPromoCode = null;
+      _discountPercent = 0;
+      _promoController.clear();
+      _promoError = null;
+    });
+  }
+
+  double get _discountAmount {
+    if (_appliedPromoCode == null || _discountPercent == 0) return 0;
+    final cart = context.read<CartProvider>();
+    return cart.subtotal * _discountPercent / 100;
+  }
 
   Future<void> _placeOrder() async {
     final cart = context.read<CartProvider>();
@@ -40,6 +117,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         deliveryPhone: widget.deliveryPhone,
         deliveryNotes: widget.deliveryNotes,
         paymentMethod: _paymentMethod,
+        promoCode: _appliedPromoCode,
+        discount: _discountAmount,
       );
 
       cart.clearCart();
@@ -65,7 +144,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final cart = context.watch<CartProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.lightBg,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
         title: const Text('Checkout',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
@@ -105,6 +184,91 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 _paymentTile('card', 'Card (coming soon)', Icons.credit_card_outlined,
                     enabled: false),
                 const SizedBox(height: 20),
+                const Text('Promo code',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _promoController,
+                        enabled: _appliedPromoCode == null,
+                        textCapitalization: TextCapitalization.characters,
+                        decoration: InputDecoration(
+                          hintText: 'Enter promo code',
+                          hintStyle: TextStyle(color: context.textMuted, fontSize: 14),
+                          filled: true,
+                          fillColor: context.inputBg,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: _promoError != null
+                                  ? Colors.red
+                                  : _appliedPromoCode != null
+                                      ? AppColors.green
+                                      : const Color(0xFFEDEFF3),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: _promoError != null
+                                  ? Colors.red
+                                  : _appliedPromoCode != null
+                                      ? AppColors.green
+                                      : const Color(0xFFEDEFF3),
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          suffixIcon: _appliedPromoCode != null
+                              ? const Icon(Icons.check_circle, color: AppColors.green, size: 20)
+                              : null,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    if (_appliedPromoCode != null)
+                      GestureDetector(
+                        onTap: _removePromo,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.close, color: Colors.red, size: 20),
+                        ),
+                      )
+                    else
+                      GestureDetector(
+                        onTap: _checkingPromo ? null : _applyPromo,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: AppColors.orange,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: _checkingPromo
+                              ? const SizedBox(
+                                  width: 18, height: 18,
+                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              : const Text('Apply', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                        ),
+                      ),
+                  ],
+                ),
+                if (_promoError != null) ...[
+                  const SizedBox(height: 6),
+                  Text(_promoError!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                ],
+                if (_appliedPromoCode != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    'Code $_appliedPromoCode applied: $_discountPercent% off',
+                    style: const TextStyle(color: AppColors.green, fontSize: 12, fontWeight: FontWeight.w600),
+                  ),
+                ],
+                const SizedBox(height: 20),
                 const Text('Order summary',
                     style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                 const SizedBox(height: 12),
@@ -128,8 +292,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           Container(
             padding: EdgeInsets.fromLTRB(20, 16, 20, 32 + MediaQuery.of(context).padding.bottom),
-            color: Colors.white,
-            child: Column(
+            color: context.surfaceColor,
+              child: Column(
               children: [
                 _row('Subtotal', 'Rs. ${cart.subtotal.toStringAsFixed(0)}'),
                 const SizedBox(height: 6),
@@ -139,8 +303,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ? 'Free'
                       : 'Rs. ${cart.deliveryFee.toStringAsFixed(0)}',
                 ),
+                if (_discountAmount > 0) ...[
+                  const SizedBox(height: 6),
+                  _row('Discount (${_discountPercent}%)', '- Rs. ${_discountAmount.toStringAsFixed(0)}'),
+                ],
                 const Divider(height: 24),
-                _row('Total', 'Rs. ${cart.total.toStringAsFixed(0)}', bold: true),
+                _row('Total', 'Rs. ${(_discountAmount > 0 ? cart.total - _discountAmount : cart.total).toStringAsFixed(0)}', bold: true),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
@@ -181,7 +349,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -193,8 +361,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: const TextStyle(
-                        fontSize: 11, color: AppColors.grey, fontWeight: FontWeight.w600)),
+                    style: TextStyle(
+                        fontSize: 11, color: context.textMuted, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 4),
                 Text(subtitle,
                     style: const TextStyle(
@@ -228,12 +396,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: ListTile(
         onTap: enabled ? () => setState(() => _paymentMethod = value) : null,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        tileColor: selected ? AppColors.orangeLight : Colors.white,
-        leading: Icon(icon, color: selected ? AppColors.orange : AppColors.grey),
+        tileColor: selected ? AppColors.orangeLight : context.surfaceColor,
+        leading: Icon(icon, color: selected ? AppColors.orange : context.textMuted),
         title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
         trailing: selected
             ? const Icon(Icons.check_circle, color: AppColors.orange)
-            : const Icon(Icons.circle_outlined, color: AppColors.grey),
+            : Icon(Icons.circle_outlined, color: context.textMuted),
       ),
     );
   }
@@ -250,7 +418,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: bold ? 18 : 13,
-                color: bold ? AppColors.orange : AppColors.dark)),
+                color: bold ? AppColors.orange : context.textPrimary)),
       ],
     );
   }

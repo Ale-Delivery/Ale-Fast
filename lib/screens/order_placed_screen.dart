@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 import '../navigation/buyer_navigator.dart';
 
 class OrderPlacedScreen extends StatelessWidget {
@@ -11,7 +12,7 @@ class OrderPlacedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBg,
+      backgroundColor: context.scaffoldBg,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -35,7 +36,7 @@ class OrderPlacedScreen extends StatelessWidget {
               Text(
                 'Your order #${order.id.length >= 8 ? order.id.substring(0, 8).toUpperCase() : order.id.toUpperCase()} has been sent to the restaurant.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.grey, height: 1.5),
+                style: TextStyle(color: context.textMuted, height: 1.5),
               ),
               const SizedBox(height: 8),
               Text(

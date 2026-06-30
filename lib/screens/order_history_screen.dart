@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/models.dart';
+import '../providers/cart_provider.dart';
 import '../services/order_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 import '../navigation/buyer_navigator.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
@@ -15,6 +19,7 @@ class OrderHistoryScreen extends StatefulWidget {
 class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   List<Order> _orders = [];
   bool _loading = true;
+  String? _cancellingId;
 
   @override
   void initState() {
@@ -30,6 +35,84 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         _orders = orders;
         _loading = false;
       });
+    }
+  }
+
+  Future<void> _reorder(Order order) async {
+    try {
+      final items = await OrderService.getOrderItems(order.id);
+      if (items.isEmpty || !mounted) return;
+
+      final cart = context.read<CartProvider>();
+      cart.clearCart();
+
+      for (final item in items) {
+        if (item.foodItemId == null) continue;
+        final response = await Supabase.instance.client
+            .from('Menu_Items')
+            .select()
+            .eq('id', item.foodItemId!)
+            .maybeSingle();
+        if (response == null) continue;
+
+        final food = FoodItem.fromJson(Map<String, dynamic>.from(response));
+        cart.addItem(food, size: item.selectedSize ?? 'Regular');
+        if (cart.items.length > 1) {
+          final lastItem = cart.items.last;
+          while (lastItem.quantity < item.quantity) {
+            cart.addItem(food, size: item.selectedSize ?? 'Regular');
+          }
+        }
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${items.length} item(s) added to cart'),
+            backgroundColor: AppColors.green,
+          ),
+        );
+        BuyerNavigator.cart(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not reorder. Items may be unavailable.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _cancelOrder(Order order) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Cancel order?', style: TextStyle(fontWeight: FontWeight.w800)),
+        content: const Text('Are you sure you want to cancel this order?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('No, keep it', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Yes, cancel', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true || !mounted) return;
+
+    setState(() => _cancellingId = order.id);
+    try {
+      await OrderService.cancelOrder(order.id);
+      await _load();
+    } finally {
+      if (mounted) setState(() => _cancellingId = null);
     }
   }
 
@@ -49,7 +132,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBg,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
         title: const Text('Order History',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
@@ -59,18 +142,18 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
           ? const Center(
               child: CircularProgressIndicator(color: AppColors.orange))
           : _orders.isEmpty
-              ? const Center(
+              ? Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('📦', style: TextStyle(fontSize: 56)),
-                      SizedBox(height: 12),
-                      Text('No orders yet',
+                      const Text('📦', style: TextStyle(fontSize: 56)),
+                      const SizedBox(height: 12),
+                      const Text('No orders yet',
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.w700)),
-                      SizedBox(height: 6),
+                      const SizedBox(height: 6),
                       Text('Your orders will appear here',
-                          style: TextStyle(color: AppColors.grey)),
+                          style: TextStyle(color: context.textMuted)),
                     ],
                   ),
                 )
@@ -94,7 +177,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                           margin: const EdgeInsets.only(bottom: 12),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: context.surfaceColor,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
@@ -142,11 +225,58 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                     ),
                                   ),
                                   const Spacer(),
+                                  if (order.status == OrderStatus.pending || order.status == OrderStatus.accepted)
+                                    _cancellingId == order.id
+                                        ? const SizedBox(
+                                            width: 16, height: 16,
+                                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.red),
+                                          )
+                                        : GestureDetector(
+                                            onTap: () => _cancelOrder(order),
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                              decoration: BoxDecoration(
+                                                color: Colors.red.withOpacity(0.1),
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              child: const Text(
+                                                'Cancel',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                  if (order.status == OrderStatus.pending || order.status == OrderStatus.accepted)
+                                    const SizedBox(width: 8),
+                                  if (order.status == OrderStatus.delivered)
+                                    GestureDetector(
+                                      onTap: () => _reorder(order),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.orange.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: const Text(
+                                          'Reorder',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.orange,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  if (order.status == OrderStatus.delivered)
+                                    const SizedBox(width: 8),
                                   if (date.isNotEmpty)
                                     Text(date,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                             fontSize: 11,
-                                            color: AppColors.grey)),
+                                            color: context.textMuted)),
                                 ],
                               ),
                             ],

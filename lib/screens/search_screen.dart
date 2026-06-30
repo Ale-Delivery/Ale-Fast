@@ -3,6 +3,7 @@ import '../models/models.dart';
 import '../navigation/buyer_navigator.dart';
 import '../services/database_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 import '../widgets/common_widgets.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -98,7 +99,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
         leading: const BackButton(),
         title: TextField(
@@ -106,7 +107,7 @@ class _SearchScreenState extends State<SearchScreen> {
           autofocus: true,
           decoration: InputDecoration(
             hintText: 'Pizza',
-            hintStyle: const TextStyle(color: AppColors.grey),
+            hintStyle: TextStyle(color: context.textMuted),
             border: InputBorder.none,
             suffixIcon: ValueListenableBuilder<bool>(
               valueListenable: _hasText,
@@ -166,7 +167,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.lightBg,
+                        color: context.surfaceColor,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(k,
@@ -285,9 +286,9 @@ class _SearchScreenState extends State<SearchScreen> {
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.surfaceColor,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFF0F0F0)),
+                    border: Border.all(color: context.cardBorder.withOpacity(0.3)),
                   ),
                   child: Row(
                     children: [
@@ -308,8 +309,8 @@ class _SearchScreenState extends State<SearchScreen> {
                                     fontWeight: FontWeight.w700)),
                             const SizedBox(height: 4),
                             Text(f.restaurantName,
-                                style: const TextStyle(
-                                    fontSize: 11, color: AppColors.grey)),
+                                style: TextStyle(
+                                    fontSize: 11, color: context.textMuted)),
                             const SizedBox(height: 4),
                             InfoRow(
                                 rating: f.rating,

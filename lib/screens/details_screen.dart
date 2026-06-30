@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../navigation/buyer_navigator.dart';
 import '../providers/cart_provider.dart';
 import '../services/database_service.dart';
+import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 import '../widgets/common_widgets.dart';
 
 class DetailsScreen extends StatefulWidget {
@@ -36,17 +37,17 @@ class _DetailsScreenState extends State<DetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF1E1E2C)),
+          icon: Icon(Icons.arrow_back_ios_new, color: context.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.favorite_border, color: Color(0xFF1E1E2C)),
+            icon: Icon(Icons.favorite_border, color: context.textPrimary),
             onPressed: () {},
           )
         ],
@@ -64,11 +65,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
             ),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             decoration: BoxDecoration(
-              color: const Color(0xFFFF7A1A),
+              color: AppColors.orange,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFF7A1A).withOpacity(0.3),
+                  color: AppColors.orange.withOpacity(0.3),
                   blurRadius: 15,
                   offset: const Offset(0, 8),
                 ),
@@ -101,17 +102,17 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 ),
                 TextButton.icon(
                   onPressed: () => BuyerNavigator.cart(context),
-                  icon: const Icon(Icons.shopping_bag_outlined, color: Color(0xFFFF7A1A), size: 18),
+                  icon: const Icon(Icons.shopping_bag_outlined, color: AppColors.orange, size: 18),
                   label: const Text(
                     'VIEW CART',
                     style: TextStyle(
-                      color: Color(0xFFFF7A1A),
+                      color: AppColors.orange,
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
                     ),
                   ),
                   style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
+                    backgroundColor: context.surfaceColor,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -140,24 +141,24 @@ class _DetailsScreenState extends State<DetailsScreen> {
               offset: const Offset(0, -30),
               child: Container(
                 padding: const EdgeInsets.all(25),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF8F9FB),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                decoration: BoxDecoration(
+                  color: context.scaffoldBg,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       widget.restaurant['name'] ?? 'Unknown Restaurant',
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
                           fontSize: 26,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1E1E2C)),
+                          color: context.textPrimary),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       widget.restaurant['tags'] ?? '',
-                      style: TextStyle(color: Colors.grey[500], fontSize: 15),
+                      style: TextStyle(color: context.textMuted, fontSize: 15),
                     ),
                     const SizedBox(height: 25),
 
@@ -171,22 +172,22 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         _infoChip(
                             Icons.directions_run_rounded,
                             widget.restaurant['delivery_fee'] ?? 'Free',
-                            const Color(0xFFFF7A1A)),
+                            AppColors.orange),
                         _infoChip(
                             Icons.access_time_rounded,
                             widget.restaurant['delivery_time'] ?? 'N/A',
-                            Colors.grey),
+                            context.textMuted),
                       ],
                     ),
 
                     const SizedBox(height: 40),
 
-                    const Text(
+                    Text(
                       "Popular Menu",
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E1E2C)),
+                          color: context.textPrimary),
                     ),
                     const SizedBox(height: 15),
 
@@ -198,7 +199,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             ConnectionState.waiting) {
                           return const Center(
                               child: CircularProgressIndicator(
-                                  color: Color(0xFFFF7A1A)));
+                                  color: AppColors.orange));
                         }
                         if (snapshot.hasError) {
                           return Center(
@@ -206,11 +207,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   style: const TextStyle(color: Colors.red)));
                         }
                         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return const Center(
+                          return Center(
                             child: Padding(
-                              padding: EdgeInsets.all(20.0),
+                              padding: const EdgeInsets.all(20.0),
                               child: Text("No menu items available yet.",
-                                  style: TextStyle(color: Colors.grey)),
+                                  style: TextStyle(color: context.textMuted)),
                             ),
                           );
                         }
@@ -232,16 +233,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             return GestureDetector(
                               onTap: () => BuyerNavigator.foodDetail(context, food),
                               child: Container(
-                              margin: const EdgeInsets.only(bottom: 15),
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: const Color(0xFFF0F0F0)),
-                              ),
-                              child: Row(
-                                children: [
-                                  // Food image
+                                margin: const EdgeInsets.only(bottom: 15),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: context.surfaceColor,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: context.cardBorder.withOpacity(0.3)),
+                                ),
+                                child: Row(
+                                  children: [
                                     AppNetworkImage(
                                       url: item['image_url'] ?? '',
                                       height: 80,
@@ -249,59 +249,56 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                       fit: BoxFit.cover,
                                       borderRadius: BorderRadius.circular(15),
                                     ),
-                                  const SizedBox(width: 15),
-                                  // Food details and price
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          item['name'] ?? 'Unknown Item',
-                                          style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: Color(0xFF1E1E2C)),
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Text(
-                                          item['description'] ?? '',
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey[500]),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        Text(
-                                          "Rs. ${item['price']}",
-                                          style: const TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color(0xFFFF7A1A)),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  // Add Button
-                                  GestureDetector(
-                                    onTap: () {
-                                      context.read<CartProvider>().addItem(food);
-                                    },
-                                    child: Container(
-                                      height: 35,
-                                      width: 35,
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFFFF7A1A),
-                                        shape: BoxShape.circle,
+                                    const SizedBox(width: 15),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item['name'] ?? 'Unknown Item',
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                                color: context.textPrimary),
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Text(
+                                            item['description'] ?? '',
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                color: context.textMuted),
+                                          ),
+                                          const SizedBox(height: 10),
+                                          Text(
+                                            "Rs. ${item['price']}",
+                                            style: const TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.orange),
+                                          ),
+                                        ],
                                       ),
-                                      child: const Icon(Icons.add,
-                                          color: Colors.white, size: 20),
                                     ),
-                                  )
-                                ],
+                                    GestureDetector(
+                                      onTap: () {
+                                        context.read<CartProvider>().addItem(food);
+                                      },
+                                      child: Container(
+                                        height: 35,
+                                        width: 35,
+                                        decoration: const BoxDecoration(
+                                          color: AppColors.orange,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(Icons.add,
+                                            color: Colors.white, size: 20),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
                             );
                           },
                         );
@@ -323,10 +320,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
         Icon(icon, color: color, size: 24),
         const SizedBox(width: 6),
         Text(label,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1E1E2C))),
+                color: context.textPrimary)),
       ],
     );
   }

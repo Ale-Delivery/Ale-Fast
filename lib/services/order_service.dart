@@ -13,6 +13,8 @@ class OrderService {
     required String deliveryPhone,
     String? deliveryNotes,
     String paymentMethod = 'cash',
+    String? promoCode,
+    double discount = 0,
   }) async {
     if (cart.items.isEmpty) {
       throw Exception('Cart is empty');
@@ -34,12 +36,17 @@ class OrderService {
       'status': OrderStatus.pending.value,
       'subtotal': cart.subtotal,
       'delivery_fee': cart.deliveryFee,
-      'total': cart.total,
+      'total': cart.total - discount,
       'delivery_address': deliveryAddress,
       'delivery_phone': deliveryPhone,
       'delivery_notes': deliveryNotes,
       'payment_method': paymentMethod,
     };
+
+    if (promoCode != null) {
+      orderData['promo_code'] = promoCode;
+      orderData['discount'] = discount;
+    }
 
     final orderResponse =
         await _client.from('Orders').insert(orderData).select().single();
@@ -92,6 +99,14 @@ class OrderService {
     return (response as List)
         .map((i) => OrderItemLine.fromJson(Map<String, dynamic>.from(i)))
         .toList();
+  }
+
+  /// Buyer can cancel if order is pending or accepted (before restaurant starts preparing).
+  static Future<void> cancelOrder(String orderId) async {
+    await _client
+        .from('Orders')
+        .update({'status': OrderStatus.cancelled.value})
+        .eq('id', orderId);
   }
 
   static Stream<Order?> watchOrder(String orderId) {
