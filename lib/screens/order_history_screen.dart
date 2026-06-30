@@ -6,6 +6,7 @@ import '../models/models.dart';
 import '../providers/cart_provider.dart';
 import '../services/order_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 import '../navigation/buyer_navigator.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
@@ -131,7 +132,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
         title: const Text('Order History',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
@@ -141,18 +142,18 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
           ? const Center(
               child: CircularProgressIndicator(color: AppColors.orange))
           : _orders.isEmpty
-              ? const Center(
+              ? Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('📦', style: TextStyle(fontSize: 56)),
-                      SizedBox(height: 12),
-                      Text('No orders yet',
+                      const Text('📦', style: TextStyle(fontSize: 56)),
+                      const SizedBox(height: 12),
+                      const Text('No orders yet',
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.w700)),
-                      SizedBox(height: 6),
+                      const SizedBox(height: 6),
                       Text('Your orders will appear here',
-                          style: TextStyle(color: AppColors.muted)),
+                          style: TextStyle(color: context.textMuted)),
                     ],
                   ),
                 )
@@ -176,7 +177,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                           margin: const EdgeInsets.only(bottom: 12),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: context.surfaceColor,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
@@ -273,9 +274,9 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                     const SizedBox(width: 8),
                                   if (date.isNotEmpty)
                                     Text(date,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                             fontSize: 11,
-                                            color: AppColors.muted)),
+                                            color: context.textMuted)),
                                 ],
                               ),
                             ],

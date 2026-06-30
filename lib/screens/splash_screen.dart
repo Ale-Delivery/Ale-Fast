@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:food_app/theme/app_theme.dart';
+import 'package:food_app/theme/theme_colors.dart';
 import 'package:food_app/navigation/buyer_navigator.dart';
 import 'package:food_app/services/local_storage_service.dart';
 
@@ -51,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: context.scaffoldBg,
       body: Stack(
         children: [
           // Bottom wave decoration
@@ -87,11 +88,11 @@ class _SplashScreenState extends State<SplashScreen>
                     // Logo Text
                     RichText(
                       text: TextSpan(
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 48,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.ink,
+                          color: context.textPrimary,
                           letterSpacing: -1,
                         ),
                         children: const [
@@ -109,7 +110,7 @@ class _SplashScreenState extends State<SplashScreen>
                       'FOOD DELIVERY',
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.muted,
+                        color: context.textMuted,
                         letterSpacing: 3,
                         fontWeight: FontWeight.w600,
                       ),

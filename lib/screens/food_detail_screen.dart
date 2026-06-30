@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/models.dart';
 import '../providers/cart_provider.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 import '../navigation/buyer_navigator.dart';
 import '../widgets/common_widgets.dart';
 
@@ -31,7 +32,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
     final cartCount = context.select<CartProvider, int>((c) => c.itemCount);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.scaffoldBg,
       body: Stack(
         children: [
           CustomScrollView(
@@ -46,10 +47,10 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                   child: Container(
                     margin: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.surfaceColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.arrow_back, color: AppColors.dark),
+                    child: Icon(Icons.arrow_back, color: context.textPrimary),
                   ),
                 ),
                 actions: [
@@ -61,11 +62,11 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                           margin: const EdgeInsets.all(8),
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: context.surfaceColor,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.shopping_bag_outlined,
-                              color: AppColors.dark, size: 20),
+                          child: Icon(Icons.shopping_bag_outlined,
+                              color: context.textPrimary, size: 20),
                         ),
                       ),
                       if (cartCount > 0)
@@ -134,9 +135,9 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
 
                       // Description
                       Text(food.description,
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 13,
-                              color: AppColors.grey,
+                              color: context.textMuted,
                               height: 1.6)),
                       const SizedBox(height: 12),
 
@@ -150,11 +151,11 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                       const SizedBox(height: 24),
 
                       // Size selector
-                      const Text('SIZE',
+                      Text('SIZE',
                           style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.grey,
+                              color: context.textMuted,
                               letterSpacing: 1)),
                       const SizedBox(height: 10),
                       Row(
@@ -170,7 +171,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                                     decoration: BoxDecoration(
                                       color: _selectedSize == s
                                           ? AppColors.orange
-                                          : AppColors.bg,
+                                          : context.surfaceColor,
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Text(s,
@@ -179,7 +180,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                                           fontWeight: FontWeight.w700,
                                           color: _selectedSize == s
                                               ? Colors.white
-                                              : AppColors.dark,
+                                              : context.textPrimary,
                                         )),
                                   ),
                                 ))
@@ -189,11 +190,11 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
 
                       // Ingredients
                       if (food.ingredients.isNotEmpty) ...[
-                        const Text('INGREDIENTS',
+                        Text('INGREDIENTS',
                             style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.grey,
+                                color: context.textMuted,
                                 letterSpacing: 1)),
                         const SizedBox(height: 10),
                         Row(
@@ -203,7 +204,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                                     width: 44,
                                     height: 44,
                                     decoration: BoxDecoration(
-                                      color: AppColors.bg,
+                                      color: context.surfaceColor,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Center(
@@ -231,7 +232,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
               child: Container(
               padding: EdgeInsets.fromLTRB(20, 16, 20, 32 + MediaQuery.of(context).padding.bottom),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.surfaceColor,
                   boxShadow: [
                     BoxShadow(
                         color: Colors.black.withOpacity(0.08),
@@ -243,16 +244,16 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                 children: [
                   // Price
                   Text('Rs. ${(food.price * _quantity).toStringAsFixed(0)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.dark)),
+                          color: context.textPrimary)),
                   const Spacer(),
 
                   // Qty selector
                   Row(
                     children: [
-                      _qtyBtn(Icons.remove, () {
+                      _qtyBtn(context, Icons.remove, () {
                         if (_quantity > 1) setState(() => _quantity--);
                       }),
                       const SizedBox(width: 12),
@@ -260,7 +261,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                           style: const TextStyle(
                               fontSize: 18, fontWeight: FontWeight.w800)),
                       const SizedBox(width: 12),
-                      _qtyBtn(Icons.add,
+                      _qtyBtn(context, Icons.add,
                           () => setState(() => _quantity++)),
                     ],
                   ),
@@ -317,17 +318,17 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
     );
   }
 
-  Widget _qtyBtn(IconData icon, VoidCallback onTap) {
+  Widget _qtyBtn(BuildContext context, IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: AppColors.bg,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(icon, size: 16, color: AppColors.dark),
+        child: Icon(icon, size: 16, color: context.textPrimary),
       ),
     );
   }

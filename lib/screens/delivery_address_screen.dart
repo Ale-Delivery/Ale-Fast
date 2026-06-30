@@ -8,9 +8,9 @@ import '../navigation/buyer_navigator.dart';
 import '../services/google_maps_service.dart';
 import '../screens/home_screen.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 
 const _primaryColor = AppColors.orange;
-const _darkInk = AppColors.ink;
 
 class DeliveryAddressScreen extends StatefulWidget {
   final bool proceedToCheckout;
@@ -259,17 +259,17 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Delivery Address',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: _darkInk),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textPrimary),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: _darkInk, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textPrimary, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -280,12 +280,12 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Where should we deliver?',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
-                      color: _darkInk,
+                      color: context.textPrimary,
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -314,9 +314,9 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                     const SizedBox(height: 8),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.surfaceColor,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.withOpacity(0.15)),
+                        border: Border.all(color: context.cardBorder.withOpacity(0.3)),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.04),
@@ -337,7 +337,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                             leading: const Icon(Icons.location_on_outlined, color: _primaryColor, size: 18),
                             title: Text(
                               item['display_name'],
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _darkInk),
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: context.textPrimary),
                             ),
                             onTap: () {
                               setState(() {
@@ -423,12 +423,12 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
 
                   // Saved Addresses Section
                   if (_savedAddresses.isNotEmpty) ...[
-                      const Text(
+                      Text(
                         'SAVED ADDRESSES',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.hint,
+                          color: context.textHint,
                           letterSpacing: 1.0,
                       ),
                     ),
@@ -437,9 +437,9 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.surfaceColor,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFEDEFF3)),
+                        border: Border.all(color: context.cardBorder.withOpacity(0.3)),
                       ),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
@@ -454,10 +454,10 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                                 children: [
                                   Text(
                                     addr['label'] ?? 'Home',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w800,
-                                      color: _darkInk,
+                                      color: context.textPrimary,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -465,9 +465,9 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                                     addr['address'] ?? '',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
-                                      color: AppColors.muted,
+                                      color: context.textMuted,
                                     ),
                                   ),
                                 ],
@@ -541,17 +541,17 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
       children: [
         Text(
           label.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w800,
-            color: AppColors.hint,
+            color: context.textHint,
             letterSpacing: 1.0,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.surfaceColor,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -566,19 +566,19 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
             maxLines: maxLines,
             keyboardType: keyboard,
             onChanged: onChanged,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: AppColors.ink,
+              color: context.textPrimary,
             ),
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: const TextStyle(
-                color: AppColors.hint,
+              hintStyle: TextStyle(
+                color: context.textHint,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
-              prefixIcon: Icon(icon, color: AppColors.hint, size: 20),
+              prefixIcon: Icon(icon, color: context.textHint, size: 20),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,

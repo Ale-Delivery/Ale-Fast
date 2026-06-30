@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/cart_provider.dart';
 import '../services/order_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 import '../navigation/buyer_navigator.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -143,7 +144,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final cart = context.watch<CartProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
         title: const Text('Checkout',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
@@ -195,9 +196,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         textCapitalization: TextCapitalization.characters,
                         decoration: InputDecoration(
                           hintText: 'Enter promo code',
-                          hintStyle: const TextStyle(color: AppColors.muted, fontSize: 14),
+                          hintStyle: TextStyle(color: context.textMuted, fontSize: 14),
                           filled: true,
-                          fillColor: Colors.white,
+                          fillColor: context.inputBg,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
@@ -291,7 +292,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           Container(
             padding: EdgeInsets.fromLTRB(20, 16, 20, 32 + MediaQuery.of(context).padding.bottom),
-            color: Colors.white,
+            color: context.surfaceColor,
               child: Column(
               children: [
                 _row('Subtotal', 'Rs. ${cart.subtotal.toStringAsFixed(0)}'),
@@ -348,7 +349,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -360,8 +361,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: const TextStyle(
-                        fontSize: 11, color: AppColors.muted, fontWeight: FontWeight.w600)),
+                    style: TextStyle(
+                        fontSize: 11, color: context.textMuted, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 4),
                 Text(subtitle,
                     style: const TextStyle(
@@ -395,12 +396,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: ListTile(
         onTap: enabled ? () => setState(() => _paymentMethod = value) : null,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        tileColor: selected ? AppColors.orangeLight : Colors.white,
-        leading: Icon(icon, color: selected ? AppColors.orange : AppColors.muted),
+        tileColor: selected ? AppColors.orangeLight : context.surfaceColor,
+        leading: Icon(icon, color: selected ? AppColors.orange : context.textMuted),
         title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
         trailing: selected
             ? const Icon(Icons.check_circle, color: AppColors.orange)
-            : const Icon(Icons.circle_outlined, color: AppColors.muted),
+            : Icon(Icons.circle_outlined, color: context.textMuted),
       ),
     );
   }
@@ -417,7 +418,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: bold ? 18 : 13,
-                color: bold ? AppColors.orange : AppColors.ink)),
+                color: bold ? AppColors.orange : context.textPrimary)),
       ],
     );
   }

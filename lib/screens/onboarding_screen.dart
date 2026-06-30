@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:food_app/theme/app_theme.dart';
-// 👇 Aluth file eka import kara
 import 'package:food_app/navigation/buyer_navigator.dart';
 
 class OnboardingItem {

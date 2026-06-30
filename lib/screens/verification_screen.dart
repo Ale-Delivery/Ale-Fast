@@ -4,6 +4,7 @@ import '../services/auth_service.dart';
 import '../navigation/buyer_navigator.dart';
 import '../screens/delivery_address_screen.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 
 class VerificationScreen extends StatefulWidget {
   final String phoneNumber;
@@ -138,7 +139,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.scaffoldBg,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 30),
@@ -149,7 +150,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                 alignment: Alignment.centerLeft,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.surfaceColor,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -160,7 +161,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     ],
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.ink, size: 18),
+                    icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textPrimary, size: 18),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -168,10 +169,10 @@ class _VerificationScreenState extends State<VerificationScreen> {
               const SizedBox(height: 32),
               
               // Header
-              const Text(
+              Text(
                 "Verification",
                 style: TextStyle(
-                  color: AppColors.ink,
+                  color: context.textPrimary,
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.8,
@@ -180,8 +181,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
               const SizedBox(height: 8),
               RichText(
                 text: TextSpan(
-                  style: const TextStyle(
-                    color: AppColors.muted,
+                  style: TextStyle(
+                    color: context.textMuted,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                     height: 1.3,
@@ -190,8 +191,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     const TextSpan(text: "Enter the 4-digit OTP Code sent to "),
                     TextSpan(
                       text: widget.phoneNumber,
-                      style: const TextStyle(
-                        color: AppColors.ink,
+                      style: TextStyle(
+                        color: context.textPrimary,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -204,7 +205,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.surfaceColor,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
@@ -230,14 +231,14 @@ class _VerificationScreenState extends State<VerificationScreen> {
                             textAlign: TextAlign.center,
                             keyboardType: TextInputType.number,
                             maxLength: 1,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.ink,
+                              color: context.textPrimary,
                             ),
                             decoration: InputDecoration(
                               counterText: "",
-                              fillColor: AppColors.bg,
+                              fillColor: context.inputBg,
                               filled: true,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),

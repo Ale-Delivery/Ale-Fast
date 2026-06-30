@@ -10,6 +10,7 @@ import '../navigation/buyer_navigator.dart';
 import '../providers/cart_provider.dart';
 import '../services/local_storage_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 import '../widgets/modern/glass_card.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -22,9 +23,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   static const _primary = AppColors.orange;
-  static const _ink = AppColors.ink;
-  static const _muted = AppColors.muted;
-  static const _surface = AppColors.bg;
 
   final TextEditingController _searchController = TextEditingController();
   late Future<List<Map<String, dynamic>>> _restaurantsFuture;
@@ -212,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Theme(
       data: _appTheme ?? Theme.of(context),
       child: Scaffold(
-        backgroundColor: _surface,
+        backgroundColor: context.scaffoldBg,
         body: SafeArea(
           bottom: false,
           child: CustomScrollView(
@@ -272,19 +270,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Flexible(
-                        child: Text(
+                          child: Text(
                           _deliveryLabel,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: _ink,
+                            color: context.textPrimary,
                           ),
                         ),
                       ),
                       SizedBox(width: 4),
                       Icon(Icons.keyboard_arrow_down_rounded,
-                          size: 18, color: _ink),
+                          size: 18, color: context.textPrimary),
                     ],
                   ),
                 ),
@@ -299,8 +297,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   width: 46,
                   height: 46,
-                  decoration: const BoxDecoration(
-                    color: _ink,
+                  decoration: BoxDecoration(
+                    color: context.textPrimary,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.shopping_bag_outlined,
@@ -345,15 +343,15 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Text(
             'Hey $_userName,',
-            style: const TextStyle(fontSize: 16, color: _muted),
+            style: TextStyle(fontSize: 16, color: context.textMuted),
           ),
           const SizedBox(height: 3),
-          const Text(
+          Text(
             'What would you like to eat?',
             style: TextStyle(
               fontSize: 25,
               height: 1.14,
-              color: _ink,
+              color: context.textPrimary,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -383,9 +381,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                     decoration: InputDecoration(
                       hintText: 'Search dishes, restaurants',
-                      hintStyle: const TextStyle(color: _muted, fontSize: 14),
+                      hintStyle: TextStyle(color: context.textMuted, fontSize: 14),
                       prefixIcon:
-                          const Icon(Icons.search_rounded, color: _muted),
+                          Icon(Icons.search_rounded, color: context.textMuted),
                       suffixIcon: _query.isEmpty
                           ? null
                           : IconButton(
@@ -500,7 +498,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.surfaceColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -530,10 +528,10 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: _ink,
+                color: context.textPrimary,
               ),
             ),
           ),
@@ -701,7 +699,7 @@ class _HomeScreenState extends State<HomeScreen> {
             indicatorColor: isDark ? AppColors.orange.withOpacity(0.2) : AppColors.orangeLight,
             labelTextStyle: WidgetStateProperty.resolveWith(
               (states) => TextStyle(
-                color: states.contains(WidgetState.selected) ? _primary : _muted,
+                color: states.contains(WidgetState.selected) ? _primary : context.textMuted,
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
               ),
@@ -937,19 +935,19 @@ class _StatePanel extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(20, 4, 20, 20),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFEDEFF3)),
+        border: Border.all(color: context.cardBorder.withOpacity(0.3)),
       ),
       child: Column(
         children: [
-          Icon(icon, color: const Color(0xFFFF6B35), size: 42),
+          Icon(icon, color: AppColors.orange, size: 42),
           const SizedBox(height: 12),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Color(0xFF1E1E2C),
+            style: TextStyle(
+              color: context.textPrimary,
               fontSize: 17,
               fontWeight: FontWeight.w800,
             ),
@@ -958,7 +956,7 @@ class _StatePanel extends StatelessWidget {
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xFF7D8491), fontSize: 13),
+            style: TextStyle(color: context.textMuted, fontSize: 13),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
@@ -988,9 +986,9 @@ class _RestaurantSkeleton extends StatelessWidget {
       height: 236,
       margin: const EdgeInsets.fromLTRB(20, 0, 20, 18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFEDEFF3)),
+        border: Border.all(color: context.cardBorder.withOpacity(0.3)),
       ),
       child: Column(
         children: [

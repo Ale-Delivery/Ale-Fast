@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/order_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 
 class OrderTrackingScreen extends StatefulWidget {
   final String orderId;
@@ -78,7 +79,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
         title: const Text('Track Order',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
@@ -105,7 +106,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                           Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: context.surfaceColor,
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Column(
@@ -118,8 +119,8 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                                 const SizedBox(height: 4),
                                 Text(
                                   '#${order.id.length >= 8 ? order.id.substring(0, 8).toUpperCase() : order.id.toUpperCase()}',
-                                  style: const TextStyle(
-                                      color: AppColors.muted, fontSize: 12),
+                                  style: TextStyle(
+                                      color: context.textMuted, fontSize: 12),
                                 ),
                                 const SizedBox(height: 12),
                                 Container(
@@ -237,7 +238,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                 child: Icon(
                   done ? Icons.check : Icons.circle_outlined,
                   size: 16,
-                  color: done ? Colors.white : AppColors.muted,
+                  color: done ? Colors.white : context.textMuted,
                 ),
               ),
               if (!isLast)
@@ -259,10 +260,10 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                   Text(title,
                       style: TextStyle(
                           fontWeight: FontWeight.w800,
-                          color: active ? AppColors.orange : AppColors.ink)),
+                          color: active ? AppColors.orange : context.textPrimary)),
                   Text(subtitle,
-                      style: const TextStyle(
-                          fontSize: 12, color: AppColors.muted)),
+                      style: TextStyle(
+                          fontSize: 12, color: context.textMuted)),
                 ],
               ),
             ),

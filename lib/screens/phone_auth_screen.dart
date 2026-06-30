@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:food_app/services/auth_service.dart';
 import 'package:food_app/navigation/buyer_navigator.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 
 class PhoneAuthScreen extends StatefulWidget {
   const PhoneAuthScreen({super.key});
@@ -81,7 +82,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.scaffoldBg,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 30),
@@ -118,20 +119,20 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
               const SizedBox(height: 32),
               
               // Header Text
-              const Text(
+              Text(
                 "Welcome to Alee",
                 style: TextStyle(
-                  color: AppColors.ink,
+                  color: context.textPrimary,
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.8,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 "Enter your phone number to continue your food journey",
                 style: TextStyle(
-                  color: AppColors.muted,
+                  color: context.textMuted,
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                   height: 1.3,
@@ -144,7 +145,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.surfaceColor,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
@@ -157,10 +158,10 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       "PHONE NUMBER",
                       style: TextStyle(
-                        color: AppColors.muted,
+                        color: context.textMuted,
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.2,
@@ -172,10 +173,10 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                     TextField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
+                        color: context.textPrimary,
                         letterSpacing: 1.0,
                       ),
                       decoration: InputDecoration(
@@ -195,7 +196,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                               )
                             )
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
@@ -208,7 +209,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w800,
-                                  color: AppColors.ink,
+                                  color: context.textPrimary,
                                 ),
                               ),
                             ],

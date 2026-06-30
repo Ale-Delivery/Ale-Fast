@@ -5,6 +5,7 @@ import '../services/auth_service.dart';
 import '../navigation/buyer_navigator.dart';
 import '../providers/theme_provider.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_colors.dart';
 import 'profile_setup_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -71,7 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: context.surfaceColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Log out?', style: TextStyle(fontWeight: FontWeight.w800)),
         content: const Text('Are you sure you want to log out? You will need to sign in again.'),
@@ -99,8 +100,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final scaffoldBg = Theme.of(context).scaffoldBackgroundColor;
     final surfaceColor = Theme.of(context).colorScheme.surface;
-    final textColor = Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.ink;
-    final mutedColor = Theme.of(context).textTheme.bodySmall?.color ?? AppColors.muted;
+    final textColor = context.textPrimary;
 
     return Scaffold(
       backgroundColor: scaffoldBg,
@@ -338,8 +338,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
-    final textColor = Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.ink;
-    final mutedColor = Theme.of(context).textTheme.bodySmall?.color ?? AppColors.muted;
+    final textColor = context.textPrimary;
+    final mutedColor = context.textMuted;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -383,7 +383,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = Theme.of(context).colorScheme.surface;
-    final textColor = Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.ink;
+    final textColor = context.textPrimary;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -423,13 +423,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             subtitle,
             style: TextStyle(
               fontSize: 13,
-              color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.muted,
+              color: context.textMuted,
             ),
           ),
         ),
         trailing: Icon(
           Icons.arrow_forward_ios_rounded,
-          color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.hint,
+        color: context.textHint,
           size: 16,
         ),
         onTap: onTap,
@@ -444,7 +444,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -492,7 +492,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
         child: Row(
           children: [
-            Icon(icon, size: 22, color: selected ? AppColors.orange : AppColors.muted),
+            Icon(icon, size: 22, color: selected ? AppColors.orange : context.textMuted),
             const SizedBox(width: 14),
             Expanded(
               child: Text(
@@ -500,7 +500,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                  color: selected ? AppColors.orange : AppColors.ink,
+                  color: selected ? AppColors.orange : context.textPrimary,
                 ),
               ),
             ),
