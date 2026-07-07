@@ -30,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String selectedCategory = 'All';
   String _query = '';
   int _selectedTab = 0;
+  String _selectedService = 'Food';
   String _deliveryLabel = 'Set delivery address';
   String _userName = 'User';
   StreamSubscription? _orderSub;
@@ -219,10 +220,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 delegate: SliverChildListDelegate([
                   _buildHeader(),
                   _buildHeroSearch(),
-                  _buildOfferCarousel(),
-                  _buildSectionTitle('Categories'),
-                  _buildCategoryList(),
-                  _buildSectionTitle('Open Restaurants'),
+                  _buildServicesRow(),
+                  if (_selectedService == 'Food') ...[
+                    _buildOfferCarousel(),
+                    _buildSectionTitle('Categories'),
+                    _buildCategoryList(),
+                    _buildSectionTitle('Open Restaurants'),
+                  ],
+                  if (_selectedService == 'Rides') _buildRidesPlaceholder(),
+                  if (_selectedService == 'Parcel') _buildParcelPlaceholder(),
                 ]),
               ),
               _buildRestaurantSliver(),
@@ -409,6 +415,139 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () => BuyerNavigator.search(context),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServicesRow() {
+    final services = [
+      {
+        'key': 'Rides',
+        'icon': Icons.directions_bike_rounded,
+        'title': 'Rides',
+        'color': const Color(0xFF00C6FF),
+      },
+      {
+        'key': 'Food',
+        'icon': Icons.restaurant_rounded,
+        'title': 'Food',
+        'color': const Color(0xFFFF6B35),
+      },
+      {
+        'key': 'Parcel',
+        'icon': Icons.inventory_2_rounded,
+        'title': 'Parcel',
+        'color': const Color(0xFF6C5CE7),
+      },
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+      child: Row(
+        children: List.generate(services.length, (i) {
+          final s = services[i];
+          final isSelected = _selectedService == s['key'];
+          final color = s['color'] as Color;
+
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedService = s['key'] as String),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                margin: EdgeInsets.only(right: i < 2 ? 12 : 0),
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? color : context.surfaceColor,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: isSelected ? color : context.cardBorder.withOpacity(0.3),
+                    width: isSelected ? 2 : 1,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: color.withOpacity(0.3),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                        ]
+                      : [],
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      s['icon'] as IconData,
+                      color: isSelected ? Colors.white : context.textMuted,
+                      size: 28,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      s['title'] as String,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : context.textPrimary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildRidesPlaceholder() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+      child: Column(
+        children: [
+          Icon(Icons.directions_bike_rounded, color: context.textMuted, size: 64),
+          const SizedBox(height: 16),
+          Text(
+            'Rides Coming Soon',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: context.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Book bike & tuk rides across Sri Lanka',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: context.textMuted, fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildParcelPlaceholder() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+      child: Column(
+        children: [
+          Icon(Icons.inventory_2_rounded, color: context.textMuted, size: 64),
+          const SizedBox(height: 16),
+          Text(
+            'Parcel Coming Soon',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: context.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Send packages anywhere fast & reliable',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: context.textMuted, fontSize: 14),
           ),
         ],
       ),
