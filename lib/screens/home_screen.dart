@@ -524,6 +524,39 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Where to search bar
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: context.surfaceColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF00C6FF),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.search_rounded, color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 14),
+                Text(
+                  'Where to?',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: context.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           // Ride type cards
           Row(
             children: [
@@ -552,42 +585,38 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          // Where to button
-          GestureDetector(
-            onTap: () => BuyerNavigator.rides(context),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: context.surfaceColor,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF00C6FF),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.search_rounded, color: Colors.white, size: 20),
+          const SizedBox(height: 16),
+          // Pickup info
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: context.surfaceColor,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF34D399),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(width: 14),
-                  Text(
-                    'Where to?',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: context.textPrimary,
-                    ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Current Location',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: context.textPrimary,
                   ),
-                  const Spacer(),
-                  Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.textMuted),
-                ],
-              ),
+                ),
+                const Spacer(),
+                Icon(Icons.chevron_right_rounded, color: context.textMuted, size: 20),
+              ],
             ),
           ),
         ],
@@ -603,38 +632,35 @@ class _HomeScreenState extends State<HomeScreen> {
     required Color color,
   }) {
     return Expanded(
-      child: GestureDetector(
-        onTap: () => BuyerNavigator.rides(context),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
-          decoration: BoxDecoration(
-            color: context.surfaceColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
-          ),
-          child: Column(
-            children: [
-              Icon(icon, color: color, size: 30),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: context.textPrimary,
-                ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: context.textPrimary,
               ),
-              const SizedBox(height: 4),
-              Text(
-                fare,
-                style: TextStyle(fontSize: 12, color: context.textMuted),
-              ),
-              Text(
-                time,
-                style: TextStyle(fontSize: 11, color: context.textHint),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              fare,
+              style: TextStyle(fontSize: 12, color: context.textMuted),
+            ),
+            Text(
+              time,
+              style: TextStyle(fontSize: 11, color: context.textHint),
+            ),
+          ],
         ),
       ),
     );
@@ -646,6 +672,74 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Location inputs
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: context.surfaceColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF34D399),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Pick-up location',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, top: 6, bottom: 6),
+                  child: Container(
+                    width: 2,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: context.textMuted.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(1),
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: const BoxDecoration(
+                        color: AppColors.orange,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Drop-off location',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           // Package size cards
           Row(
             children: [
@@ -674,42 +768,30 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          // Send parcel button
-          GestureDetector(
-            onTap: () => BuyerNavigator.parcel(context),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: context.surfaceColor,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF6C5CE7),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.add_rounded, color: Colors.white, size: 22),
-                  ),
-                  const SizedBox(width: 14),
-                  Text(
-                    'Send a Parcel',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: context.textPrimary,
-                    ),
-                  ),
-                  const Spacer(),
-                  Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.textMuted),
-                ],
-              ),
+          const SizedBox(height: 16),
+          // Package type chips
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: ['Documents', 'Food', 'Electronics', 'Clothing', 'Other']
+                  .map((type) => Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: context.surfaceColor,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
+                        ),
+                        child: Text(
+                          type,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: context.textPrimary,
+                          ),
+                        ),
+                      ))
+                  .toList(),
             ),
           ),
         ],
@@ -725,38 +807,35 @@ class _HomeScreenState extends State<HomeScreen> {
     required Color color,
   }) {
     return Expanded(
-      child: GestureDetector(
-        onTap: () => BuyerNavigator.parcel(context),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
-          decoration: BoxDecoration(
-            color: context.surfaceColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
-          ),
-          child: Column(
-            children: [
-              Icon(icon, color: color, size: 30),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: context.textPrimary,
-                ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: context.textPrimary,
               ),
-              const SizedBox(height: 4),
-              Text(
-                fare,
-                style: TextStyle(fontSize: 12, color: context.textMuted),
-              ),
-              Text(
-                desc,
-                style: TextStyle(fontSize: 11, color: context.textHint),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              fare,
+              style: TextStyle(fontSize: 12, color: context.textMuted),
+            ),
+            Text(
+              desc,
+              style: TextStyle(fontSize: 11, color: context.textHint),
+            ),
+          ],
         ),
       ),
     );
