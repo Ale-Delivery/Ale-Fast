@@ -10,6 +10,13 @@ import '../providers/cart_provider.dart';
 import '../services/local_storage_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
+import 'food_screen.dart';
+import 'rides_screen.dart';
+import 'parcel_screen.dart';
+import 'grocery_screen.dart';
+import 'order_history_screen.dart';
+import 'cart_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +27,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedTab = 0;
+  int _serviceView = -1; // -1 = home content, 0=food, 1=rides, 2=parcel, 3=grocery
   String _deliveryLabel = 'Set delivery address';
   String _userName = 'User';
   StreamSubscription? _orderSub;
@@ -100,17 +108,37 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _handleTabTap(int index) {
-    setState(() => _selectedTab = index);
-    switch (index) {
-      case 1:
-        BuyerNavigator.orderHistory(context).then((_) => _loadDeliveryLabel());
-        break;
-      case 2:
-        BuyerNavigator.cart(context).then((_) => _loadDeliveryLabel());
-        break;
-      case 3:
-        BuyerNavigator.profile(context).then((_) => _loadDeliveryLabel());
-        break;
+    setState(() {
+      _selectedTab = index;
+      _serviceView = -1; // Reset service view when switching tabs
+    });
+  }
+
+  void _openService(int serviceIndex) {
+    setState(() {
+      _serviceView = serviceIndex;
+      _selectedTab = 0; // Keep home tab active visually
+    });
+  }
+
+  Widget _buildBody() {
+    // Service views (Food, Rides, Parcel, Grocery)
+    if (_serviceView >= 0) {
+      switch (_serviceView) {
+        case 0: return const FoodScreen(isEmbedded: true);
+        case 1: return const RidesScreen(isEmbedded: true);
+        case 2: return const ParcelScreen(isEmbedded: true);
+        case 3: return const GroceryScreen(isEmbedded: true);
+      }
+    }
+
+    // Tab views
+    switch (_selectedTab) {
+      case 0: return _buildHomeContent();
+      case 1: return const OrderHistoryScreen(isEmbedded: true);
+      case 2: return const CartScreen(isEmbedded: true);
+      case 3: return const ProfileScreen(isEmbedded: true);
+      default: return _buildHomeContent();
     }
   }
 
@@ -120,24 +148,28 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: context.scaffoldBg,
       body: SafeArea(
         bottom: false,
-        child: CustomScrollView(
-          slivers: [
-            SliverList(
-              delegate: SliverChildListDelegate([
-                _buildHeader(),
-                _buildGreeting(),
-                _buildServicePills(),
-                const SizedBox(height: 32),
-                _buildQuickActions(),
-                const SizedBox(height: 32),
-                _buildRecentSection(),
-              ]),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 120)),
-          ],
-        ),
+        child: _buildBody(),
       ),
       bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  Widget _buildHomeContent() {
+    return CustomScrollView(
+      slivers: [
+        SliverList(
+          delegate: SliverChildListDelegate([
+            _buildHeader(),
+            _buildGreeting(),
+            _buildServiceGrid(),
+            const SizedBox(height: 32),
+            _buildQuickActions(),
+            const SizedBox(height: 32),
+            _buildRecentSection(),
+          ]),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 100)),
+      ],
     );
   }
 
@@ -148,7 +180,6 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Row(
         children: [
-          // Delivery address
           Expanded(
             child: GestureDetector(
               onTap: () async {
@@ -187,16 +218,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          // Notification bell
           _iconButton(
             icon: LucideIcons.bell,
             onTap: () => BuyerNavigator.notifications(context),
           ),
           const SizedBox(width: 12),
-          // Cart
           _iconButton(
             icon: LucideIcons.shoppingBag,
-            onTap: () => BuyerNavigator.cart(context),
+            onTap: () => _handleTabTap(2),
             badge: cartCount,
           ),
         ],
@@ -277,12 +306,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildServicePills() {
+  Widget _buildServiceGrid() {
     final services = [
-      {'key': 'Rides', 'icon': LucideIcons.bike, 'label': 'Rides', 'desc': 'Book a ride'},
-      {'key': 'Food', 'icon': LucideIcons.utensils, 'label': 'Food', 'desc': 'Order food'},
-      {'key': 'Parcel', 'icon': LucideIcons.package, 'label': 'Parcel', 'desc': 'Send parcels'},
-      {'key': 'Grocery', 'icon': LucideIcons.shoppingCart, 'label': 'Grocery', 'desc': 'Fresh items'},
+      {'key': 'Rides', 'icon': LucideIcons.bike, 'label': 'Rides', 'desc': 'Book a ride', 'idx': 1},
+      {'key': 'Food', 'icon': LucideIcons.utensils, 'label': 'Food', 'desc': 'Order food', 'idx': 0},
+      {'key': 'Parcel', 'icon': LucideIcons.package, 'label': 'Parcel', 'desc': 'Send parcels', 'idx': 2},
+      {'key': 'Grocery', 'icon': LucideIcons.shoppingCart, 'label': 'Grocery', 'desc': 'Fresh items', 'idx': 3},
     ];
 
     return Padding(
@@ -300,13 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
         itemBuilder: (context, i) {
           final s = services[i];
           return GestureDetector(
-            onTap: () {
-              final key = s['key'] as String;
-              if (key == 'Rides') BuyerNavigator.rides(context);
-              if (key == 'Food') BuyerNavigator.food(context);
-              if (key == 'Parcel') BuyerNavigator.parcel(context);
-              if (key == 'Grocery') BuyerNavigator.grocery(context);
-            },
+            onTap: () => _openService(s['idx'] as int),
             child: Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
@@ -365,9 +388,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildQuickActions() {
     final actions = [
-      {'icon': LucideIcons.clock, 'label': 'Orders', 'onTap': () => BuyerNavigator.orderHistory(context)},
+      {'icon': LucideIcons.clock, 'label': 'Orders', 'onTap': () => _handleTabTap(1)},
       {'icon': LucideIcons.heart, 'label': 'Favorites', 'onTap': () => BuyerNavigator.favorites(context)},
-      {'icon': LucideIcons.percent, 'label': 'Offers', 'onTap': () => BuyerNavigator.food(context)},
+      {'icon': LucideIcons.percent, 'label': 'Offers', 'onTap': () => _openService(0)},
       {'icon': LucideIcons.headphones, 'label': 'Support', 'onTap': () => BuyerNavigator.helpSupport(context)},
     ];
 
@@ -434,7 +457,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildPromoCard() {
     return GestureDetector(
-      onTap: () => BuyerNavigator.food(context),
+      onTap: () => _openService(0),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(24),
@@ -539,7 +562,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _navItem(int index, IconData icon, String label) {
-    final isActive = _selectedTab == index;
+    final isActive = _selectedTab == index && _serviceView == -1;
     return GestureDetector(
       onTap: () => _handleTabTap(index),
       behavior: HitTestBehavior.opaque,

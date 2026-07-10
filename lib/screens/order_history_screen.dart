@@ -11,7 +11,8 @@ import '../theme/theme_colors.dart';
 import '../navigation/buyer_navigator.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
-  const OrderHistoryScreen({super.key});
+  final bool isEmbedded;
+  const OrderHistoryScreen({super.key, this.isEmbedded = false});
 
   @override
   State<OrderHistoryScreen> createState() => _OrderHistoryScreenState();
@@ -148,10 +149,12 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
             color: context.textPrimary,
           ),
         ),
-        leading: IconButton(
-          icon: Icon(LucideIcons.arrowLeft, size: 20, color: context.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: widget.isEmbedded
+            ? null
+            : IconButton(
+                icon: Icon(LucideIcons.arrowLeft, size: 20, color: context.textPrimary),
+                onPressed: () => Navigator.pop(context),
+              ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(52),
           child: Container(

@@ -5,7 +5,8 @@ import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
 
 class ParcelScreen extends StatefulWidget {
-  const ParcelScreen({super.key});
+  final bool isEmbedded;
+  const ParcelScreen({super.key, this.isEmbedded = false});
 
   @override
   State<ParcelScreen> createState() => _ParcelScreenState();
@@ -111,20 +112,22 @@ class _ParcelScreenState extends State<ParcelScreen> {
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: context.cardBg,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: context.cardBorder, width: 0.5),
+          if (!widget.isEmbedded) ...[
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: context.cardBg,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: context.cardBorder, width: 0.5),
+                ),
+                child: Icon(LucideIcons.arrowLeft, size: 18, color: context.textPrimary),
               ),
-              child: Icon(LucideIcons.arrowLeft, size: 18, color: context.textPrimary),
             ),
-          ),
-          const SizedBox(width: 14),
+            const SizedBox(width: 14),
+          ],
           Text(
             'Send Parcel',
             style: TextStyle(

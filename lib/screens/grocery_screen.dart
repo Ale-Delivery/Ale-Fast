@@ -5,7 +5,8 @@ import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
 
 class GroceryScreen extends StatefulWidget {
-  const GroceryScreen({super.key});
+  final bool isEmbedded;
+  const GroceryScreen({super.key, this.isEmbedded = false});
 
   @override
   State<GroceryScreen> createState() => _GroceryScreenState();
@@ -59,20 +60,22 @@ class _GroceryScreenState extends State<GroceryScreen> {
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: context.cardBg,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: context.cardBorder, width: 0.5),
+          if (!widget.isEmbedded) ...[
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: context.cardBg,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: context.cardBorder, width: 0.5),
+                ),
+                child: Icon(LucideIcons.arrowLeft, size: 18, color: context.textPrimary),
               ),
-              child: Icon(LucideIcons.arrowLeft, size: 18, color: context.textPrimary),
             ),
-          ),
-          const SizedBox(width: 14),
+            const SizedBox(width: 14),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -8,7 +8,8 @@ import '../widgets/common_widgets.dart';
 import '../navigation/buyer_navigator.dart';
 
 class CartScreen extends StatelessWidget {
-  const CartScreen({super.key});
+  final bool isEmbedded;
+  const CartScreen({super.key, this.isEmbedded = false});
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +26,12 @@ class CartScreen extends StatelessWidget {
             color: context.textPrimary,
           ),
         ),
-        leading: IconButton(
-          icon: Icon(LucideIcons.arrowLeft, size: 20, color: context.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: isEmbedded
+            ? null
+            : IconButton(
+                icon: Icon(LucideIcons.arrowLeft, size: 20, color: context.textPrimary),
+                onPressed: () => Navigator.pop(context),
+              ),
         actions: [
           if (cart.items.isNotEmpty)
             TextButton(

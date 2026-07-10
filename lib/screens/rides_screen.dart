@@ -5,7 +5,8 @@ import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
 
 class RidesScreen extends StatefulWidget {
-  const RidesScreen({super.key});
+  final bool isEmbedded;
+  const RidesScreen({super.key, this.isEmbedded = false});
 
   @override
   State<RidesScreen> createState() => _RidesScreenState();
@@ -76,11 +77,12 @@ class _RidesScreenState extends State<RidesScreen> {
             ),
           ),
           // Back button
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
-            left: 16,
-            child: _circleButton(LucideIcons.arrowLeft, () => Navigator.pop(context)),
-          ),
+          if (!widget.isEmbedded)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              left: 16,
+              child: _circleButton(LucideIcons.arrowLeft, () => Navigator.pop(context)),
+            ),
           // Locate button
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,

@@ -8,7 +8,8 @@ import '../theme/theme_colors.dart';
 import 'profile_setup_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final bool isEmbedded;
+  const ProfileScreen({super.key, this.isEmbedded = false});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -90,10 +91,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: context.textPrimary,
           ),
         ),
-        leading: IconButton(
-          icon: Icon(LucideIcons.arrowLeft, size: 20, color: context.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: widget.isEmbedded
+            ? null
+            : IconButton(
+                icon: Icon(LucideIcons.arrowLeft, size: 20, color: context.textPrimary),
+                onPressed: () => Navigator.pop(context),
+              ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: AppColors.accent, strokeWidth: 2))
