@@ -111,25 +111,45 @@ class _FoodScreenState extends State<FoodScreen> {
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            'Food Delivery',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: context.textPrimary,
-              letterSpacing: -0.8,
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: context.cardBg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: context.cardBorder, width: 0.5),
+              ),
+              child: Icon(LucideIcons.arrowLeft, size: 18, color: context.textPrimary),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            'Restaurants near you',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w400,
-              color: context.textMuted,
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Food Delivery',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: context.textPrimary,
+                    letterSpacing: -0.8,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Restaurants near you',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: context.textMuted,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
