@@ -228,8 +228,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildCategoryList(),
                     _buildSectionTitle('Open Restaurants'),
                   ],
-                  if (_selectedService == 'Rides') _buildRidesPreview(),
-                  if (_selectedService == 'Parcel') _buildParcelPreview(),
                 ]),
               ),
               _buildRestaurantSliver(),
@@ -469,7 +467,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
           return Expanded(
             child: GestureDetector(
-              onTap: () => setState(() => _selectedService = s['key'] as String),
+              onTap: () {
+                final key = s['key'] as String;
+                if (key == 'Rides') {
+                  BuyerNavigator.rides(context);
+                } else if (key == 'Parcel') {
+                  BuyerNavigator.parcel(context);
+                } else {
+                  setState(() => _selectedService = key);
+                }
+              },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeInOut,
@@ -514,148 +521,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         }),
-      ),
-    );
-  }
-
-  Widget _buildRidesPreview() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: GestureDetector(
-        onTap: () => BuyerNavigator.rides(context),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF00C6FF), Color(0xFF0078FF)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF00C6FF).withValues(alpha: 0.3),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.two_wheeler_rounded, color: Colors.white.withValues(alpha: 0.7), size: 22),
-                  const SizedBox(width: 6),
-                  Icon(Icons.directions_car_filled_rounded, color: Colors.white.withValues(alpha: 0.7), size: 22),
-                  const SizedBox(width: 6),
-                  Icon(Icons.directions_car_rounded, color: Colors.white.withValues(alpha: 0.7), size: 22),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Need a Ride?',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Book bike, tuk or car rides',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Text(
-                  'Open Rides',
-                  style: TextStyle(
-                    color: Color(0xFF0078FF),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildParcelPreview() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: GestureDetector(
-        onTap: () => BuyerNavigator.parcel(context),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF6C5CE7), Color(0xFFA55EEA)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF6C5CE7).withValues(alpha: 0.3),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Icon(Icons.inventory_2_rounded,
-                  color: Colors.white.withValues(alpha: 0.7), size: 36),
-              const SizedBox(height: 12),
-              const Text(
-                'Send a Parcel',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Deliver anything, anywhere',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Text(
-                  'Open Parcel',
-                  style: TextStyle(
-                    color: Color(0xFF6C5CE7),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
