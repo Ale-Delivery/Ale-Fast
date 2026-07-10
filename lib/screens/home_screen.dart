@@ -115,15 +115,12 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _selectedTab = index);
     switch (index) {
       case 1:
-        BuyerNavigator.search(context).then((_) => _loadDeliveryLabel());
+        BuyerNavigator.orderHistory(context).then((_) => _loadDeliveryLabel());
         break;
       case 2:
         BuyerNavigator.cart(context).then((_) => _loadDeliveryLabel());
         break;
       case 3:
-        BuyerNavigator.orderHistory(context).then((_) => _loadDeliveryLabel());
-        break;
-      case 4:
         BuyerNavigator.profile(context).then((_) => _loadDeliveryLabel());
         break;
     }
@@ -434,19 +431,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 label: 'Home',
               ),
               NavigationDestination(
-                icon: Icon(Icons.search_rounded),
-                selectedIcon: Icon(Icons.search, color: _primary),
-                label: 'Search',
+                icon: Icon(Icons.receipt_long_outlined),
+                selectedIcon: Icon(Icons.receipt_long, color: _primary),
+                label: 'Activities',
               ),
               NavigationDestination(
                 icon: Icon(Icons.shopping_bag_outlined),
                 selectedIcon: Icon(Icons.shopping_bag_rounded, color: _primary),
                 label: 'Cart',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.receipt_long_outlined),
-                selectedIcon: Icon(Icons.receipt_long, color: _primary),
-                label: 'Orders',
               ),
               NavigationDestination(
                 icon: Icon(Icons.person_outline_rounded),
