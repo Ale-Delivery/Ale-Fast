@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
@@ -241,7 +242,7 @@ class _RidesScreenState extends State<RidesScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
-                Icons.search_rounded,
+                LucideIcons.search,
                 color: _primary,
                 size: 20,
               ),
@@ -268,7 +269,7 @@ class _RidesScreenState extends State<RidesScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.access_time_rounded,
+                    LucideIcons.clock,
                     color: context.textMuted,
                     size: 14,
                   ),
@@ -532,7 +533,7 @@ class _RidesScreenState extends State<RidesScreen> {
             ),
           ),
           Icon(
-            Icons.chevron_right_rounded,
+            LucideIcons.chevronRight,
             color: context.textMuted,
             size: 22,
           ),

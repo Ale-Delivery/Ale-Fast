@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../navigation/buyer_navigator.dart';
@@ -188,11 +189,11 @@ class _FoodScreenState extends State<FoodScreen> {
             hintText: 'Search dishes, restaurants',
             hintStyle: TextStyle(color: context.textMuted, fontSize: 14),
             prefixIcon:
-                Icon(Icons.search_rounded, color: context.textMuted),
+                Icon(LucideIcons.search, color: context.textMuted),
             suffixIcon: _query.isEmpty
                 ? null
                 : IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 18),
+                    icon: const Icon(LucideIcons.x, size: 18),
                     onPressed: () {
                       _searchController.clear();
                       setState(() => _query = '');
@@ -331,7 +332,7 @@ class _FoodScreenState extends State<FoodScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.local_offer_rounded, color: _primary, size: 20),
+                  const Icon(LucideIcons.tag, color: _primary, size: 20),
                   const SizedBox(width: 8),
                   Text(
                     'Promotions',
@@ -396,7 +397,7 @@ class _FoodScreenState extends State<FoodScreen> {
                                 ),
                               ),
                               const Spacer(),
-                              Icon(Icons.local_offer_rounded,
+                              Icon(LucideIcons.tag,
                                   color:
                                       Colors.white.withValues(alpha: 0.5),
                                   size: 18),
@@ -553,7 +554,7 @@ class _FoodScreenState extends State<FoodScreen> {
         if (restaurants.isEmpty) {
           return SliverToBoxAdapter(
             child: _StatePanel(
-              icon: Icons.search_off_rounded,
+              icon: LucideIcons.searchX,
               title: 'No matches found',
               subtitle: 'Try another food, restaurant, or category.',
               actionLabel: 'Clear filters',
@@ -636,7 +637,7 @@ class _RestaurantCard extends StatelessWidget {
                     top: 12,
                     left: 12,
                     child: _Pill(
-                      icon: Icons.access_time_rounded,
+                      icon: LucideIcons.clock,
                       label: deliveryTime,
                       color: Theme.of(context)
                           .scaffoldBackgroundColor
@@ -669,7 +670,7 @@ class _RestaurantCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Icon(Icons.chevron_right_rounded,
+                        Icon(LucideIcons.chevronRight,
                             color: Theme.of(context)
                                 .textTheme
                                 .bodySmall
@@ -697,14 +698,14 @@ class _RestaurantCard extends StatelessWidget {
                       runSpacing: 8,
                       children: [
                         _Pill(
-                          icon: Icons.star_rounded,
+                          icon: LucideIcons.star,
                           label: rating,
                           color: AppColors.orange
                               .withValues(alpha: 0.1),
                           foreground: AppColors.orange,
                         ),
                         _Pill(
-                          icon: Icons.delivery_dining_rounded,
+                          icon: LucideIcons.truck,
                           label: deliveryFee,
                           color:
                               AppColors.blue.withValues(alpha: 0.1),

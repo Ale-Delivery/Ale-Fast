@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
 
@@ -22,19 +23,19 @@ class _ParcelScreenState extends State<ParcelScreen> {
   final _sizes = [
     {
       'label': 'Small',
-      'icon': Icons.inventory_rounded,
+      'icon': LucideIcons.package,
       'fare': 'Rs. 200',
       'desc': 'Up to 1kg, fits in bag',
     },
     {
       'label': 'Medium',
-      'icon': Icons.inventory,
+      'icon': LucideIcons.box,
       'fare': 'Rs. 350',
       'desc': 'Up to 5kg, medium box',
     },
     {
       'label': 'Large',
-      'icon': Icons.inventory_2,
+      'icon': LucideIcons.packageCheck,
       'fare': 'Rs. 500',
       'desc': 'Up to 15kg, large box',
     },

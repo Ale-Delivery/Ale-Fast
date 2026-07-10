@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -159,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
       child: Row(
         children: [
-          _roundButton(Icons.receipt_long_rounded,
+          _roundButton(LucideIcons.clipboardList,
               onTap: () => BuyerNavigator.orderHistory(context)),
           const SizedBox(width: 14),
           Expanded(
@@ -216,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 shape: BoxShape.circle,
                 border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
               ),
-              child: Icon(Icons.notifications_none_rounded,
+              child: Icon(LucideIcons.bell,
                   color: context.textPrimary, size: 22),
             ),
           ),
@@ -233,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: context.textPrimary,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.shopping_bag_outlined,
+                  child: const Icon(LucideIcons.shoppingBag,
                       color: Colors.white, size: 21),
                 ),
                 if (cartCount > 0)
@@ -296,19 +297,19 @@ class _HomeScreenState extends State<HomeScreen> {
     final services = [
       {
         'key': 'Rides',
-        'icon': Icons.directions_bike_rounded,
+        'icon': LucideIcons.bike,
         'title': 'Rides',
         'color': const Color(0xFF00C6FF),
       },
       {
         'key': 'Food',
-        'icon': Icons.restaurant_rounded,
+        'icon': LucideIcons.utensils,
         'title': 'Food',
         'color': const Color(0xFFFF6B35),
       },
       {
         'key': 'Parcel',
-        'icon': Icons.inventory_2_rounded,
+        'icon': LucideIcons.package,
         'title': 'Parcel',
         'color': const Color(0xFF6C5CE7),
       },
@@ -424,25 +425,25 @@ class _HomeScreenState extends State<HomeScreen> {
             selectedIndex: _selectedTab,
             backgroundColor: Colors.transparent,
             onDestinationSelected: _handleTabTap,
-            destinations: const [
+            destinations: [
               NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home_rounded, color: _primary),
+                icon: Icon(LucideIcons.home),
+                selectedIcon: Icon(LucideIcons.home, color: _primary),
                 label: 'Home',
               ),
               NavigationDestination(
-                icon: Icon(Icons.receipt_long_outlined),
-                selectedIcon: Icon(Icons.receipt_long, color: _primary),
+                icon: Icon(LucideIcons.clipboardList),
+                selectedIcon: Icon(LucideIcons.clipboardList, color: _primary),
                 label: 'Activities',
               ),
               NavigationDestination(
-                icon: Icon(Icons.shopping_bag_outlined),
-                selectedIcon: Icon(Icons.shopping_bag_rounded, color: _primary),
+                icon: Icon(LucideIcons.shoppingBag),
+                selectedIcon: Icon(LucideIcons.shoppingBag, color: _primary),
                 label: 'Cart',
               ),
               NavigationDestination(
-                icon: Icon(Icons.person_outline_rounded),
-                selectedIcon: Icon(Icons.person_rounded, color: _primary),
+                icon: Icon(LucideIcons.user),
+                selectedIcon: Icon(LucideIcons.user, color: _primary),
                 label: 'Profile',
               ),
             ],

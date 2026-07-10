@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../services/local_storage_service.dart';
 import '../services/auth_service.dart';
@@ -238,7 +239,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildSectionHeader('Account'),
                   const SizedBox(height: 12),
                   _buildMenuTile(
-                    icon: Icons.edit_outlined,
+                    icon: LucideIcons.pencil,
                     title: 'Edit Profile',
                     subtitle: 'Update your personal info',
                     onTap: () {
@@ -257,13 +258,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     },
                   ),
                   _buildMenuTile(
-                    icon: Icons.receipt_long_rounded,
+                    icon: LucideIcons.clipboardList,
                     title: 'Order History',
                     subtitle: 'View your previous orders',
                     onTap: () => BuyerNavigator.orderHistory(context),
                   ),
                   _buildMenuTile(
-                    icon: Icons.location_on_rounded,
+                    icon: LucideIcons.mapPin,
                     title: 'Delivery Address',
                     subtitle: _addressLabel ?? 'Manage locations',
                     onTap: () async {
@@ -275,19 +276,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     },
                   ),
                   _buildMenuTile(
-                    icon: Icons.favorite_border_rounded,
+                    icon: LucideIcons.heart,
                     title: 'Favorites',
                     subtitle: 'Your saved restaurants',
                     onTap: () => BuyerNavigator.favorites(context),
                   ),
                   _buildMenuTile(
-                    icon: Icons.notifications_none_rounded,
+                    icon: LucideIcons.bell,
                     title: 'Notifications',
                     subtitle: 'Order updates & promotions',
                     onTap: () => BuyerNavigator.notifications(context),
                   ),
                   _buildMenuTile(
-                    icon: Icons.support_agent_rounded,
+                    icon: LucideIcons.headphones,
                     title: 'Help & Support',
                     subtitle: 'FAQ and contact us',
                     onTap: () => BuyerNavigator.helpSupport(context),
@@ -306,7 +307,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     height: 52,
                     child: TextButton.icon(
                       onPressed: _logout,
-                      icon: const Icon(Icons.logout_rounded, color: AppColors.red, size: 20),
+                      icon: const Icon(LucideIcons.logOut, color: AppColors.red, size: 20),
                       label: const Text(
                         'Log out',
                         style: TextStyle(
