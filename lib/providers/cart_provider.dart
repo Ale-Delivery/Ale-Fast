@@ -15,6 +15,8 @@ class CartProvider extends ChangeNotifier {
 
   double get total => subtotal + deliveryFee;
 
+  double get totalAmount => total;
+
   void addItem(FoodItem food, {String size = '10"'}) {
     final idx = _items.indexWhere(
       (i) => i.food.id == food.id && i.selectedSize == size,
@@ -40,6 +42,24 @@ class CartProvider extends ChangeNotifier {
       } else {
         _items.removeAt(idx);
       }
+      notifyListeners();
+    }
+  }
+
+  void updateQuantity(int index, int quantity) {
+    if (index >= 0 && index < _items.length) {
+      if (quantity <= 0) {
+        _items.removeAt(index);
+      } else {
+        _items[index].quantity = quantity;
+      }
+      notifyListeners();
+    }
+  }
+
+  void removeItemAt(int index) {
+    if (index >= 0 && index < _items.length) {
+      _items.removeAt(index);
       notifyListeners();
     }
   }

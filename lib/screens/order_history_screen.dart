@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -98,35 +99,25 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
         BuyerNavigator.cart(context);
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not reorder. Items may be unavailable.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      debugPrint('Reorder error: $e');
     }
   }
 
   Future<void> _cancelOrder(Order order) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Cancel order?',
-            style: TextStyle(fontWeight: FontWeight.w800)),
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Cancel Order', style: TextStyle(fontWeight: FontWeight.w700)),
         content: const Text('Are you sure you want to cancel this order?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('No, keep it',
-                style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('No', style: TextStyle(color: context.textMuted)),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Yes, cancel',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Yes, cancel', style: TextStyle(color: AppColors.red, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -137,34 +128,11 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
     try {
       await OrderService.cancelOrder(order.id);
       await _load();
+    } catch (e) {
+      debugPrint('Cancel error: $e');
     } finally {
       if (mounted) setState(() => _cancellingId = null);
     }
-  }
-
-  Color _statusColor(OrderStatus status) {
-    switch (status) {
-      case OrderStatus.delivered:
-        return AppColors.green;
-      case OrderStatus.cancelled:
-        return Colors.red;
-      case OrderStatus.pending:
-        return Colors.amber;
-      default:
-        return AppColors.orange;
-    }
-  }
-
-  IconData _serviceIcon(String name) {
-    if (name.toLowerCase().contains('ride')) return Icons.two_wheeler_rounded;
-    if (name.toLowerCase().contains('parcel')) return Icons.inventory_2_rounded;
-    return Icons.restaurant_rounded;
-  }
-
-  Color _serviceColor(String name) {
-    if (name.toLowerCase().contains('ride')) return const Color(0xFF00C6FF);
-    if (name.toLowerCase().contains('parcel')) return const Color(0xFF6C5CE7);
-    return AppColors.orange;
   }
 
   @override
@@ -172,201 +140,190 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       appBar: AppBar(
-        title: const Text('Activities',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-        leading: const BackButton(),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: AppColors.orange,
-          indicatorWeight: 3,
-          labelColor: AppColors.orange,
-          unselectedLabelColor: context.textMuted,
-          labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-          tabs: [
-            Tab(text: 'Ongoing (${_getOngoing().length})'),
-            Tab(text: 'Completed (${_getCompleted().length})'),
-            Tab(text: 'Cancelled (${_getCancelled().length})'),
-          ],
+        title: Text(
+          'My Orders',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: context.textPrimary,
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(LucideIcons.arrowLeft, size: 20, color: context.textPrimary),
+          onPressed: () => Navigator.pop(context),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(52),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: TabBar(
+              controller: _tabController,
+              indicatorColor: AppColors.accent,
+              indicatorWeight: 2.5,
+              labelColor: AppColors.accent,
+              unselectedLabelColor: context.textMuted,
+              labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              unselectedLabelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              tabs: const [
+                Tab(text: 'Ongoing'),
+                Tab(text: 'Completed'),
+                Tab(text: 'Cancelled'),
+              ],
+            ),
+          ),
         ),
       ),
       body: _loading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.orange))
-          : RefreshIndicator(
-              onRefresh: _load,
-              color: AppColors.orange,
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildOrderList(_getOngoing(), isEmpty: 'No ongoing orders', emptyIcon: Icons.local_shipping_outlined),
-                  _buildOrderList(_getCompleted(), isEmpty: 'No completed orders', emptyIcon: Icons.check_circle_outline),
-                  _buildOrderList(_getCancelled(), isEmpty: 'No cancelled orders', emptyIcon: Icons.cancel_outlined),
-                ],
-              ),
+          ? const Center(child: CircularProgressIndicator(color: AppColors.accent, strokeWidth: 2))
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildOrderList(_getOngoing(), isOngoing: true),
+                _buildOrderList(_getCompleted()),
+                _buildOrderList(_getCancelled()),
+              ],
             ),
     );
   }
 
-  Widget _buildOrderList(List<Order> orders, {required String isEmpty, required IconData emptyIcon}) {
+  Widget _buildOrderList(List<Order> orders, {bool isOngoing = false}) {
     if (orders.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(emptyIcon, color: context.textMuted, size: 56),
-            const SizedBox(height: 12),
-            Text(isEmpty,
-                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 6),
-            Text('Your orders will appear here',
-                style: TextStyle(color: context.textMuted, fontSize: 13)),
+            Icon(LucideIcons.clipboardList, size: 48, color: context.textHint),
+            const SizedBox(height: 16),
+            Text(
+              'No orders here',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: context.textMuted,
+              ),
+            ),
           ],
         ),
       );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 100),
       itemCount: orders.length,
-      itemBuilder: (_, i) {
-        final order = orders[i];
-        final date = order.createdAt != null
-            ? DateFormat('MMM d, h:mm a').format(order.createdAt!)
-            : '';
-        final sColor = _serviceColor(order.restaurantName);
-        final sIcon = _serviceIcon(order.restaurantName);
+      itemBuilder: (context, i) => _buildOrderCard(orders[i], isOngoing: isOngoing),
+    );
+  }
 
-        return GestureDetector(
-          onTap: () => BuyerNavigator.orderTracking(context, order.id),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: context.surfaceColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: sColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(sIcon, color: sColor, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(order.restaurantName,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w800, fontSize: 15)),
-                          const SizedBox(height: 2),
-                          Text(order.deliveryAddress,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  fontSize: 12, color: context.textMuted)),
-                        ],
-                      ),
-                    ),
-                    Text('Rs. ${order.total.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.orange,
-                            fontSize: 15)),
-                  ],
+  Widget _buildOrderCard(Order order, {bool isOngoing = false}) {
+    final statusText = order.status.name[0].toUpperCase() + order.status.name.substring(1);
+    final statusColor = context.statusColor(order.status.name);
+    final dateStr = order.createdAt != null ? DateFormat('MMM d, h:mm a').format(order.createdAt!) : '';
+    final isCancelling = _cancellingId == order.id;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: context.cardBg,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: context.cardBorder, width: 0.5),
+        boxShadow: context.cardShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: _statusColor(order.status)
-                            .withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        order.status.label,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: _statusColor(order.status),
+                child: Text(
+                  statusText,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: statusColor,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                dateStr,
+                style: TextStyle(fontSize: 12, color: context.textMuted),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            order.restaurantName,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: context.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Rs. ${order.total.toStringAsFixed(0)}',
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: AppColors.accent,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              if (order.status == OrderStatus.pending ||
+                  order.status == OrderStatus.accepted) ...[
+                Expanded(
+                  child: SizedBox(
+                    height: 40,
+                    child: OutlinedButton(
+                      onPressed: isCancelling ? null : () => _cancelOrder(order),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.red,
+                        side: const BorderSide(color: AppColors.red, width: 1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                    ),
-                    const Spacer(),
-                    if (order.status == OrderStatus.pending ||
-                        order.status == OrderStatus.accepted)
-                      _cancellingId == order.id
+                      child: isCancelling
                           ? const SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.red),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.red),
                             )
-                          : GestureDetector(
-                              onTap: () => _cancelOrder(order),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: Colors.red.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: const Text(
-                                  'Cancel',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              ),
-                            ),
-                    if (order.status == OrderStatus.delivered)
-                      GestureDetector(
-                        onTap: () => _reorder(order),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: AppColors.orange.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Text(
-                            'Reorder',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.orange,
-                            ),
-                          ),
+                          : const Text('Cancel', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
+              if (order.status == OrderStatus.delivered)
+                Expanded(
+                  child: SizedBox(
+                    height: 40,
+                    child: ElevatedButton(
+                      onPressed: () => _reorder(order),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accent,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                    if (date.isNotEmpty) ...[
-                      const SizedBox(width: 8),
-                      Text(date,
-                          style: TextStyle(
-                              fontSize: 11, color: context.textMuted)),
-                    ],
-                  ],
+                      child: const Text('Reorder', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
                 ),
-              ],
-            ),
+            ],
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

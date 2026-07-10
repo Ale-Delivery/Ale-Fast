@@ -1,79 +1,67 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 extension ThemeColors on BuildContext {
   bool get isDark => Theme.of(this).brightness == Brightness.dark;
 
   Color get scaffoldBg => Theme.of(this).scaffoldBackgroundColor;
   Color get surfaceColor => Theme.of(this).colorScheme.surface;
-  Color get primaryColor => Theme.of(this).colorScheme.primary;
+  Color get primaryColor => AppColors.accent;
 
-  Color get textPrimary =>
-      isDark ? const Color(0xFFF0F0F5) : const Color(0xFF0F1014);
-  Color get textSecondary =>
-      isDark ? const Color(0xCCDDDEE3) : const Color(0xFF1E1E2C);
-  Color get textMuted =>
-      isDark ? const Color(0xFF8E8EA0) : const Color(0xFF6B7280);
-  Color get textHint =>
-      isDark ? const Color(0xFF5C5C6F) : const Color(0xFF9CA3AF);
+  // ── Text ─────────────────────────────────────────────────────
+  Color get textPrimary => isDark ? Colors.white : AppColors.ink;
+  Color get textSecondary => isDark ? const Color(0xFFAEAEB2) : AppColors.ink.withValues(alpha: 0.7);
+  Color get textMuted => isDark ? AppColors.muted : AppColors.muted;
+  Color get textHint => isDark ? const Color(0xFF636366) : AppColors.hint;
 
-  Color get cardBg =>
-      isDark ? const Color(0xFF181B22) : Colors.white;
-  Color get cardBorder =>
-      isDark ? const Color(0xFF2A2D35) : const Color(0xFFE5E7EB);
+  // ── Cards & Surfaces ────────────────────────────────────────
+  Color get cardBg => isDark ? const Color(0xFF2C2C2E) : Colors.white;
+  Color get cardBorder => isDark ? const Color(0xFF3A3A3C) : AppColors.border;
 
-  Color get inputBg =>
-      isDark ? const Color(0xFF13151A) : Colors.white;
+  Color get inputBg => isDark ? const Color(0xFF2C2C2E) : Colors.white;
 
-  Color get chipBg =>
-      isDark ? const Color(0xFF1E2128) : const Color(0xFFF3F4F6);
-  Color get chipActiveBg => const Color(0xFFFF416C);
+  Color get chipBg => isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7);
+  Color get chipActiveBg => AppColors.accent;
 
-  Color get divider =>
-      isDark ? const Color(0xFF22252D) : const Color(0xFFE5E7EB);
+  Color get divider => isDark ? const Color(0xFF38383A) : AppColors.divider;
 
-  Color get shimmerBase =>
-      isDark ? const Color(0xFF181B22) : const Color(0xFFF0F0F0);
-  Color get shimmerHighlight =>
-      isDark ? const Color(0xFF22252D) : const Color(0xFFE0E0E0);
+  Color get shimmerBase => isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7);
+  Color get shimmerHighlight => isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA);
 
-  Color get appBarBg =>
-      isDark ? const Color(0xFF0F1117) : Colors.white;
+  Color get appBarBg => isDark ? Colors.black : Colors.white;
 
-  List<BoxShadow> get cardShadow => isDark
-      ? [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: const Color(0xFFFF416C).withValues(alpha: 0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 0),
-          ),
-        ]
-      : [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ];
+  // ── Shadows (minimalist soft) ───────────────────────────────
+  List<BoxShadow> get cardShadow => [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+          blurRadius: 16,
+          offset: const Offset(0, 2),
+        ),
+      ];
 
+  List<BoxShadow> get floatingShadow => [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+          blurRadius: 24,
+          offset: const Offset(0, -4),
+        ),
+      ];
+
+  // ── Status Colors ───────────────────────────────────────────
   Color statusColor(String status) {
     switch (status) {
       case 'pending':
-        return const Color(0xFFFBBF24);
+        return AppColors.amber;
       case 'accepted':
       case 'preparing':
-        return const Color(0xFF60A5FA);
+        return AppColors.accent;
       case 'on_the_way':
       case 'out_for_delivery':
-        return const Color(0xFFA78BFA);
+        return AppColors.purple;
       case 'delivered':
-        return const Color(0xFF34D399);
+        return AppColors.green;
       case 'cancelled':
-        return const Color(0xFFF87171);
+        return AppColors.red;
       default:
         return textMuted;
     }
