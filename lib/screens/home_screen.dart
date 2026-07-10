@@ -409,7 +409,7 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF007AFF), Color(0xFF5856D6)],
+            colors: [Color(0xFFE63946), Color(0xFFC62828)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -459,10 +459,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text(
+              child: Text(
                 'Order now',
                 style: TextStyle(
-                  color: Color(0xFF007AFF),
+                  color: AppColors.accent,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),

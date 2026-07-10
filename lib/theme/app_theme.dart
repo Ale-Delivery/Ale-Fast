@@ -7,9 +7,9 @@ class AppColors {
   AppColors._();
 
   // ── Brand ────────────────────────────────────────────────────
-  static const Color accent = Color(0xFF007AFF); // Electric Blue
-  static const Color accentLight = Color(0xFFE8F4FD);
-  static const Color accentDark = Color(0xFF0056CC);
+  static const Color accent = Color(0xFFE63946); // Premium Red
+  static const Color accentLight = Color(0xFFFDE8EA);
+  static const Color accentDark = Color(0xFFC62828);
 
   // ── Surfaces ─────────────────────────────────────────────────
   static const Color white = Color(0xFFFFFFFF);
@@ -58,7 +58,7 @@ class AppGradients {
   AppGradients._();
 
   static const LinearGradient primary = LinearGradient(
-    colors: [Color(0xFF007AFF), Color(0xFF0056CC)],
+    colors: [Color(0xFFE63946), Color(0xFFC62828)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -70,7 +70,7 @@ class AppGradients {
   );
 
   static const LinearGradient avatar = LinearGradient(
-    colors: [Color(0xFF007AFF), Color(0xFF5856D6)],
+    colors: [Color(0xFFE63946), Color(0xFFC62828)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
