@@ -67,22 +67,9 @@ class _ParcelScreenState extends State<ParcelScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      appBar: AppBar(
-        title: Text(
-          'Send Parcel',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: context.textPrimary,
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(LucideIcons.arrowLeft, size: 20, color: context.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
       body: Column(
         children: [
+          _buildHeader(),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
@@ -115,6 +102,39 @@ class _ParcelScreenState extends State<ParcelScreen> {
         fontWeight: FontWeight.w700,
         color: context.textMuted,
         letterSpacing: 0.5,
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: context.cardBg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: context.cardBorder, width: 0.5),
+              ),
+              child: Icon(LucideIcons.arrowLeft, size: 18, color: context.textPrimary),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Text(
+            'Send Parcel',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: context.textPrimary,
+              letterSpacing: -0.8,
+            ),
+          ),
+        ],
       ),
     );
   }

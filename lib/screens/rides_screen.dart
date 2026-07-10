@@ -96,15 +96,14 @@ class _RidesScreenState extends State<RidesScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 44,
-        height: 44,
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
           color: context.cardBg,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: context.cardBorder, width: 0.5),
-          boxShadow: context.cardShadow,
         ),
-        child: Icon(icon, size: 20, color: context.textPrimary),
+        child: Icon(icon, size: 18, color: context.textPrimary),
       ),
     );
   }
