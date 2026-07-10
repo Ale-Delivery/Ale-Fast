@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 import '../services/local_storage_service.dart';
 import '../services/auth_service.dart';
 import '../navigation/buyer_navigator.dart';
+import '../providers/theme_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
 
@@ -234,6 +236,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 24),
                   if (!_isEditing) ...[
                     _buildMenuSection('Preferences', [
+                      _buildThemeSwitcher(),
                       _menuItem(LucideIcons.bell, 'Notifications', () => BuyerNavigator.notifications(context)),
                       _menuItem(LucideIcons.headphones, 'Help & Support', () => BuyerNavigator.helpSupport(context)),
                     ]),
@@ -555,6 +558,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(children: items),
         ),
       ],
+    );
+  }
+
+  Widget _buildThemeSwitcher() {
+    final themeProvider = context.watch<ThemeProvider>();
+    final currentMode = themeProvider.themeMode;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.accent.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(LucideIcons.palette, size: 18, color: AppColors.accent),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              'Theme',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: context.textPrimary),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: context.chipBg,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _themeBtn(LucideIcons.sun, 'Light', ThemeMode.light, currentMode, themeProvider),
+                _themeBtn(LucideIcons.moon, 'Dark', ThemeMode.dark, currentMode, themeProvider),
+                _themeBtn(LucideIcons.monitor, 'System', ThemeMode.system, currentMode, themeProvider),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _themeBtn(IconData icon, String label, ThemeMode mode, ThemeMode current, ThemeProvider provider) {
+    final isSelected = current == mode;
+    return GestureDetector(
+      onTap: () => provider.setThemeMode(mode),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.accent : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          size: 16,
+          color: isSelected ? Colors.white : context.textMuted,
+        ),
+      ),
     );
   }
 
