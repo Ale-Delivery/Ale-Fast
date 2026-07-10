@@ -5,7 +5,6 @@ import '../services/auth_service.dart';
 import '../navigation/buyer_navigator.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
-import 'profile_setup_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool isEmbedded;
@@ -18,28 +17,55 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String? _name;
   String? _phone;
+  String? _email;
+  String? _gender;
+  String? _birthday;
+  String? _userId;
   bool _isLoading = true;
+  bool _isEditing = false;
+  bool _isSaving = false;
+
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+  String? _editGender;
+  DateTime? _editBirthday;
+
+  final _authService = AuthService();
 
   @override
   void initState() {
     super.initState();
+    _nameController = TextEditingController();
+    _emailController = TextEditingController();
     _load();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
     setState(() => _isLoading = true);
     final name = await LocalStorageService.getUserName();
     final phone = await LocalStorageService.getUserPhone();
+    final savedUserId = await LocalStorageService.getUserId();
 
     if (phone != null) {
-      final authService = AuthService();
-      final profile = await authService.getUserProfile(phone);
+      final profile = await _authService.getUserProfile(phone);
       if (profile != null && mounted) {
         setState(() {
           _name = profile['name'] ?? name ?? 'Guest';
           _phone = phone;
+          _email = profile['email'];
+          _gender = profile['gender'];
+          _birthday = profile['birthday'];
+          _userId = profile['id']?.toString() ?? savedUserId;
           _isLoading = false;
         });
+        _initControllers();
         return;
       }
     }
@@ -48,8 +74,103 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _name = name ?? 'Guest';
         _phone = phone;
+        _userId = savedUserId;
         _isLoading = false;
       });
+      _initControllers();
+    }
+  }
+
+  void _initControllers() {
+    _nameController.text = _name ?? '';
+    _emailController.text = _email ?? '';
+    _editGender = _gender;
+    if (_birthday != null) {
+      _editBirthday = DateTime.tryParse(_birthday!);
+    }
+  }
+
+  void _startEditing() {
+    _initControllers();
+    setState(() => _isEditing = true);
+  }
+
+  void _cancelEditing() {
+    setState(() => _isEditing = false);
+  }
+
+  Future<void> _saveProfile() async {
+    final fullName = _nameController.text.trim();
+    if (fullName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your name'), behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      await _authService.saveUserProfile(
+        name: fullName,
+        email: _emailController.text.trim(),
+        gender: _editGender ?? '',
+        birthday: _editBirthday?.toIso8601String().split('T')[0] ?? '',
+        phone: _phone,
+        existingUserId: _userId,
+      );
+
+      await LocalStorageService.setProfileComplete(
+        userId: _userId ?? '',
+        name: fullName,
+        phone: _phone,
+      );
+
+      if (mounted) {
+        setState(() {
+          _name = fullName;
+          _email = _emailController.text.trim();
+          _gender = _editGender;
+          _birthday = _editBirthday?.toIso8601String().split('T')[0];
+          _isEditing = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated'), behavior: SnackBarBehavior.floating),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.red, behavior: SnackBarBehavior.floating),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  Future<void> _selectDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _editBirthday ?? DateTime(2000, 1, 1),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.accent,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: AppColors.ink,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() => _editBirthday = picked);
     }
   }
 
@@ -85,11 +206,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         title: Text(
           'Profile',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: context.textPrimary,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: context.textPrimary),
         ),
         leading: widget.isEmbedded
             ? null
@@ -97,6 +214,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 icon: Icon(LucideIcons.arrowLeft, size: 20, color: context.textPrimary),
                 onPressed: () => Navigator.pop(context),
               ),
+        actions: [
+          if (_isEditing)
+            TextButton(
+              onPressed: _isSaving ? null : _cancelEditing,
+              child: Text('Cancel', style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w500)),
+            ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: AppColors.accent, strokeWidth: 2))
@@ -105,18 +229,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 children: [
                   _buildProfileHeader(),
-                  const SizedBox(height: 32),
-                  _buildMenuSection('Account', [
-                    _menuItem(LucideIcons.user, 'Edit Profile', () => _editProfile()),
-                    _menuItem(LucideIcons.mapPin, 'Addresses', () => _manageAddresses()),
-                    _menuItem(LucideIcons.heart, 'Favorites', () => BuyerNavigator.favorites(context)),
-                  ]),
                   const SizedBox(height: 24),
-                  _buildMenuSection('Preferences', [
-                    _menuItem(LucideIcons.bell, 'Notifications', () => BuyerNavigator.notifications(context)),
-                    _menuItem(LucideIcons.headphones, 'Help & Support', () => BuyerNavigator.helpSupport(context)),
-                  ]),
+                  if (_isEditing) _buildEditForm() else _buildProfileDetails(),
                   const SizedBox(height: 24),
+                  if (!_isEditing) ...[
+                    _buildMenuSection('Preferences', [
+                      _menuItem(LucideIcons.bell, 'Notifications', () => BuyerNavigator.notifications(context)),
+                      _menuItem(LucideIcons.headphones, 'Help & Support', () => BuyerNavigator.helpSupport(context)),
+                    ]),
+                    const SizedBox(height: 24),
+                  ],
                   _buildMenuSection('', [
                     _menuItem(LucideIcons.logOut, 'Log Out', _logout, isDestructive: true),
                   ]),
@@ -148,11 +270,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Center(
               child: Text(
                 initials,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w700),
               ),
             ),
           ),
@@ -163,39 +281,255 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Text(
                   _name ?? 'User',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: context.textPrimary,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: context.textPrimary),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   _phone ?? '',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: context.textMuted),
+                ),
+              ],
+            ),
+          ),
+          if (!_isEditing)
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.accent.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
+                icon: const Icon(LucideIcons.pencil, size: 16, color: AppColors.accent),
+                onPressed: _startEditing,
+                padding: EdgeInsets.zero,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileDetails() {
+    return _buildMenuSection('Details', [
+      _detailItem(LucideIcons.user, 'Name', _name ?? '-'),
+      _detailItem(LucideIcons.phone, 'Phone', _phone ?? '-'),
+      _detailItem(LucideIcons.mail, 'Email', _email ?? '-'),
+      _detailItem(LucideIcons.user, 'Gender', _gender ?? '-'),
+      _detailItem(LucideIcons.calendar, 'Birthday', _birthday ?? '-'),
+    ]);
+  }
+
+  Widget _detailItem(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.accent.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 16, color: AppColors.accent),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: context.textMuted),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: context.textPrimary),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditForm() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: context.cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: context.cardBorder, width: 0.5),
+        boxShadow: context.cardShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'EDIT PROFILE',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: context.textMuted,
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 18),
+          _buildField(label: 'Name', controller: _nameController, icon: LucideIcons.user),
+          const SizedBox(height: 16),
+          _buildField(label: 'Email', controller: _emailController, icon: LucideIcons.mail, keyboard: TextInputType.emailAddress),
+          const SizedBox(height: 16),
+          _buildGenderSelector(),
+          const SizedBox(height: 16),
+          _buildDateField(),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: _isSaving ? null : _saveProfile,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              child: _isSaving
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('Save Changes', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    TextInputType keyboard = TextInputType.text,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: context.textMuted, letterSpacing: 0.8),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: keyboard,
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: context.textPrimary),
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, size: 18, color: context.textMuted),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: context.cardBorder),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: context.cardBorder),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGenderSelector() {
+    final options = ['Male', 'Female', 'Other'];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'GENDER',
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: context.textMuted, letterSpacing: 0.8),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: options.map((g) {
+            final isSelected = _editGender == g;
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => _editGender = g),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: EdgeInsets.only(right: g != 'Other' ? 8 : 0),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.accent.withValues(alpha: 0.1) : context.surfaceColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected ? AppColors.accent : context.cardBorder,
+                      width: isSelected ? 1.5 : 0.5,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      g,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected ? AppColors.accent : context.textPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateField() {
+    final dateStr = _editBirthday != null
+        ? '${_editBirthday!.day}/${_editBirthday!.month}/${_editBirthday!.year}'
+        : '';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'BIRTHDAY',
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: context.textMuted, letterSpacing: 0.8),
+        ),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: _selectDate,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            decoration: BoxDecoration(
+              color: context.surfaceColor,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: context.cardBorder, width: 0.5),
+            ),
+            child: Row(
+              children: [
+                Icon(LucideIcons.calendar, size: 18, color: context.textMuted),
+                const SizedBox(width: 12),
+                Text(
+                  dateStr.isEmpty ? 'Select date' : dateStr,
                   style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: context.textMuted,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: dateStr.isEmpty ? context.textHint : context.textPrimary,
                   ),
                 ),
               ],
             ),
           ),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.accent.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(LucideIcons.pencil, size: 16, color: AppColors.accent),
-              onPressed: _editProfile,
-              padding: EdgeInsets.zero,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -208,12 +542,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.only(left: 4, bottom: 10),
             child: Text(
               title.toUpperCase(),
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: context.textMuted,
-                letterSpacing: 0.8,
-              ),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: context.textMuted, letterSpacing: 0.8),
             ),
           ),
         Container(
@@ -223,9 +552,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             border: Border.all(color: context.cardBorder, width: 0.5),
             boxShadow: context.cardShadow,
           ),
-          child: Column(
-            children: items,
-          ),
+          child: Column(children: items),
         ),
       ],
     );
@@ -252,32 +579,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(width: 14),
             Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: color,
-                ),
-              ),
+              child: Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: color)),
             ),
             Icon(LucideIcons.chevronRight, size: 18, color: context.textHint),
           ],
         ),
       ),
     );
-  }
-
-  void _editProfile() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const ProfileSetupScreen()),
-    );
-    _load();
-  }
-
-  void _manageAddresses() async {
-    await BuyerNavigator.deliveryAddress(context, proceedToCheckout: false);
-    _load();
   }
 }
