@@ -279,57 +279,86 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildServicePills() {
     final services = [
-      {'key': 'Rides', 'icon': LucideIcons.bike, 'label': 'Rides'},
-      {'key': 'Food', 'icon': LucideIcons.utensils, 'label': 'Food'},
-      {'key': 'Parcel', 'icon': LucideIcons.package, 'label': 'Parcel'},
-      {'key': 'Grocery', 'icon': LucideIcons.shoppingCart, 'label': 'Grocery'},
+      {'key': 'Rides', 'icon': LucideIcons.bike, 'label': 'Rides', 'desc': 'Book a ride'},
+      {'key': 'Food', 'icon': LucideIcons.utensils, 'label': 'Food', 'desc': 'Order food'},
+      {'key': 'Parcel', 'icon': LucideIcons.package, 'label': 'Parcel', 'desc': 'Send parcels'},
+      {'key': 'Grocery', 'icon': LucideIcons.shoppingCart, 'label': 'Grocery', 'desc': 'Fresh items'},
     ];
 
     return Padding(
-      padding: const EdgeInsets.only(left: 24, right: 24, top: 28),
-      child: SizedBox(
-        height: 52,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: services.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 12),
-          itemBuilder: (context, i) {
-            final s = services[i];
-            return GestureDetector(
-              onTap: () {
-                final key = s['key'] as String;
-                if (key == 'Rides') BuyerNavigator.rides(context);
-                if (key == 'Food') BuyerNavigator.food(context);
-                if (key == 'Parcel') BuyerNavigator.parcel(context);
-                if (key == 'Grocery') BuyerNavigator.grocery(context);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                decoration: BoxDecoration(
-                  color: context.cardBg,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: context.cardBorder, width: 0.5),
-                  boxShadow: context.cardShadow,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(s['icon'] as IconData, size: 18, color: AppColors.accent),
-                    const SizedBox(width: 10),
-                    Text(
-                      s['label'] as String,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: context.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
+      padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 14,
+          mainAxisSpacing: 14,
+          childAspectRatio: 1.6,
         ),
+        itemCount: services.length,
+        itemBuilder: (context, i) {
+          final s = services[i];
+          return GestureDetector(
+            onTap: () {
+              final key = s['key'] as String;
+              if (key == 'Rides') BuyerNavigator.rides(context);
+              if (key == 'Food') BuyerNavigator.food(context);
+              if (key == 'Parcel') BuyerNavigator.parcel(context);
+              if (key == 'Grocery') BuyerNavigator.grocery(context);
+            },
+            child: Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: context.cardBg,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: context.cardBorder, width: 0.5),
+                boxShadow: context.cardShadow,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.accent.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      s['icon'] as IconData,
+                      size: 22,
+                      color: AppColors.accent,
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        s['label'] as String,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: context.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        s['desc'] as String,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: context.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
