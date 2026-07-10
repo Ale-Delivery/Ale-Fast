@@ -282,6 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
       {'key': 'Rides', 'icon': LucideIcons.bike, 'label': 'Rides'},
       {'key': 'Food', 'icon': LucideIcons.utensils, 'label': 'Food'},
       {'key': 'Parcel', 'icon': LucideIcons.package, 'label': 'Parcel'},
+      {'key': 'Grocery', 'icon': LucideIcons.shoppingCart, 'label': 'Grocery'},
     ];
 
     return Padding(
@@ -300,6 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (key == 'Rides') BuyerNavigator.rides(context);
                 if (key == 'Food') BuyerNavigator.food(context);
                 if (key == 'Parcel') BuyerNavigator.parcel(context);
+                if (key == 'Grocery') BuyerNavigator.grocery(context);
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),

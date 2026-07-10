@@ -15,6 +15,7 @@ import '../screens/order_history_screen.dart';
 import '../screens/order_placed_screen.dart';
 import '../screens/order_tracking_screen.dart';
 import '../screens/parcel_screen.dart';
+import '../screens/grocery_screen.dart';
 import '../screens/phone_auth_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/profile_setup_screen.dart';
@@ -237,6 +238,12 @@ class BuyerNavigator {
   static Future<void> food(BuildContext context) {
     return Navigator.of(context).push(
       _route(const FoodScreen(), name: AppRoutes.foodDetail),
+    );
+  }
+
+  static Future<void> grocery(BuildContext context) {
+    return Navigator.of(context).push(
+      _route(const GroceryScreen(), name: AppRoutes.grocery),
     );
   }
 }
