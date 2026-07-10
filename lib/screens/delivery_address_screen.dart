@@ -316,10 +316,10 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                       decoration: BoxDecoration(
                         color: context.surfaceColor,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: context.cardBorder.withOpacity(0.3)),
+                        border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
+                            color: Colors.black.withValues(alpha: 0.04),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -374,7 +374,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: _primaryColor),
                           ),
                           style: TextButton.styleFrom(
-                            backgroundColor: _primaryColor.withOpacity(0.08),
+                            backgroundColor: _primaryColor.withValues(alpha: 0.08),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -399,7 +399,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: _primaryColor),
                           ),
                           style: TextButton.styleFrom(
-                            backgroundColor: _primaryColor.withOpacity(0.08),
+                            backgroundColor: _primaryColor.withValues(alpha: 0.08),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -439,7 +439,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                       decoration: BoxDecoration(
                         color: context.surfaceColor,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: context.cardBorder.withOpacity(0.3)),
+                        border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
                       ),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
@@ -555,7 +555,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.03),
+                color: Colors.grey.withValues(alpha: 0.03),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),

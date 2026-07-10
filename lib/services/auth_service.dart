@@ -34,9 +34,9 @@ class AuthService {
     
     String dummyOtp = "1234"; 
     
-    print("=======================================");
-    print("Mock SMS: Sent to $phoneNumber | OTP Code: $dummyOtp"); 
-    print("=======================================");
+    debugPrint("=======================================");
+    debugPrint("Mock SMS: Sent to $phoneNumber | OTP Code: $dummyOtp"); 
+    debugPrint("=======================================");
     
     return dummyOtp; 
   }

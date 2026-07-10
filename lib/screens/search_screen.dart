@@ -288,7 +288,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   decoration: BoxDecoration(
                     color: context.surfaceColor,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: context.cardBorder.withOpacity(0.3)),
+                    border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [

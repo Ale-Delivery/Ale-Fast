@@ -60,7 +60,7 @@ class CartScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.05),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2))
                           ],
@@ -133,7 +133,7 @@ class CartScreen extends StatelessWidget {
                     color: context.surfaceColor,
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withValues(alpha: 0.08),
                           blurRadius: 20,
                           offset: const Offset(0, -5))
                     ],

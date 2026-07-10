@@ -114,7 +114,7 @@ class RestaurantCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color: Colors.black.withValues(alpha: 0.06),
                 blurRadius: 10,
                 offset: const Offset(0, 4))
           ],
@@ -183,7 +183,7 @@ class FoodCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 8,
               offset: const Offset(0, 3))
           ],
@@ -270,7 +270,7 @@ class CategoryChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 6,
                 offset: const Offset(0, 2))
           ],

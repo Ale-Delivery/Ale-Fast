@@ -69,7 +69,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.orange.withOpacity(0.3),
+                  color: AppColors.orange.withValues(alpha: 0.3),
                   blurRadius: 15,
                   offset: const Offset(0, 8),
                 ),
@@ -238,7 +238,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 decoration: BoxDecoration(
                                   color: context.surfaceColor,
                                   borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: context.cardBorder.withOpacity(0.3)),
+                                  border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
                                 ),
                                 child: Row(
                                   children: [

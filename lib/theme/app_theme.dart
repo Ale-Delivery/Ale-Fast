@@ -194,38 +194,38 @@ class AppTheme {
           fontWeight: FontWeight.w400,
         ),
       ),
-      cardTheme: CardThemeData(
-        color: const Color(0xFF181B22),
+      cardTheme: const CardThemeData(
+        color: Color(0xFF181B22),
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(20)),
-          side: const BorderSide(color: Color(0xFF2A2D35), width: 1),
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+          side: BorderSide(color: Color(0xFF2A2D35), width: 1),
         ),
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: EdgeInsets.only(bottom: 12),
       ),
-      chipTheme: ChipThemeData(
+      chipTheme: const ChipThemeData(
         backgroundColor: AppColors.surface,
         selectedColor: AppColors.orange,
         side: BorderSide.none,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(24)),
         ),
-        labelStyle: const TextStyle(
+        labelStyle: TextStyle(
           fontFamily: 'Outfit',
           fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
       ),
-      snackBarTheme: SnackBarThemeData(
+      snackBarTheme: const SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.white,
-        contentTextStyle: const TextStyle(
+        contentTextStyle: TextStyle(
           fontFamily: 'Outfit',
           color: AppColors.bg,
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16)),
         ),
       ),
@@ -330,38 +330,38 @@ class AppTheme {
           fontWeight: FontWeight.w400,
         ),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: const CardThemeData(
         color: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(20)),
-          side: const BorderSide(color: Color(0xFFE5E7EB), width: 1),
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+          side: BorderSide(color: Color(0xFFE5E7EB), width: 1),
         ),
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: EdgeInsets.only(bottom: 12),
       ),
-      chipTheme: ChipThemeData(
+      chipTheme: const ChipThemeData(
         backgroundColor: AppColors.lightSurface,
         selectedColor: AppColors.orange,
         side: BorderSide.none,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(24)),
         ),
-        labelStyle: const TextStyle(
+        labelStyle: TextStyle(
           fontFamily: 'Outfit',
           fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
       ),
-      snackBarTheme: SnackBarThemeData(
+      snackBarTheme: const SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.lightInk,
-        contentTextStyle: const TextStyle(
+        contentTextStyle: TextStyle(
           fontFamily: 'Outfit',
           color: AppColors.lightBg,
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16)),
         ),
       ),

@@ -173,7 +173,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
                         decoration: BoxDecoration(
                           color: context.surfaceColor,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: context.cardBorder.withOpacity(0.3)),
+                          border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
                         ),
                         child: Row(
                           children: [
@@ -239,7 +239,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
           ? FloatingActionButton.extended(
               backgroundColor: AppColors.orange,
               onPressed: () {},
-              label: Text('${cartCount} items · Rs. ${cartTotal.toStringAsFixed(0)}',
+              label: Text('$cartCount items · Rs. ${cartTotal.toStringAsFixed(0)}',
                   style: const TextStyle(
                       color: Colors.white, fontWeight: FontWeight.w700)),
               icon: const Icon(Icons.shopping_cart_outlined,

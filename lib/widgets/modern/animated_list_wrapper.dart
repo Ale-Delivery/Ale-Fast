@@ -6,10 +6,10 @@ class AnimatedListWrapper extends StatelessWidget {
   final bool isHorizontal;
   
   const AnimatedListWrapper({
-    Key? key,
+    super.key,
     required this.children,
     this.isHorizontal = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

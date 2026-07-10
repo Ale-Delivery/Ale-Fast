@@ -10,7 +10,7 @@ class GoogleMapsService {
   static Future<List<Map<String, dynamic>>> getAutocompleteSuggestions(String query) async {
     if (query.trim().length < 3) return [];
 
-    final apiKey = AppConstants.googleMapsApiKey;
+    const apiKey = AppConstants.googleMapsApiKey;
     if (apiKey.isNotEmpty) {
       try {
         final client = HttpClient();
@@ -100,7 +100,7 @@ class GoogleMapsService {
   /// Converts a placeId (from Google Autocomplete) or address to coordinates
   static Future<Map<String, double>?> getCoordinatesFromPlace(Map<String, dynamic> item) async {
     if (item['is_google'] == true && item['place_id'] != null) {
-      final apiKey = AppConstants.googleMapsApiKey;
+      const apiKey = AppConstants.googleMapsApiKey;
       if (apiKey.isNotEmpty) {
         try {
           final client = HttpClient();
@@ -141,7 +141,7 @@ class GoogleMapsService {
 
   /// Reverse geocodes coordinates to a human-readable address.
   static Future<String> reverseGeocode(double lat, double lng) async {
-    final apiKey = AppConstants.googleMapsApiKey;
+    const apiKey = AppConstants.googleMapsApiKey;
     if (apiKey.isNotEmpty) {
       try {
         final client = HttpClient();

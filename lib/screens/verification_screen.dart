@@ -104,6 +104,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
         if (exists) {
           final hasAddress = await LocalStorageService.getDeliveryAddress();
           if (hasAddress == null) {
+            if (!mounted) return;
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
                 builder: (_) => const DeliveryAddressScreen(proceedToCheckout: false),
@@ -111,6 +112,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
               (_) => false,
             );
           } else {
+            if (!mounted) return;
             BuyerNavigator.home(context, clearStack: true);
           }
         } else {
@@ -154,7 +156,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
+                        color: Colors.black.withValues(alpha: 0.03),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       )
@@ -209,8 +211,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 15,
+color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 15,
                       offset: const Offset(0, 8),
                     )
                   ]
@@ -288,7 +290,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.orange.withOpacity(0.25),
+                              color: AppColors.orange.withValues(alpha: 0.25),
                               blurRadius: 12,
                               offset: const Offset(0, 6),
                             ),

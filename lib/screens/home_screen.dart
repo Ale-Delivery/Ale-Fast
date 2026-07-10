@@ -286,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Icon(Icons.keyboard_arrow_down_rounded,
                           size: 18, color: context.textPrimary),
                     ],
@@ -370,10 +370,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                    border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
+                        color: Colors.black.withValues(alpha: 0.04),
                         blurRadius: 18,
                         offset: const Offset(0, 10),
                       ),
@@ -463,13 +463,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: isSelected ? color : context.surfaceColor,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: isSelected ? color : context.cardBorder.withOpacity(0.3),
+                    color: isSelected ? color : context.cardBorder.withValues(alpha: 0.3),
                     width: isSelected ? 2 : 1,
                   ),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: color.withOpacity(0.3),
+                            color: color.withValues(alpha: 0.3),
                             blurRadius: 16,
                             offset: const Offset(0, 6),
                           ),
@@ -575,7 +575,7 @@ class _HomeScreenState extends State<HomeScreen> {
               borderRadius: BorderRadius.circular(22),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.12),
+                  color: Colors.black.withValues(alpha: 0.12),
                   blurRadius: 20,
                   offset: const Offset(0, 12),
                 ),
@@ -593,8 +593,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.black.withOpacity(0.7),
-                        Colors.black.withOpacity(0.12),
+                        Colors.black.withValues(alpha: 0.7),
+                        Colors.black.withValues(alpha: 0.12),
                       ],
                     ),
                   ),
@@ -622,7 +622,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.86),
+                          color: Colors.white.withValues(alpha: 0.86),
                           fontSize: 12,
                           height: 1.25,
                         ),
@@ -721,7 +721,7 @@ class _HomeScreenState extends State<HomeScreen> {
             selectedColor: _primary,
             backgroundColor: Theme.of(context).colorScheme.surface,
             side: BorderSide(
-              color: isSelected ? _primary : Theme.of(context).dividerColor.withOpacity(0.1),
+              color: isSelected ? _primary : Theme.of(context).dividerColor.withValues(alpha: 0.1),
             ),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
@@ -827,7 +827,7 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           boxShadow: [
             BoxShadow(
-              color: isDark ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.08),
+              color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.08),
               blurRadius: 24,
               offset: const Offset(0, -8),
             ),
@@ -835,7 +835,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: NavigationBarTheme(
           data: NavigationBarThemeData(
-            indicatorColor: isDark ? AppColors.orange.withOpacity(0.2) : AppColors.orangeLight,
+            indicatorColor: isDark ? AppColors.orange.withValues(alpha: 0.2) : AppColors.orangeLight,
             labelTextStyle: WidgetStateProperty.resolveWith(
               (states) => TextStyle(
                 color: states.contains(WidgetState.selected) ? _primary : context.textMuted,
@@ -936,7 +936,7 @@ class _RestaurantCard extends StatelessWidget {
                     child: _Pill(
                       icon: Icons.access_time_rounded,
                       label: deliveryTime,
-                      color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8),
+                      color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.8),
                       foreground: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
@@ -985,19 +985,19 @@ class _RestaurantCard extends StatelessWidget {
                         _Pill(
                           icon: Icons.star_rounded,
                           label: rating,
-                          color: AppColors.orange.withOpacity(0.1),
+                          color: AppColors.orange.withValues(alpha: 0.1),
                           foreground: AppColors.orange,
                         ),
                         _Pill(
                           icon: Icons.delivery_dining_rounded,
                           label: deliveryFee,
-                          color: AppColors.blue.withOpacity(0.1),
+                          color: AppColors.blue.withValues(alpha: 0.1),
                           foreground: AppColors.blue,
                         ),
                         _Pill(
                           icon: Icons.verified_rounded,
                           label: 'Open now',
-                          color: AppColors.green.withOpacity(0.1),
+                          color: AppColors.green.withValues(alpha: 0.1),
                           foreground: AppColors.green,
                         ),
                       ],
@@ -1076,7 +1076,7 @@ class _StatePanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: context.cardBorder.withOpacity(0.3)),
+        border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -1127,7 +1127,7 @@ class _RestaurantSkeleton extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: context.cardBorder.withOpacity(0.3)),
+        border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [

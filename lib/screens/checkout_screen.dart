@@ -128,8 +128,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Could not place order. Please check your connection and try again.'),
+          const SnackBar(
+            content: Text('Could not place order. Please check your connection and try again.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -233,7 +233,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
+                            color: Colors.red.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(Icons.close, color: Colors.red, size: 20),
@@ -305,7 +305,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 if (_discountAmount > 0) ...[
                   const SizedBox(height: 6),
-                  _row('Discount (${_discountPercent}%)', '- Rs. ${_discountAmount.toStringAsFixed(0)}'),
+                  _row('Discount ($_discountPercent%)', '- Rs. ${_discountAmount.toStringAsFixed(0)}'),
                 ],
                 const Divider(height: 24),
                 _row('Total', 'Rs. ${(_discountAmount > 0 ? cart.total - _discountAmount : cart.total).toStringAsFixed(0)}', bold: true),

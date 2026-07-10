@@ -181,7 +181,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.05),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -212,7 +212,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                         horizontal: 8, vertical: 3),
                                     decoration: BoxDecoration(
                                       color: _statusColor(order.status)
-                                          .withOpacity(0.15),
+                                          .withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
@@ -236,7 +236,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                             child: Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                               decoration: BoxDecoration(
-                                                color: Colors.red.withOpacity(0.1),
+                                                color: Colors.red.withValues(alpha: 0.1),
                                                 borderRadius: BorderRadius.circular(6),
                                               ),
                                               child: const Text(
@@ -257,7 +257,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                         decoration: BoxDecoration(
-                                          color: AppColors.orange.withOpacity(0.1),
+                                          color: AppColors.orange.withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: const Text(

@@ -138,7 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.darkCard.withOpacity(0.2),
+                          color: AppColors.darkCard.withValues(alpha: 0.2),
                           blurRadius: 15,
                           offset: const Offset(0, 8),
                         ),
@@ -152,7 +152,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: AppGradients.avatar,
-                            border: Border.all(color: Colors.white.withOpacity(0.2), width: 3),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 3),
                           ),
                           child: Center(
                             child: Text(
@@ -183,12 +183,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               if (_phone != null)
                                 Row(
                                   children: [
-                                    Icon(Icons.phone_rounded, color: Colors.white.withOpacity(0.6), size: 14),
+                                    Icon(Icons.phone_rounded, color: Colors.white.withValues(alpha: 0.6), size: 14),
                                     const SizedBox(width: 6),
                                     Text(
                                       _phone!,
                                       style: TextStyle(
-                                        color: Colors.white.withOpacity(0.7),
+                                        color: Colors.white.withValues(alpha: 0.7),
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -214,7 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: (isDark ? Colors.black : Colors.grey).withOpacity(0.04),
+                            color: (isDark ? Colors.black : Colors.grey).withValues(alpha: 0.04),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -311,7 +311,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       style: TextButton.styleFrom(
-                        backgroundColor: AppColors.red.withOpacity(0.06),
+                        backgroundColor: AppColors.red.withValues(alpha: 0.06),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -348,7 +348,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Theme.of(context).dividerColor.withOpacity(0.1),
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: mutedColor, size: 18),
@@ -392,7 +392,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: (isDark ? Colors.black : Colors.grey).withOpacity(0.03),
+            color: (isDark ? Colors.black : Colors.grey).withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -404,7 +404,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: AppColors.orange.withOpacity(0.1),
+            color: AppColors.orange.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: AppColors.orange, size: 22),
@@ -448,7 +448,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.03),
+            color: Colors.grey.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

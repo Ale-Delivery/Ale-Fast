@@ -9,13 +9,13 @@ class ModernButton extends StatefulWidget {
   final bool isSecondary;
 
   const ModernButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.isLoading = false,
     this.icon,
     this.isSecondary = false,
-  }) : super(key: key);
+  });
 
   @override
   State<ModernButton> createState() => _ModernButtonState();
@@ -53,7 +53,7 @@ class _ModernButtonState extends State<ModernButton> {
                 : null,
             boxShadow: widget.isSecondary ? [] : [
               BoxShadow(
-                color: AppColors.orange.withOpacity(0.3),
+                color: AppColors.orange.withValues(alpha: 0.3),
                 blurRadius: 16,
                 offset: const Offset(0, 8),
               ),

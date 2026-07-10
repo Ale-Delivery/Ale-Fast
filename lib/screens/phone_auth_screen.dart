@@ -104,7 +104,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.orange.withOpacity(0.2),
+                      color: AppColors.orange.withValues(alpha: 0.2),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     )
@@ -149,7 +149,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
+                      color: Colors.black.withValues(alpha: 0.03),
                       blurRadius: 15,
                       offset: const Offset(0, 8),
                     )
@@ -182,7 +182,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                       decoration: InputDecoration(
                         hintText: "07X XXX XXXX",
                         hintStyle: TextStyle(
-                          color: Colors.grey.withOpacity(0.6),
+                          color: Colors.grey.withValues(alpha: 0.6),
                           fontWeight: FontWeight.w500,
                         ),
                         prefixIcon: Container(
@@ -191,7 +191,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                           decoration: BoxDecoration(
                             border: Border(
                               right: BorderSide(
-                                color: Colors.grey.withOpacity(0.2),
+                                color: Colors.grey.withValues(alpha: 0.2),
                                 width: 1.5,
                               )
                             )
@@ -199,11 +199,11 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
+                              const Text(
                                 "🇱🇰", // Sri Lanka flag emoji
                                 style: TextStyle(fontSize: 20),
                               ),
-                              SizedBox(width: 6),
+                              const SizedBox(width: 6),
                               Text(
                                 "+94",
                                 style: TextStyle(
@@ -218,14 +218,14 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide(
-                            color: Colors.grey.withOpacity(0.15),
+                            color: Colors.grey.withValues(alpha: 0.15),
                             width: 1.5,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide(
-                            color: Colors.grey.withOpacity(0.15),
+                            color: Colors.grey.withValues(alpha: 0.15),
                             width: 1.5,
                           ),
                         ),
@@ -256,7 +256,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.orange.withOpacity(0.25),
+                              color: AppColors.orange.withValues(alpha: 0.25),
                               blurRadius: 12,
                               offset: const Offset(0, 6),
                             ),
