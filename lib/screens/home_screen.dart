@@ -223,6 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _buildServicesRow(),
                   if (_selectedService == 'Food') ...[
                     _buildOfferCarousel(),
+                    _buildPromotionsSection(),
                     _buildSectionTitle('Categories'),
                     _buildCategoryList(),
                     _buildSectionTitle('Open Restaurants'),
@@ -519,40 +520,121 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildRidesPlaceholder() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Ride type cards
+          Row(
+            children: [
+              _rideTypeCard(
+                icon: Icons.two_wheeler_rounded,
+                title: 'Bike',
+                fare: 'Rs. 150',
+                time: '~5 min',
+                color: const Color(0xFF00C6FF),
+              ),
+              const SizedBox(width: 12),
+              _rideTypeCard(
+                icon: Icons.directions_car_filled_rounded,
+                title: 'Tuk',
+                fare: 'Rs. 300',
+                time: '~8 min',
+                color: const Color(0xFFFF6B35),
+              ),
+              const SizedBox(width: 12),
+              _rideTypeCard(
+                icon: Icons.directions_car_rounded,
+                title: 'Car',
+                fare: 'Rs. 500',
+                time: '~10 min',
+                color: const Color(0xFF6C5CE7),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          // Where to button
+          GestureDetector(
+            onTap: () => BuyerNavigator.rides(context),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: context.surfaceColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF00C6FF),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.search_rounded, color: Colors.white, size: 20),
+                  ),
+                  const SizedBox(width: 14),
+                  Text(
+                    'Where to?',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: context.textPrimary,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.textMuted),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _rideTypeCard({
+    required IconData icon,
+    required String title,
+    required String fare,
+    required String time,
+    required Color color,
+  }) {
+    return Expanded(
       child: GestureDetector(
         onTap: () => BuyerNavigator.rides(context),
-        child: Column(
-          children: [
-            Icon(Icons.directions_bike_rounded, color: context.textMuted, size: 64),
-            const SizedBox(height: 16),
-            Text(
-              'Book a Ride',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: context.textPrimary,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+          decoration: BoxDecoration(
+            color: context.surfaceColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, color: color, size: 30),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: context.textPrimary,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tap to book bike, tuk or car rides',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.textMuted, fontSize: 14),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF00C6FF),
-                borderRadius: BorderRadius.circular(14),
+              const SizedBox(height: 4),
+              Text(
+                fare,
+                style: TextStyle(fontSize: 12, color: context.textMuted),
               ),
-              child: const Text(
-                'Open Rides',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+              Text(
+                time,
+                style: TextStyle(fontSize: 11, color: context.textHint),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -560,43 +642,253 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildParcelPlaceholder() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Package size cards
+          Row(
+            children: [
+              _parcelSizeCard(
+                icon: Icons.inventory_rounded,
+                title: 'Small',
+                fare: 'Rs. 200',
+                desc: 'Up to 1kg',
+                color: const Color(0xFF6C5CE7),
+              ),
+              const SizedBox(width: 12),
+              _parcelSizeCard(
+                icon: Icons.inventory,
+                title: 'Medium',
+                fare: 'Rs. 350',
+                desc: 'Up to 5kg',
+                color: const Color(0xFF8B5CF6),
+              ),
+              const SizedBox(width: 12),
+              _parcelSizeCard(
+                icon: Icons.inventory_2_rounded,
+                title: 'Large',
+                fare: 'Rs. 500',
+                desc: 'Up to 15kg',
+                color: const Color(0xFFA78BFA),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          // Send parcel button
+          GestureDetector(
+            onTap: () => BuyerNavigator.parcel(context),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: context.surfaceColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF6C5CE7),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.add_rounded, color: Colors.white, size: 22),
+                  ),
+                  const SizedBox(width: 14),
+                  Text(
+                    'Send a Parcel',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: context.textPrimary,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.textMuted),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _parcelSizeCard({
+    required IconData icon,
+    required String title,
+    required String fare,
+    required String desc,
+    required Color color,
+  }) {
+    return Expanded(
       child: GestureDetector(
         onTap: () => BuyerNavigator.parcel(context),
-        child: Column(
-          children: [
-            Icon(Icons.inventory_2_rounded, color: context.textMuted, size: 64),
-            const SizedBox(height: 16),
-            Text(
-              'Send a Parcel',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: context.textPrimary,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+          decoration: BoxDecoration(
+            color: context.surfaceColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, color: color, size: 30),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: context.textPrimary,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tap to send packages anywhere fast',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.textMuted, fontSize: 14),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF6C5CE7),
-                borderRadius: BorderRadius.circular(14),
+              const SizedBox(height: 4),
+              Text(
+                fare,
+                style: TextStyle(fontSize: 12, color: context.textMuted),
               ),
-              child: const Text(
-                'Open Parcel',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+              Text(
+                desc,
+                style: TextStyle(fontSize: 11, color: context.textHint),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildPromotionsSection() {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _fetchOffers(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        final offers = snapshot.data!;
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.local_offer_rounded, color: _primary, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Promotions',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: context.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 100,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: offers.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    final offer = offers[index];
+                    return Container(
+                      width: 220,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            _primary,
+                            _primary.withValues(alpha: 0.8),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _primary.withValues(alpha: 0.25),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.25),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  '${offer['discount_percent']}% OFF',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                              const Spacer(),
+                              Icon(Icons.local_offer_rounded,
+                                  color: Colors.white.withValues(alpha: 0.5), size: 18),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            offer['code'] ?? '',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            offer['description'] ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.85),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchOffers() async {
+    try {
+      final data = await Supabase.instance.client
+          .from('Offers')
+          .select()
+          .eq('is_active', true)
+          .order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(data);
+    } catch (_) {
+      return [];
+    }
   }
 
   Widget _buildOfferCarousel() {
