@@ -6,6 +6,7 @@ import '../screens/delivery_address_screen.dart';
 import '../screens/details_screen.dart';
 import '../screens/favorites_screen.dart';
 import '../screens/food_detail_screen.dart';
+import '../screens/food_screen.dart';
 import '../screens/help_support_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/notifications_screen.dart';
@@ -230,6 +231,12 @@ class BuyerNavigator {
   static Future<void> parcel(BuildContext context) {
     return Navigator.of(context).push(
       _route(const ParcelScreen(), name: AppRoutes.parcel),
+    );
+  }
+
+  static Future<void> food(BuildContext context) {
+    return Navigator.of(context).push(
+      _route(const FoodScreen(), name: AppRoutes.foodDetail),
     );
   }
 }
