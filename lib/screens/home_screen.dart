@@ -228,8 +228,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildCategoryList(),
                     _buildSectionTitle('Open Restaurants'),
                   ],
-                  if (_selectedService == 'Rides') _buildRidesPlaceholder(),
-                  if (_selectedService == 'Parcel') _buildParcelPlaceholder(),
+                  if (_selectedService == 'Rides') _buildRidesPreview(),
+                  if (_selectedService == 'Parcel') _buildParcelPreview(),
                 ]),
               ),
               _buildRestaurantSliver(),
@@ -518,324 +518,143 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildRidesPlaceholder() {
+  Widget _buildRidesPreview() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Where to search bar
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: context.surfaceColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
+      child: GestureDetector(
+        onTap: () => BuyerNavigator.rides(context),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF00C6FF), Color(0xFF0078FF)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF00C6FF),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.search_rounded, color: Colors.white, size: 20),
-                ),
-                const SizedBox(width: 14),
-                Text(
-                  'Where to?',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: context.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Ride type cards
-          Row(
-            children: [
-              _rideTypeCard(
-                icon: Icons.two_wheeler_rounded,
-                title: 'Bike',
-                fare: 'Rs. 150',
-                time: '~5 min',
-                color: const Color(0xFF00C6FF),
-              ),
-              const SizedBox(width: 12),
-              _rideTypeCard(
-                icon: Icons.directions_car_filled_rounded,
-                title: 'Tuk',
-                fare: 'Rs. 300',
-                time: '~8 min',
-                color: const Color(0xFFFF6B35),
-              ),
-              const SizedBox(width: 12),
-              _rideTypeCard(
-                icon: Icons.directions_car_rounded,
-                title: 'Car',
-                fare: 'Rs. 500',
-                time: '~10 min',
-                color: const Color(0xFF6C5CE7),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF00C6FF).withValues(alpha: 0.3),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          // Pickup info
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: context.surfaceColor,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF34D399),
-                    shape: BoxShape.circle,
-                  ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.two_wheeler_rounded, color: Colors.white.withValues(alpha: 0.7), size: 22),
+                  const SizedBox(width: 6),
+                  Icon(Icons.directions_car_filled_rounded, color: Colors.white.withValues(alpha: 0.7), size: 22),
+                  const SizedBox(width: 6),
+                  Icon(Icons.directions_car_rounded, color: Colors.white.withValues(alpha: 0.7), size: 22),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Need a Ride?',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  'Current Location',
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Book bike, tuk or car rides',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Text(
+                  'Open Rides',
                   style: TextStyle(
+                    color: Color(0xFF0078FF),
+                    fontWeight: FontWeight.w800,
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: context.textPrimary,
                   ),
                 ),
-                const Spacer(),
-                Icon(Icons.chevron_right_rounded, color: context.textMuted, size: 20),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _rideTypeCard({
-    required IconData icon,
-    required String title,
-    required String fare,
-    required String time,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        decoration: BoxDecoration(
-          color: context.surfaceColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 6),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: context.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              fare,
-              style: TextStyle(fontSize: 12, color: context.textMuted),
-            ),
-            Text(
-              time,
-              style: TextStyle(fontSize: 11, color: context.textHint),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildParcelPlaceholder() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Location inputs
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: context.surfaceColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF34D399),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Pick-up location',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: context.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 4, top: 6, bottom: 6),
-                  child: Container(
-                    width: 2,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: context.textMuted.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(1),
-                    ),
-                  ),
-                ),
-                Row(
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: AppColors.orange,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Drop-off location',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: context.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Package size cards
-          Row(
-            children: [
-              _parcelSizeCard(
-                icon: Icons.inventory_rounded,
-                title: 'Small',
-                fare: 'Rs. 200',
-                desc: 'Up to 1kg',
-                color: const Color(0xFF6C5CE7),
-              ),
-              const SizedBox(width: 12),
-              _parcelSizeCard(
-                icon: Icons.inventory,
-                title: 'Medium',
-                fare: 'Rs. 350',
-                desc: 'Up to 5kg',
-                color: const Color(0xFF8B5CF6),
-              ),
-              const SizedBox(width: 12),
-              _parcelSizeCard(
-                icon: Icons.inventory_2_rounded,
-                title: 'Large',
-                fare: 'Rs. 500',
-                desc: 'Up to 15kg',
-                color: const Color(0xFFA78BFA),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          // Package type chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: ['Documents', 'Food', 'Electronics', 'Clothing', 'Other']
-                  .map((type) => Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: context.surfaceColor,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
-                        ),
-                        child: Text(
-                          type,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: context.textPrimary,
-                          ),
-                        ),
-                      ))
-                  .toList(),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _parcelSizeCard({
-    required IconData icon,
-    required String title,
-    required String fare,
-    required String desc,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        decoration: BoxDecoration(
-          color: context.surfaceColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 6),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: context.textPrimary,
+  Widget _buildParcelPreview() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      child: GestureDetector(
+        onTap: () => BuyerNavigator.parcel(context),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF6C5CE7), Color(0xFFA55EEA)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF6C5CE7).withValues(alpha: 0.3),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              fare,
-              style: TextStyle(fontSize: 12, color: context.textMuted),
-            ),
-            Text(
-              desc,
-              style: TextStyle(fontSize: 11, color: context.textHint),
-            ),
-          ],
+            ],
+          ),
+          child: Column(
+            children: [
+              Icon(Icons.inventory_2_rounded,
+                  color: Colors.white.withValues(alpha: 0.7), size: 36),
+              const SizedBox(height: 12),
+              const Text(
+                'Send a Parcel',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Deliver anything, anywhere',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Text(
+                  'Open Parcel',
+                  style: TextStyle(
+                    color: Color(0xFF6C5CE7),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
