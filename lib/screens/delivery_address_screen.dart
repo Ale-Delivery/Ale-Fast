@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/local_storage_service.dart';
 import '../services/auth_service.dart';
@@ -22,7 +23,6 @@ class DeliveryAddressScreen extends StatefulWidget {
 }
 
 class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
-
   final _labelController = TextEditingController(text: 'Home');
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -30,9 +30,17 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
   bool _loading = true;
   bool _isLocating = false;
   List<Map<String, dynamic>> _savedAddresses = [];
+  int? _selectedAddressIndex;
 
   List<Map<String, dynamic>> _addressSuggestions = [];
   Timer? _debounceTimer;
+
+  final _labelOptions = [
+    {'label': 'Home', 'icon': LucideIcons.home},
+    {'label': 'Work', 'icon': LucideIcons.briefcase},
+    {'label': 'Apartment', 'icon': LucideIcons.building},
+    {'label': 'Other', 'icon': LucideIcons.mapPin},
+  ];
 
   Future<void> _onAddressChanged(String query) async {
     _debounceTimer?.cancel();
@@ -44,9 +52,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
       try {
         final suggestions = await GoogleMapsService.getAutocompleteSuggestions(query);
         if (mounted) {
-          setState(() {
-            _addressSuggestions = suggestions;
-          });
+          setState(() => _addressSuggestions = suggestions);
         }
       } catch (e) {
         debugPrint('Error getting address suggestions: $e');
@@ -56,12 +62,9 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
 
   Future<void> _getCurrentLocation() async {
     setState(() => _isLocating = true);
-    
-    bool serviceEnabled;
-    LocationPermission permission;
 
     try {
-      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -72,7 +75,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
         return;
       }
 
-      permission = await Geolocator.checkPermission();
+      LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
@@ -99,7 +102,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-      
+
       final resolvedAddress = await GoogleMapsService.reverseGeocode(
         position.latitude,
         position.longitude,
@@ -108,10 +111,11 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
       if (mounted) {
         setState(() {
           _addressController.text = resolvedAddress;
+          _selectedAddressIndex = null;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location updated successfully!'), behavior: SnackBarBehavior.floating),
+          const SnackBar(content: Text('Location updated!'), behavior: SnackBarBehavior.floating),
         );
       }
     } catch (e) {
@@ -121,9 +125,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLocating = false);
-      }
+      if (mounted) setState(() => _isLocating = false);
     }
   }
 
@@ -166,23 +168,19 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
     }
   }
 
-  void _selectSavedAddress(Map<String, dynamic> address) {
+  void _selectSavedAddress(Map<String, dynamic> address, int index) {
     setState(() {
+      _selectedAddressIndex = index;
       _labelController.text = address['label'] ?? 'Home';
       _addressController.text = address['address'] ?? '';
       _phoneController.text = address['phone'] ?? '';
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Selected ${address['label']} address'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 
   Future<void> _deleteSavedAddress(String id) async {
     try {
       await Supabase.instance.client.from('Saved_Addresses').delete().eq('id', id);
+      setState(() => _selectedAddressIndex = null);
       await _loadSavedAddresses();
     } catch (e) {
       debugPrint('Error deleting address: $e');
@@ -219,7 +217,6 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
       phone: _phoneController.text.trim(),
     );
 
-    // Also save to Supabase for persistence across logins
     try {
       final userId = await LocalStorageService.getUserId();
       if (userId != null) {
@@ -269,7 +266,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textPrimary, size: 20),
+          icon: Icon(LucideIcons.arrowLeft, color: context.textPrimary, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -280,36 +277,210 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Saved addresses at top
+                  if (_savedAddresses.isNotEmpty) ...[
+                    Row(
+                      children: [
+                        Icon(LucideIcons.bookmark, size: 16, color: context.textHint),
+                        const SizedBox(width: 6),
+                        Text(
+                          'SAVED ADDRESSES',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: context.textHint,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    ...List.generate(_savedAddresses.length, (i) {
+                      final addr = _savedAddresses[i];
+                      final isSelected = _selectedAddressIndex == i;
+                      final label = addr['label'] ?? 'Home';
+                      final labelData = _labelOptions.firstWhere(
+                        (l) => l['label'] == label,
+                        orElse: () => _labelOptions.last,
+                      );
+                      return GestureDetector(
+                        onTap: () => _selectSavedAddress(addr, i),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? _primaryColor.withValues(alpha: 0.08)
+                                : context.surfaceColor,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: isSelected
+                                  ? _primaryColor
+                                  : context.cardBorder.withValues(alpha: 0.3),
+                              width: isSelected ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? _primaryColor.withValues(alpha: 0.15)
+                                      : context.textHint.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  labelData['icon'] as IconData,
+                                  size: 16,
+                                  color: isSelected ? _primaryColor : context.textHint,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      label,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w800,
+                                        color: isSelected ? _primaryColor : context.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      addr['address'] ?? '',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(fontSize: 12, color: context.textMuted),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (isSelected)
+                                Icon(LucideIcons.check, size: 16, color: _primaryColor)
+                              else
+                                IconButton(
+                                  icon: Icon(LucideIcons.trash2, size: 16, color: context.textHint),
+                                  onPressed: () => _deleteSavedAddress(addr['id']),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 20),
+                    // Divider
+                    Row(
+                      children: [
+                        const Expanded(child: Divider()),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            'OR ADD NEW',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: context.textHint,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ),
+                        const Expanded(child: Divider()),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+
+                  // Heading when no saved addresses
+                  if (_savedAddresses.isEmpty)
+                    Text(
+                      'Where should we deliver?',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: context.textPrimary,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+
+                  // Label chips
                   Text(
-                    'Where should we deliver?',
+                    'LABEL',
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 11,
                       fontWeight: FontWeight.w800,
-                      color: context.textPrimary,
-                      letterSpacing: -0.5,
+                      color: context.textHint,
+                      letterSpacing: 1.0,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  
-                  // Label Field
-                  _buildField(
-                    label: 'Label (e.g. Home, Office)',
-                    controller: _labelController,
-                    icon: Icons.label_important_outline_rounded,
-                    hintText: 'Home, Office, Apartment...',
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _labelOptions.map((opt) {
+                      final isSelected = _labelController.text == opt['label'];
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _labelController.text = opt['label'] as String;
+                            _selectedAddressIndex = null;
+                          });
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? _primaryColor.withValues(alpha: 0.12)
+                                : context.surfaceColor,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected ? _primaryColor : context.cardBorder.withValues(alpha: 0.3),
+                              width: isSelected ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                opt['icon'] as IconData,
+                                size: 14,
+                                color: isSelected ? _primaryColor : context.textMuted,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                opt['label'] as String,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                                  color: isSelected ? _primaryColor : context.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                   const SizedBox(height: 18),
-                  
-                  // Address Field
+
+                  // Address field
                   _buildField(
                     label: 'Full address',
                     controller: _addressController,
-                    icon: Icons.location_on_outlined,
+                    icon: LucideIcons.mapPin,
                     hintText: 'Street address, city, postal code',
                     maxLines: 2,
                     onChanged: _onAddressChanged,
                   ),
-                  
+
                   if (_addressSuggestions.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Container(
@@ -334,7 +505,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                           final item = _addressSuggestions[index];
                           return ListTile(
                             dense: true,
-                            leading: const Icon(Icons.location_on_outlined, color: _primaryColor, size: 18),
+                            leading: const Icon(LucideIcons.mapPin, color: _primaryColor, size: 18),
                             title: Text(
                               item['display_name'],
                               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: context.textPrimary),
@@ -343,6 +514,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                               setState(() {
                                 _addressController.text = item['display_name'];
                                 _addressSuggestions = [];
+                                _selectedAddressIndex = null;
                               });
                               FocusScope.of(context).unfocus();
                             },
@@ -352,8 +524,8 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                     ),
                   ],
                   const SizedBox(height: 14),
-                  
-                  // Location Action Buttons Row
+
+                  // Location buttons
                   Row(
                     children: [
                       Expanded(
@@ -363,12 +535,9 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                               ? const SizedBox(
                                   width: 14,
                                   height: 14,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: _primaryColor,
-                                  ),
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: _primaryColor),
                                 )
-                              : const Icon(Icons.my_location_rounded, size: 16, color: _primaryColor),
+                              : const Icon(LucideIcons.crosshair, size: 16, color: _primaryColor),
                           label: Text(
                             _isLocating ? 'Locating...' : 'Locate Me',
                             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: _primaryColor),
@@ -376,9 +545,7 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                           style: TextButton.styleFrom(
                             backgroundColor: _primaryColor.withValues(alpha: 0.08),
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ),
@@ -390,10 +557,11 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                             if (result != null && result['address'] != null) {
                               setState(() {
                                 _addressController.text = result['address'];
+                                _selectedAddressIndex = null;
                               });
                             }
                           },
-                          icon: const Icon(Icons.map_outlined, size: 16, color: _primaryColor),
+                          icon: const Icon(LucideIcons.scan, size: 16, color: _primaryColor),
                           label: const Text(
                             'Select on Map',
                             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: _primaryColor),
@@ -401,100 +569,35 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                           style: TextButton.styleFrom(
                             backgroundColor: _primaryColor.withValues(alpha: 0.08),
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 20),
-                  
-                  // Phone Field
+
+                  // Phone field
                   _buildField(
                     label: 'Recipient Phone number',
                     controller: _phoneController,
-                    icon: Icons.phone_android_outlined,
+                    icon: LucideIcons.phone,
                     hintText: '07X XXX XXXX',
                     keyboard: TextInputType.phone,
                   ),
                   const SizedBox(height: 18),
 
-                  // Saved Addresses Section
-                  if (_savedAddresses.isNotEmpty) ...[
-                      Text(
-                        'SAVED ADDRESSES',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: context.textHint,
-                          letterSpacing: 1.0,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ..._savedAddresses.map((addr) => Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: context.surfaceColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
-                      ),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () => _selectSavedAddress(addr),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.location_on_outlined, color: _primaryColor, size: 18),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    addr['label'] ?? 'Home',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w800,
-                                      color: context.textPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    addr['address'] ?? '',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: context.textMuted,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                              onPressed: () => _deleteSavedAddress(addr['id']),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )),
-                    const SizedBox(height: 18),
-                  ],
-
-                  // Delivery Notes Field
+                  // Delivery notes
                   _buildField(
                     label: 'Delivery notes (optional)',
                     controller: _notesController,
-                    icon: Icons.note_alt_outlined,
+                    icon: LucideIcons.messageSquare,
                     hintText: 'e.g. Ring bell, leave at the door',
                     maxLines: 2,
                   ),
                   const SizedBox(height: 36),
-                  
-                  // Submit Button
+
+                  // Submit button
                   SizedBox(
                     width: double.infinity,
                     height: 54,
@@ -504,19 +607,11 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
                         backgroundColor: _primaryColor,
                         foregroundColor: Colors.white,
                         elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       child: Text(
-                        widget.proceedToCheckout
-                            ? 'Continue to Checkout'
-                            : 'Save Address',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
-                          letterSpacing: 0.2,
-                        ),
+                        widget.proceedToCheckout ? 'Continue to Checkout' : 'Save Address',
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, letterSpacing: 0.2),
                       ),
                     ),
                   ),
