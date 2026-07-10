@@ -296,6 +296,21 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           GestureDetector(
+            onTap: () => BuyerNavigator.notifications(context),
+            child: Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: context.surfaceColor,
+                shape: BoxShape.circle,
+                border: Border.all(color: context.cardBorder.withValues(alpha: 0.3)),
+              ),
+              child: Icon(Icons.notifications_none_rounded,
+                  color: context.textPrimary, size: 22),
+            ),
+          ),
+          const SizedBox(width: 10),
+          GestureDetector(
             onTap: () => BuyerNavigator.cart(context),
             child: Stack(
               clipBehavior: Clip.none,
@@ -505,25 +520,40 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildRidesPlaceholder() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-      child: Column(
-        children: [
-          Icon(Icons.directions_bike_rounded, color: context.textMuted, size: 64),
-          const SizedBox(height: 16),
-          Text(
-            'Rides Coming Soon',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: context.textPrimary,
+      child: GestureDetector(
+        onTap: () => BuyerNavigator.rides(context),
+        child: Column(
+          children: [
+            Icon(Icons.directions_bike_rounded, color: context.textMuted, size: 64),
+            const SizedBox(height: 16),
+            Text(
+              'Book a Ride',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: context.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Book bike & tuk rides across Sri Lanka',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: context.textMuted, fontSize: 14),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              'Tap to book bike, tuk or car rides',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: context.textMuted, fontSize: 14),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00C6FF),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Text(
+                'Open Rides',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -531,25 +561,40 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildParcelPlaceholder() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-      child: Column(
-        children: [
-          Icon(Icons.inventory_2_rounded, color: context.textMuted, size: 64),
-          const SizedBox(height: 16),
-          Text(
-            'Parcel Coming Soon',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: context.textPrimary,
+      child: GestureDetector(
+        onTap: () => BuyerNavigator.parcel(context),
+        child: Column(
+          children: [
+            Icon(Icons.inventory_2_rounded, color: context.textMuted, size: 64),
+            const SizedBox(height: 16),
+            Text(
+              'Send a Parcel',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: context.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Send packages anywhere fast & reliable',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: context.textMuted, fontSize: 14),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              'Tap to send packages anywhere fast',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: context.textMuted, fontSize: 14),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6C5CE7),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Text(
+                'Open Parcel',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

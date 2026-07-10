@@ -211,6 +211,40 @@ DROP POLICY IF EXISTS "Anyone can read active offers" ON "Offers";
 CREATE POLICY "Anyone can read active offers" ON "Offers"
   FOR SELECT USING (true);
 
+-- ── Favorites (buyer) ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS "Favorites" (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT NOT NULL,
+  restaurant_id TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, restaurant_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_favorites_user ON "Favorites"(user_id);
+
+ALTER TABLE "Favorites" ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users manage own favorites" ON "Favorites";
+CREATE POLICY "Users manage own favorites" ON "Favorites"
+  FOR ALL USING (user_id = auth.uid()::text OR true) WITH CHECK (true);
+
+-- ── Notifications ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS "Notifications" (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  type TEXT DEFAULT 'info',
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON "Notifications"(user_id);
+
+ALTER TABLE "Notifications" ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users manage own notifications" ON "Notifications";
+CREATE POLICY "Users manage own notifications" ON "Notifications"
+  FOR ALL USING (user_id = auth.uid()::text OR true) WITH CHECK (true);
+
 -- ── Realtime ───────────────────────────────────────────────────
 DO $$
 BEGIN

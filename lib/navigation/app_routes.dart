@@ -17,4 +17,10 @@ abstract final class AppRoutes {
   static const orderHistory = '/order-history';
   static const profile = '/profile';
   static const locationPicker = '/location-picker';
+  static const favorites = '/favorites';
+  static const notifications = '/notifications';
+  static const review = '/review';
+  static const helpSupport = '/help-support';
+  static const rides = '/rides';
+  static const parcel = '/parcel';
 }

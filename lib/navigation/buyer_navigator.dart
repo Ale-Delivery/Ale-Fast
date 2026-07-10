@@ -4,15 +4,21 @@ import '../screens/cart_screen.dart';
 import '../screens/checkout_screen.dart';
 import '../screens/delivery_address_screen.dart';
 import '../screens/details_screen.dart';
+import '../screens/favorites_screen.dart';
 import '../screens/food_detail_screen.dart';
+import '../screens/help_support_screen.dart';
 import '../screens/home_screen.dart';
+import '../screens/notifications_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/order_history_screen.dart';
 import '../screens/order_placed_screen.dart';
 import '../screens/order_tracking_screen.dart';
+import '../screens/parcel_screen.dart';
 import '../screens/phone_auth_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/profile_setup_screen.dart';
+import '../screens/review_screen.dart';
+import '../screens/rides_screen.dart';
 import '../screens/search_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/verification_screen.dart';
@@ -184,6 +190,46 @@ class BuyerNavigator {
   static Future<Map<String, dynamic>?> locationPicker(BuildContext context) {
     return Navigator.of(context).push<Map<String, dynamic>?>(
       _route(const LocationPickerScreen(), name: AppRoutes.locationPicker),
+    );
+  }
+
+  // ── New features ─────────────────────────────────────────────
+  static Future<void> favorites(BuildContext context) {
+    return Navigator.of(context).push(
+      _route(const FavoritesScreen(), name: AppRoutes.favorites),
+    );
+  }
+
+  static Future<void> notifications(BuildContext context) {
+    return Navigator.of(context).push(
+      _route(const NotificationsScreen(), name: AppRoutes.notifications),
+    );
+  }
+
+  static void review(BuildContext context, String orderId, String restaurantId) {
+    Navigator.of(context).push(
+      _route(
+        ReviewScreen(orderId: orderId, restaurantId: restaurantId),
+        name: AppRoutes.review,
+      ),
+    );
+  }
+
+  static Future<void> helpSupport(BuildContext context) {
+    return Navigator.of(context).push(
+      _route(const HelpSupportScreen(), name: AppRoutes.helpSupport),
+    );
+  }
+
+  static Future<void> rides(BuildContext context) {
+    return Navigator.of(context).push(
+      _route(const RidesScreen(), name: AppRoutes.rides),
+    );
+  }
+
+  static Future<void> parcel(BuildContext context) {
+    return Navigator.of(context).push(
+      _route(const ParcelScreen(), name: AppRoutes.parcel),
     );
   }
 }

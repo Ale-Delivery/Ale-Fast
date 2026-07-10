@@ -275,17 +275,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     },
                   ),
                   _buildMenuTile(
+                    icon: Icons.favorite_border_rounded,
+                    title: 'Favorites',
+                    subtitle: 'Your saved restaurants',
+                    onTap: () => BuyerNavigator.favorites(context),
+                  ),
+                  _buildMenuTile(
+                    icon: Icons.notifications_none_rounded,
+                    title: 'Notifications',
+                    subtitle: 'Order updates & promotions',
+                    onTap: () => BuyerNavigator.notifications(context),
+                  ),
+                  _buildMenuTile(
                     icon: Icons.support_agent_rounded,
                     title: 'Help & Support',
-                    subtitle: '24/7 customer care service',
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Support coming soon'),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
+                    subtitle: 'FAQ and contact us',
+                    onTap: () => BuyerNavigator.helpSupport(context),
                   ),
                   const SizedBox(height: 28),
 
