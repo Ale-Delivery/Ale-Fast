@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
+import '../services/local_storage_service.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -25,7 +26,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final userId = Supabase.instance.client.auth.currentUser?.id;
+      final userId = await LocalStorageService.getUserId();
       if (userId == null) {
         if (mounted) setState(() => _loading = false);
         return;
@@ -60,7 +61,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Future<void> _markAllRead() async {
     try {
-      final userId = Supabase.instance.client.auth.currentUser?.id;
+      final userId = await LocalStorageService.getUserId();
       if (userId == null) return;
       await Supabase.instance.client
           .from('Notifications')

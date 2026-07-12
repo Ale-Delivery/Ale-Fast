@@ -45,8 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void _subscribeToOrders() {
-    final userId = Supabase.instance.client.auth.currentUser?.id;
+  void _subscribeToOrders() async {
+    final userId = await LocalStorageService.getUserId();
     if (userId == null) return;
 
     _orderSub?.cancel();

@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
+import '../services/local_storage_service.dart';
 
 class ReviewScreen extends StatefulWidget {
   final String orderId;
@@ -63,10 +64,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      final userId = Supabase.instance.client.auth.currentUser?.id;
+      final userId = await LocalStorageService.getUserId();
+      if (userId == null) return;
       await Supabase.instance.client.from('Reviews').insert({
         'order_id': widget.orderId,
-        'user_id': userId!,
+        'user_id': userId,
         'restaurant_id': widget.restaurantId,
         'rating': _rating,
         'comment': _commentController.text.trim(),

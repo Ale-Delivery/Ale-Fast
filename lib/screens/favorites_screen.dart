@@ -27,12 +27,39 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     final userId = await LocalStorageService.getUserId();
     if (userId == null) return [];
 
-    final data = await Supabase.instance.client
-        .from('Favorites')
-        .select('restaurant_id, Restaurants(*)')
-        .eq('user_id', userId);
+    try {
+      // Step 1: Get favorite restaurant IDs
+      final favData = await Supabase.instance.client
+          .from('Favorites')
+          .select('restaurant_id')
+          .eq('user_id', userId);
 
-    return List<Map<String, dynamic>>.from(data);
+      if (favData.isEmpty) return [];
+
+      final restaurantIds = favData.map((r) => r['restaurant_id'].toString()).toList();
+
+      // Step 2: Fetch restaurant details
+      final restData = await Supabase.instance.client
+          .from('Restaurants')
+          .select()
+          .inFilter('id', restaurantIds);
+
+      // Step 3: Merge
+      final restMap = <String, Map<String, dynamic>>{};
+      for (final r in restData) {
+        restMap[r['id'].toString()] = r;
+      }
+
+      return favData.map((fav) {
+        return {
+          'restaurant_id': fav['restaurant_id'],
+          'Restaurants': restMap[fav['restaurant_id'].toString()],
+        };
+      }).where((f) => f['Restaurants'] != null).toList();
+    } catch (e) {
+      debugPrint('Error fetching favorites: $e');
+      rethrow;
+    }
   }
 
   Future<void> _removeFavorite(String restaurantId) async {
