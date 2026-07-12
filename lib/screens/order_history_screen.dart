@@ -142,7 +142,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
       backgroundColor: context.scaffoldBg,
       appBar: AppBar(
         title: Text(
-          'My Orders',
+          'Your Activities',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
