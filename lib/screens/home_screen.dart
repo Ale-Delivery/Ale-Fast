@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -537,45 +536,35 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBottomNav() {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(color: Colors.transparent),
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-          decoration: BoxDecoration(
-            color: context.scaffoldBg.withValues(alpha: 0.75),
-          ),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            decoration: BoxDecoration(
-              color: context.cardBg.withValues(alpha: 0.85),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: context.cardBorder, width: 0.5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 24,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      decoration: BoxDecoration(
+        color: context.scaffoldBg,
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        decoration: BoxDecoration(
+          color: context.cardBg,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: context.cardBorder, width: 0.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 24,
+              offset: const Offset(0, 4),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _navItem(0, LucideIcons.home, 'Home'),
-                _navItem(1, LucideIcons.clipboardList, 'Activities'),
-                _navItem(2, LucideIcons.shoppingBag, 'Cart'),
-                _navItem(3, LucideIcons.user, 'Profile'),
-              ],
-            ),
-          ),
+          ],
         ),
-      ],
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _navItem(0, LucideIcons.home, 'Home'),
+            _navItem(1, LucideIcons.clipboardList, 'Activities'),
+            _navItem(2, LucideIcons.shoppingBag, 'Cart'),
+            _navItem(3, LucideIcons.user, 'Profile'),
+          ],
+        ),
+      ),
     );
   }
 
