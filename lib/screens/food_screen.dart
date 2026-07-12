@@ -23,6 +23,7 @@ class _FoodScreenState extends State<FoodScreen> {
 
   String selectedCategory = 'All';
   String _query = '';
+  Set<String> _favoriteIds = {};
 
   final List<Map<String, dynamic>> _categories = const [
     {'name': 'All', 'icon': LucideIcons.grid3x3},
@@ -37,6 +38,7 @@ class _FoodScreenState extends State<FoodScreen> {
     super.initState();
     _restaurantsFuture = _fetchRestaurants();
     _offersFuture = _fetchOffers();
+    _loadFavorites();
   }
 
   @override
@@ -68,6 +70,49 @@ class _FoodScreenState extends State<FoodScreen> {
       return List<Map<String, dynamic>>.from(data);
     } catch (_) {
       return [];
+    }
+  }
+
+  Future<void> _loadFavorites() async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
+    try {
+      final data = await Supabase.instance.client
+          .from('Favorites')
+          .select('restaurant_id')
+          .eq('user_id', userId);
+      if (mounted) {
+        setState(() {
+          _favoriteIds = Set<String>.from(
+            data.map((r) => r['restaurant_id'].toString()),
+          );
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _toggleFavorite(String restaurantId) async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
+
+    final isFav = _favoriteIds.contains(restaurantId);
+    try {
+      if (isFav) {
+        await Supabase.instance.client
+            .from('Favorites')
+            .delete()
+            .eq('user_id', userId)
+            .eq('restaurant_id', restaurantId);
+        setState(() => _favoriteIds.remove(restaurantId));
+      } else {
+        await Supabase.instance.client.from('Favorites').insert({
+          'user_id': userId,
+          'restaurant_id': restaurantId,
+        });
+        setState(() => _favoriteIds.add(restaurantId));
+      }
+    } catch (e) {
+      debugPrint('Error toggling favorite: $e');
     }
   }
 
@@ -371,6 +416,8 @@ class _FoodScreenState extends State<FoodScreen> {
     final cuisine = restaurant['cuisine'] ?? 'Various';
     final rating = (restaurant['rating'] as num?)?.toDouble() ?? 0.0;
     final imageUrl = restaurant['image_url'] ?? '';
+    final id = restaurant['id'].toString();
+    final isFav = _favoriteIds.contains(id);
 
     return GestureDetector(
       onTap: () {
@@ -433,6 +480,26 @@ class _FoodScreenState extends State<FoodScreen> {
                           ),
                         ),
                       ),
+                      GestureDetector(
+                        onTap: () => _toggleFavorite(id),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: isFav
+                                ? AppColors.red.withValues(alpha: 0.08)
+                                : context.chipBg,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            isFav ? LucideIcons.heart : LucideIcons.heart,
+                            size: 18,
+                            color: isFav ? AppColors.red : context.textMuted,
+                            fill: isFav ? 1.0 : 0.0,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       if (rating > 0)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
