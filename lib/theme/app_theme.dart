@@ -57,8 +57,16 @@ class AppColors {
 class AppGradients {
   AppGradients._();
 
+  // Premium fiery red gradient: Deep Crimson → Vibrant Red
   static const LinearGradient primary = LinearGradient(
-    colors: [Color(0xFFE63946), Color(0xFFC62828)],
+    colors: [Color(0xFFDC143C), Color(0xFFFF3B30)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  // Even more vibrant for hero sections
+  static const LinearGradient hero = LinearGradient(
+    colors: [Color(0xFFDC143C), Color(0xFFFF6B35)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -70,7 +78,7 @@ class AppGradients {
   );
 
   static const LinearGradient avatar = LinearGradient(
-    colors: [Color(0xFFE63946), Color(0xFFC62828)],
+    colors: [Color(0xFFDC143C), Color(0xFFFF3B30)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -80,6 +88,15 @@ class AppGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
+  // Glowing shadow for gradient buttons
+  static List<BoxShadow> get glow => [
+        BoxShadow(
+          color: const Color(0xFFFF3B30).withValues(alpha: 0.35),
+          blurRadius: 24,
+          offset: const Offset(0, 8),
+        ),
+      ];
 }
 
 // ─── Theme ─────────────────────────────────────────────────────
@@ -165,6 +182,7 @@ class AppTheme {
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(16)),
           ),
+          shadowColor: const Color(0xFFFF3B30).withValues(alpha: 0.35),
           textStyle: const TextStyle(
             fontFamily: 'Inter',
             fontSize: 16,

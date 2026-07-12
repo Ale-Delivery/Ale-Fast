@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -291,14 +292,17 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            'What do you need?',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: context.textPrimary,
-              letterSpacing: -0.8,
-              height: 1.1,
+          ShaderMask(
+            shaderCallback: (bounds) => AppGradients.hero.createShader(bounds),
+            child: const Text(
+              'What do you need?',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: -0.8,
+                height: 1.1,
+              ),
             ),
           ),
         ],
@@ -346,13 +350,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: AppColors.accent.withValues(alpha: 0.1),
+                      gradient: AppGradients.primary,
                       borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.accent.withValues(alpha: 0.25),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Icon(
                       s['icon'] as IconData,
                       size: 22,
-                      color: AppColors.accent,
+                      color: Colors.white,
                     ),
                   ),
                   Column(
@@ -407,13 +418,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.08),
+                    gradient: AppGradients.primary,
                     borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.accent.withValues(alpha: 0.25),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Icon(
                     a['icon'] as IconData,
                     size: 22,
-                    color: AppColors.accent,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -462,19 +480,9 @@ class _HomeScreenState extends State<HomeScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFFE63946), Color(0xFFC62828)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          gradient: AppGradients.hero,
           borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.accent.withValues(alpha: 0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          boxShadow: AppGradients.glow,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -482,7 +490,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: Colors.white.withValues(alpha: 0.25),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Text(
@@ -529,35 +537,45 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBottomNav() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-      decoration: BoxDecoration(
-        color: context.scaffoldBg.withValues(alpha: 0.85),
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        decoration: BoxDecoration(
-          color: context.cardBg.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: context.cardBorder, width: 0.5),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 24,
-              offset: const Offset(0, 4),
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(color: Colors.transparent),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          decoration: BoxDecoration(
+            color: context.scaffoldBg.withValues(alpha: 0.75),
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            decoration: BoxDecoration(
+              color: context.cardBg.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: context.cardBorder, width: 0.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 24,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-          ],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _navItem(0, LucideIcons.home, 'Home'),
+                _navItem(1, LucideIcons.clipboardList, 'Activities'),
+                _navItem(2, LucideIcons.shoppingBag, 'Cart'),
+                _navItem(3, LucideIcons.user, 'Profile'),
+              ],
+            ),
+          ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _navItem(0, LucideIcons.home, 'Home'),
-            _navItem(1, LucideIcons.clipboardList, 'Activities'),
-            _navItem(2, LucideIcons.shoppingBag, 'Cart'),
-            _navItem(3, LucideIcons.user, 'Profile'),
-          ],
-        ),
-      ),
+      ],
     );
   }
 
@@ -573,8 +591,10 @@ class _HomeScreenState extends State<HomeScreen> {
           vertical: 10,
         ),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.accent : Colors.transparent,
+          gradient: isActive ? AppGradients.primary : null,
+          color: isActive ? null : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
+          boxShadow: isActive ? AppGradients.glow : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
