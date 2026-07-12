@@ -227,6 +227,22 @@ DROP POLICY IF EXISTS "Users manage own favorites" ON "Favorites";
 CREATE POLICY "Users manage own favorites" ON "Favorites"
   FOR ALL USING (user_id = auth.uid()::text OR true) WITH CHECK (true);
 
+-- ── Food Favorites (buyer) ───────────────────────────────────
+CREATE TABLE IF NOT EXISTS "FoodFavorites" (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT NOT NULL,
+  food_id TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, food_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_food_favorites_user ON "FoodFavorites"(user_id);
+
+ALTER TABLE "FoodFavorites" ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users manage own food favorites" ON "FoodFavorites";
+CREATE POLICY "Users manage own food favorites" ON "FoodFavorites"
+  FOR ALL USING (user_id = auth.uid()::text OR true) WITH CHECK (true);
+
 -- ── Notifications ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "Notifications" (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

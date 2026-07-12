@@ -419,23 +419,21 @@ class _FoodScreenState extends State<FoodScreen> {
     final id = restaurant['id'].toString();
     final isFav = _favoriteIds.contains(id);
 
-    return GestureDetector(
-      onTap: () {
-        BuyerNavigator.restaurantDetails(context, restaurant);
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: context.cardBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: context.cardBorder, width: 0.5),
-          boxShadow: context.cardShadow,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image
-            ClipRRect(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: context.cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: context.cardBorder, width: 0.5),
+        boxShadow: context.cardShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image
+          GestureDetector(
+            onTap: () => BuyerNavigator.restaurantDetails(context, restaurant),
+            child: ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               child: imageUrl.isNotEmpty
                   ? CachedNetworkImage(
@@ -462,8 +460,12 @@ class _FoodScreenState extends State<FoodScreen> {
                       child: Icon(LucideIcons.store, color: context.textHint, size: 32),
                     ),
             ),
-            // Info
-            Padding(
+          ),
+          // Info
+          GestureDetector(
+            onTap: () => BuyerNavigator.restaurantDetails(context, restaurant),
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -482,6 +484,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       ),
                       GestureDetector(
                         onTap: () => _toggleFavorite(id),
+                        behavior: HitTestBehavior.opaque,
                         child: Container(
                           width: 36,
                           height: 36,
@@ -492,7 +495,7 @@ class _FoodScreenState extends State<FoodScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
-                            isFav ? LucideIcons.heart : LucideIcons.heart,
+                            LucideIcons.heart,
                             size: 18,
                             color: isFav ? AppColors.red : context.textMuted,
                             fill: isFav ? 1.0 : 0.0,
@@ -537,8 +540,8 @@ class _FoodScreenState extends State<FoodScreen> {
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

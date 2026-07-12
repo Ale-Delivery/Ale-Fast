@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/models.dart';
 import '../services/database_service.dart';
 import '../providers/cart_provider.dart';
@@ -21,11 +23,13 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
   bool _loading = true;
   String _activeTab = 'Burger';
   final List<String> _tabs = ['Burger', 'Sandwich', 'Pizza', 'Sandwich'];
+  Set<String> _favoriteFoodIds = {};
 
   @override
   void initState() {
     super.initState();
     _loadFoods();
+    _loadFoodFavorites();
   }
 
   Future<void> _loadFoods() async {
@@ -33,6 +37,49 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
     final foods = await DatabaseService.getFoodItems(
         restaurantId: widget.restaurant.id);
     if (mounted) setState(() { _foods = foods; _loading = false; });
+  }
+
+  Future<void> _loadFoodFavorites() async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
+    try {
+      final data = await Supabase.instance.client
+          .from('FoodFavorites')
+          .select('food_id')
+          .eq('user_id', userId);
+      if (mounted) {
+        setState(() {
+          _favoriteFoodIds = Set<String>.from(
+            data.map((r) => r['food_id'].toString()),
+          );
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _toggleFoodFavorite(String foodId) async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
+
+    final isFav = _favoriteFoodIds.contains(foodId);
+    try {
+      if (isFav) {
+        await Supabase.instance.client
+            .from('FoodFavorites')
+            .delete()
+            .eq('user_id', userId)
+            .eq('food_id', foodId);
+        setState(() => _favoriteFoodIds.remove(foodId));
+      } else {
+        await Supabase.instance.client.from('FoodFavorites').insert({
+          'user_id': userId,
+          'food_id': foodId,
+        });
+        setState(() => _favoriteFoodIds.add(foodId));
+      }
+    } catch (e) {
+      debugPrint('Error toggling food favorite: $e');
+    }
   }
 
   @override
@@ -160,6 +207,8 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
                 delegate: SliverChildBuilderDelegate(
                   (_, i) {
                     final food = _foods[i];
+                    final foodId = food.id.toString();
+                    final isFoodFav = _favoriteFoodIds.contains(foodId);
                     return GestureDetector(
                       onTap: () => Navigator.push(
                         context,
@@ -208,6 +257,27 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
                                 ],
                               ),
                             ),
+                            GestureDetector(
+                              onTap: () => _toggleFoodFavorite(foodId),
+                              behavior: HitTestBehavior.opaque,
+                              child: Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: isFoodFav
+                                      ? AppColors.red.withValues(alpha: 0.08)
+                                      : context.chipBg,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  LucideIcons.heart,
+                                  size: 18,
+                                  color: isFoodFav ? AppColors.red : context.textMuted,
+                                  fill: isFoodFav ? 1.0 : 0.0,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             AddButton(
                               onTap: () {
                                 context.read<CartProvider>().addItem(food);
