@@ -35,6 +35,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _checkingPromo = false;
   DateTime? _scheduledTime;
   bool _scheduleOrder = false;
+  int _selectedTip = 0;
+  final _instructionsController = TextEditingController();
 
   @override
   void dispose() {
@@ -112,16 +114,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     setState(() => _placing = true);
     try {
+      final instructions = _instructionsController.text.trim();
       final order = await OrderService.placeOrder(
         cart: cart,
         deliveryAddress:
             '${widget.addressLabel}: ${widget.deliveryAddress}',
         deliveryPhone: widget.deliveryPhone,
-        deliveryNotes: widget.deliveryNotes,
+        deliveryNotes: instructions.isNotEmpty ? instructions : widget.deliveryNotes,
         paymentMethod: _paymentMethod,
         promoCode: _appliedPromoCode,
         discount: _discountAmount,
         scheduledAt: _scheduledTime,
+        tip: _selectedTip.toDouble(),
       );
 
       cart.clearCart();
@@ -253,6 +257,80 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                 ],
                 const SizedBox(height: 20),
+                const Text('Tip your rider',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                const SizedBox(height: 4),
+                Text('Show appreciation for fast delivery',
+                    style: TextStyle(fontSize: 12, color: context.textMuted)),
+                const SizedBox(height: 12),
+                Row(
+                  children: [0, 100, 200, 300, 500].map((amount) {
+                    final isSelected = _selectedTip == amount;
+                    return Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _selectedTip = amount),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.accent
+                                : context.cardBg,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.accent
+                                  : context.divider,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                amount == 0 ? Icons.close : Icons.favorite,
+                                color: isSelected ? Colors.white : context.textMuted,
+                                size: 16,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                amount == 0 ? 'None' : 'Rs.$amount',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: isSelected ? Colors.white : context.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 20),
+                const Text('Delivery instructions',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                const SizedBox(height: 4),
+                Text('Gate code, floor, landmark, etc.',
+                    style: TextStyle(fontSize: 12, color: context.textMuted)),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _instructionsController,
+                  maxLines: 2,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    hintText: 'e.g. Ring bell twice, Apt 3B, near the park',
+                    hintStyle: TextStyle(color: context.textMuted, fontSize: 14),
+                    filled: true,
+                    fillColor: context.inputBg,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.all(14),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 const Text('Promo code',
                     style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                 const SizedBox(height: 12),
@@ -376,8 +454,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   const SizedBox(height: 6),
                   _row('Discount ($_discountPercent%)', '- Rs. ${_discountAmount.toStringAsFixed(0)}'),
                 ],
+                if (_selectedTip > 0) ...[
+                  const SizedBox(height: 6),
+                  _row('Rider tip', 'Rs. $_selectedTip'),
+                ],
                 const Divider(height: 24),
-                _row('Total', 'Rs. ${(_discountAmount > 0 ? cart.total - _discountAmount : cart.total).toStringAsFixed(0)}', bold: true),
+                _row('Total', 'Rs. ${(_discountAmount > 0 ? cart.total - _discountAmount + _selectedTip : cart.total + _selectedTip).toStringAsFixed(0)}', bold: true),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../services/local_storage_service.dart';
@@ -235,6 +236,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   if (_isEditing) _buildEditForm() else _buildProfileDetails(),
                   const SizedBox(height: 24),
                   if (!_isEditing) ...[
+                    _buildReferralSection(),
+                    const SizedBox(height: 24),
                     _buildMenuSection('Preferences', [
                       _buildThemeSwitcher(),
                       _menuItem(LucideIcons.bell, 'Notifications', () => BuyerNavigator.notifications(context)),
@@ -658,6 +661,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Icon(LucideIcons.chevronRight, size: 18, color: context.textHint),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildReferralSection() {
+    final code = _phone ?? 'USER';
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: AppGradients.primary,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.card_giftcard, color: Colors.white, size: 28),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Refer & Earn',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Share your code, earn Rs.100 each',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  code,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: 3,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: code));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Referral code copied!'),
+                        backgroundColor: AppColors.green,
+                      ),
+                    );
+                  },
+                  child: const Icon(Icons.copy, color: Colors.white, size: 20),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

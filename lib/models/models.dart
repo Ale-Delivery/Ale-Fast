@@ -227,6 +227,7 @@ class Order {
   final double? driverLat;
   final double? driverLng;
   final String? driverEta;
+  final double tip;
 
   const Order({
     required this.id,
@@ -246,6 +247,7 @@ class Order {
     this.driverLat,
     this.driverLng,
     this.driverEta,
+    this.tip = 0,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
@@ -270,6 +272,7 @@ class Order {
         driverLat: _toDoubleOrNull(json['driver_lat']),
         driverLng: _toDoubleOrNull(json['driver_lng']),
         driverEta: json['driver_eta']?.toString(),
+        tip: _toDouble(json['tip']),
       );
 
   Map<String, dynamic> toJson() => {
@@ -290,6 +293,7 @@ class Order {
         'driver_lat': driverLat,
         'driver_lng': driverLng,
         'driver_eta': driverEta,
+        'tip': tip,
       };
 }
 

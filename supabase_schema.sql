@@ -112,6 +112,8 @@ CREATE TABLE IF NOT EXISTS "Orders" (
   driver_lat DOUBLE PRECISION,
   driver_lng DOUBLE PRECISION,
   driver_eta TEXT,
+  tip DECIMAL(10, 2) DEFAULT 0,
+  referral_code TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -266,6 +268,24 @@ CREATE POLICY "Anyone can read messages" ON "Messages"
 DROP POLICY IF EXISTS "Anyone can send messages" ON "Messages";
 CREATE POLICY "Anyone can send messages" ON "Messages"
   FOR INSERT WITH CHECK (true);
+
+-- ── Referrals ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS "Referrals" (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  referrer_id TEXT NOT NULL,
+  referred_phone TEXT NOT NULL,
+  referred_user_id TEXT,
+  status TEXT DEFAULT 'pending',
+  reward_amount DECIMAL(10, 2) DEFAULT 100,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON "Referrals"(referrer_id);
+
+ALTER TABLE "Referrals" ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can manage referrals" ON "Referrals";
+CREATE POLICY "Anyone can manage referrals" ON "Referrals"
+  FOR ALL USING (true) WITH CHECK (true);
 
 -- ── Notifications ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "Notifications" (

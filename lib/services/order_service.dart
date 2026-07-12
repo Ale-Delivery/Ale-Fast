@@ -16,6 +16,7 @@ class OrderService {
     String? promoCode,
     double discount = 0,
     DateTime? scheduledAt,
+    double tip = 0,
   }) async {
     if (cart.items.isEmpty) {
       throw Exception('Cart is empty');
@@ -51,6 +52,11 @@ class OrderService {
 
     if (scheduledAt != null) {
       orderData['scheduled_at'] = scheduledAt.toIso8601String();
+    }
+
+    if (tip > 0) {
+      orderData['tip'] = tip;
+      orderData['total'] = (orderData['total'] as double) + tip;
     }
 
     final orderResponse =

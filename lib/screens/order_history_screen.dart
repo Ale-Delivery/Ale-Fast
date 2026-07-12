@@ -81,12 +81,8 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
         if (response == null) continue;
 
         final food = FoodItem.fromJson(Map<String, dynamic>.from(response));
-        cart.addItem(food, size: item.selectedSize ?? 'Regular');
-        if (cart.items.length > 1) {
-          final lastItem = cart.items.last;
-          while (lastItem.quantity < item.quantity) {
-            cart.addItem(food, size: item.selectedSize ?? 'Regular');
-          }
+        for (int i = 0; i < item.quantity; i++) {
+          cart.addItem(food, size: item.selectedSize ?? 'Regular');
         }
       }
 
@@ -306,12 +302,15 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
                 ),
                 const SizedBox(width: 12),
               ],
-              if (order.status == OrderStatus.delivered)
+              if (order.status == OrderStatus.delivered ||
+                  order.status == OrderStatus.cancelled)
                 Expanded(
                   child: SizedBox(
                     height: 40,
-                    child: ElevatedButton(
+                    child: ElevatedButton.icon(
                       onPressed: () => _reorder(order),
+                      icon: const Icon(Icons.replay, size: 16),
+                      label: const Text('Reorder', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.accent,
                         foregroundColor: Colors.white,
@@ -319,7 +318,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Reorder', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ),
