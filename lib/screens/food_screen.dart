@@ -426,141 +426,123 @@ class _FoodScreenState extends State<FoodScreen> {
     final id = restaurant['id'].toString();
     final isFav = _favoriteIds.contains(id);
 
-    return Stack(
-      children: [
-        GestureDetector(
-          onTap: () => BuyerNavigator.restaurantDetails(context, restaurant),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
-              color: context.cardBg,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: context.cardBorder, width: 0.5),
-              boxShadow: context.cardShadow,
+    return GestureDetector(
+      onTap: () => BuyerNavigator.restaurantDetails(context, restaurant),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: context.cardBg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: context.cardBorder, width: 0.5),
+          boxShadow: context.cardShadow,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              child: imageUrl.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      height: 160,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(
+                        height: 160,
+                        color: context.chipBg,
+                        child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accent),
+                        ),
+                      ),
+                      errorWidget: (_, __, ___) => Container(
+                        height: 160,
+                        color: context.chipBg,
+                        child: Icon(LucideIcons.imageOff, color: context.textHint, size: 32),
+                      ),
+                    )
+                  : Container(
+                      height: 160,
+                      color: context.chipBg,
+                      child: Icon(LucideIcons.store, color: context.textHint, size: 32),
+                    ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Image
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                  child: imageUrl.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: imageUrl,
-                          height: 160,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) => Container(
-                            height: 160,
-                            color: context.chipBg,
-                            child: const Center(
-                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accent),
-                            ),
-                          ),
-                          errorWidget: (_, __, ___) => Container(
-                            height: 160,
-                            color: context.chipBg,
-                            child: Icon(LucideIcons.imageOff, color: context.textHint, size: 32),
-                          ),
-                        )
-                      : Container(
-                          height: 160,
-                          color: context.chipBg,
-                          child: Icon(LucideIcons.store, color: context.textHint, size: 32),
-                        ),
-                ),
-                // Info
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            // Info
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              name.toString(),
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: context.textPrimary,
-                              ),
-                            ),
+                      Expanded(
+                        child: Text(
+                          name.toString(),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: context.textPrimary,
                           ),
-                          const SizedBox(width: 44),
-                          if (rating > 0)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors.accent.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(LucideIcons.star, size: 12, color: AppColors.amber),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    rating.toStringAsFixed(1),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.accent,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        cuisine.toString(),
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: context.textMuted,
                         ),
                       ),
+                      GestureDetector(
+                        onTap: () => _toggleFavorite(id),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: isFav ? AppColors.red : context.chipBg,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            LucideIcons.heart,
+                            size: 18,
+                            color: isFav ? Colors.white : context.textMuted,
+                            fill: isFav ? 1.0 : 0.0,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      if (rating > 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.accent.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(LucideIcons.star, size: 12, color: AppColors.amber),
+                              const SizedBox(width: 4),
+                              Text(
+                                rating.toStringAsFixed(1),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.accent,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        // Favorite button - positioned absolutely on top
-        Positioned(
-          top: 170,
-          right: 16,
-          child: GestureDetector(
-            onTap: () {
-              _toggleFavorite(id);
-            },
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: isFav ? AppColors.red : context.cardBg,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+                  const SizedBox(height: 6),
+                  Text(
+                    cuisine.toString(),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: context.textMuted,
+                    ),
                   ),
                 ],
               ),
-              child: Icon(
-                LucideIcons.heart,
-                size: 18,
-                color: isFav ? Colors.white : context.textMuted,
-                fill: isFav ? 1.0 : 0.0,
-              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
