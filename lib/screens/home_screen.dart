@@ -125,10 +125,10 @@ class _HomeScreenState extends State<HomeScreen> {
     // Service views (Food, Rides, Parcel, Grocery)
     if (_serviceView >= 0) {
       switch (_serviceView) {
-        case 0: return const FoodScreen(isEmbedded: true);
-        case 1: return const RidesScreen(isEmbedded: true);
-        case 2: return const ParcelScreen(isEmbedded: true);
-        case 3: return const GroceryScreen(isEmbedded: true);
+        case 0: return FoodScreen(isEmbedded: true, onBack: () => setState(() => _serviceView = -1));
+        case 1: return RidesScreen(isEmbedded: true, onBack: () => setState(() => _serviceView = -1));
+        case 2: return ParcelScreen(isEmbedded: true, onBack: () => setState(() => _serviceView = -1));
+        case 3: return GroceryScreen(isEmbedded: true, onBack: () => setState(() => _serviceView = -1));
       }
     }
 
@@ -311,10 +311,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildServiceGrid() {
     final services = [
-      {'key': 'Rides', 'icon': LucideIcons.bike, 'label': 'Rides', 'desc': 'Book a ride', 'idx': 1},
-      {'key': 'Food', 'icon': LucideIcons.utensils, 'label': 'Food', 'desc': 'Order food', 'idx': 0},
-      {'key': 'Parcel', 'icon': LucideIcons.package, 'label': 'Parcel', 'desc': 'Send parcels', 'idx': 2},
-      {'key': 'Grocery', 'icon': LucideIcons.shoppingCart, 'label': 'Grocery', 'desc': 'Fresh items', 'idx': 3},
+      {
+        'key': 'Rides',
+        'icon': LucideIcons.bike,
+        'label': 'Rides',
+        'desc': 'Book a ride',
+        'idx': 1,
+        'color': const Color(0xFF3B82F6),
+      },
+      {
+        'key': 'Food',
+        'icon': LucideIcons.utensils,
+        'label': 'Food',
+        'desc': 'Order food',
+        'idx': 0,
+        'color': const Color(0xFFF59E0B),
+      },
+      {
+        'key': 'Parcel',
+        'icon': LucideIcons.package,
+        'label': 'Parcel',
+        'desc': 'Send parcels',
+        'idx': 2,
+        'color': const Color(0xFF8B5CF6),
+      },
+      {
+        'key': 'Grocery',
+        'icon': LucideIcons.shoppingCart,
+        'label': 'Grocery',
+        'desc': 'Fresh items',
+        'idx': 3,
+        'color': const Color(0xFF22C55E),
+      },
     ];
 
     return Padding(
@@ -331,6 +359,7 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: services.length,
         itemBuilder: (context, i) {
           final s = services[i];
+          final svcColor = s['color'] as Color;
           return GestureDetector(
             onTap: () => _openService(s['idx'] as int),
             child: Container(
@@ -349,20 +378,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      gradient: AppGradients.primary,
+                      color: svcColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.accent.withValues(alpha: 0.25),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
                     ),
                     child: Icon(
                       s['icon'] as IconData,
                       size: 22,
-                      color: Colors.white,
+                      color: svcColor,
                     ),
                   ),
                   Column(
@@ -398,10 +420,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildQuickActions() {
     final actions = [
-      {'icon': LucideIcons.clock, 'label': 'Orders', 'onTap': () => _handleTabTap(1)},
-      {'icon': LucideIcons.heart, 'label': 'Favorites', 'onTap': () => BuyerNavigator.favorites(context)},
-      {'icon': LucideIcons.percent, 'label': 'Offers', 'onTap': () => _openService(0)},
-      {'icon': LucideIcons.headphones, 'label': 'Support', 'onTap': () => BuyerNavigator.helpSupport(context)},
+      {'icon': LucideIcons.clock, 'label': 'Orders', 'onTap': () => _handleTabTap(1), 'color': const Color(0xFF3B82F6)},
+      {'icon': LucideIcons.heart, 'label': 'Favorites', 'onTap': () => BuyerNavigator.favorites(context), 'color': const Color(0xFFEF4444)},
+      {'icon': LucideIcons.percent, 'label': 'Offers', 'onTap': () => _openService(0), 'color': const Color(0xFFF59E0B)},
+      {'icon': LucideIcons.headphones, 'label': 'Support', 'onTap': () => BuyerNavigator.helpSupport(context), 'color': const Color(0xFF8B5CF6)},
     ];
 
     return Padding(
@@ -409,6 +431,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: actions.map((a) {
+          final itemColor = a['color'] as Color;
           return GestureDetector(
             onTap: a['onTap'] as VoidCallback,
             child: Column(
@@ -417,20 +440,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    gradient: AppGradients.primary,
+                    color: itemColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.accent.withValues(alpha: 0.25),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: Icon(
                     a['icon'] as IconData,
                     size: 22,
-                    color: Colors.white,
+                    color: itemColor,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -580,10 +596,8 @@ class _HomeScreenState extends State<HomeScreen> {
           vertical: 10,
         ),
         decoration: BoxDecoration(
-          gradient: isActive ? AppGradients.primary : null,
-          color: isActive ? null : Colors.transparent,
+          color: isActive ? AppColors.accent.withValues(alpha: 0.08) : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: isActive ? AppGradients.glow : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -591,14 +605,14 @@ class _HomeScreenState extends State<HomeScreen> {
             Icon(
               icon,
               size: 20,
-              color: isActive ? Colors.white : context.textMuted,
+              color: isActive ? AppColors.accent : context.textMuted,
             ),
             if (isActive) ...[
               const SizedBox(width: 8),
               Text(
                 label,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: AppColors.accent,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),

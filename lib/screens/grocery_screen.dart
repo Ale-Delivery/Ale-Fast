@@ -6,7 +6,8 @@ import '../theme/theme_colors.dart';
 
 class GroceryScreen extends StatefulWidget {
   final bool isEmbedded;
-  const GroceryScreen({super.key, this.isEmbedded = false});
+  final VoidCallback? onBack;
+  const GroceryScreen({super.key, this.isEmbedded = false, this.onBack});
 
   @override
   State<GroceryScreen> createState() => _GroceryScreenState();
@@ -16,14 +17,14 @@ class _GroceryScreenState extends State<GroceryScreen> {
   String _query = '';
 
   final List<Map<String, dynamic>> _categories = const [
-    {'name': 'Fruits', 'icon': LucideIcons.apple},
-    {'name': 'Vegetables', 'icon': LucideIcons.leaf},
-    {'name': 'Dairy', 'icon': LucideIcons.milk},
-    {'name': 'Bakery', 'icon': LucideIcons.croissant},
-    {'name': 'Snacks', 'icon': LucideIcons.cookie},
-    {'name': 'Drinks', 'icon': LucideIcons.coffee},
-    {'name': 'Meat', 'icon': LucideIcons.beef},
-    {'name': 'Frozen', 'icon': LucideIcons.snowflake},
+    {'name': 'Fruits', 'icon': LucideIcons.apple, 'color': Color(0xFF22C55E)},
+    {'name': 'Vegetables', 'icon': LucideIcons.leaf, 'color': Color(0xFF16A34A)},
+    {'name': 'Dairy', 'icon': LucideIcons.milk, 'color': Color(0xFF3B82F6)},
+    {'name': 'Bakery', 'icon': LucideIcons.croissant, 'color': Color(0xFFF59E0B)},
+    {'name': 'Snacks', 'icon': LucideIcons.cookie, 'color': Color(0xFFEA580C)},
+    {'name': 'Drinks', 'icon': LucideIcons.coffee, 'color': Color(0xFF8B5CF6)},
+    {'name': 'Meat', 'icon': LucideIcons.beef, 'color': Color(0xFFEF4444)},
+    {'name': 'Frozen', 'icon': LucideIcons.snowflake, 'color': Color(0xFF06B6D4)},
   ];
 
   @override
@@ -60,22 +61,26 @@ class _GroceryScreenState extends State<GroceryScreen> {
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Row(
         children: [
-          if (!widget.isEmbedded) ...[
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: context.cardBg,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: context.cardBorder, width: 0.5),
-                ),
-                child: Icon(LucideIcons.arrowLeft, size: 18, color: context.textPrimary),
+          GestureDetector(
+            onTap: () {
+              if (widget.onBack != null) {
+                widget.onBack!();
+              } else {
+                Navigator.pop(context);
+              }
+            },
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: context.cardBg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: context.cardBorder, width: 0.5),
               ),
+              child: Icon(LucideIcons.arrowLeft, size: 18, color: context.textPrimary),
             ),
-            const SizedBox(width: 14),
-          ],
+          ),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,13 +172,13 @@ class _GroceryScreenState extends State<GroceryScreen> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.08),
+                  color: (cat['color'] as Color).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
                   cat['icon'] as IconData,
                   size: 22,
-                  color: AppColors.accent,
+                  color: cat['color'] as Color,
                 ),
               ),
               const SizedBox(height: 8),
@@ -194,14 +199,15 @@ class _GroceryScreenState extends State<GroceryScreen> {
 
   Widget _buildPopularItems() {
     final items = [
-      {'name': 'Fresh Apples', 'price': 'Rs. 350', 'unit': '1kg'},
-      {'name': 'Milk Pack', 'price': 'Rs. 220', 'unit': '1L'},
-      {'name': 'Bread Loaf', 'price': 'Rs. 180', 'unit': '1pc'},
-      {'name': 'Eggs', 'price': 'Rs. 280', 'unit': '12pc'},
+      {'name': 'Fresh Apples', 'price': 'Rs. 350', 'unit': '1kg', 'icon': LucideIcons.apple, 'color': const Color(0xFF22C55E)},
+      {'name': 'Milk Pack', 'price': 'Rs. 220', 'unit': '1L', 'icon': LucideIcons.milk, 'color': const Color(0xFF3B82F6)},
+      {'name': 'Bread Loaf', 'price': 'Rs. 180', 'unit': '1pc', 'icon': LucideIcons.croissant, 'color': const Color(0xFFF59E0B)},
+      {'name': 'Eggs', 'price': 'Rs. 280', 'unit': '12pc', 'icon': LucideIcons.egg, 'color': const Color(0xFFEA580C)},
     ];
 
     return Column(
       children: items.map((item) {
+        final itemColor = item['color'] as Color;
         return Container(
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.all(14),
@@ -217,10 +223,10 @@ class _GroceryScreenState extends State<GroceryScreen> {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.08),
+                  color: itemColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(LucideIcons.package, size: 22, color: AppColors.accent),
+                child: Icon(item['icon'] as IconData, size: 22, color: itemColor),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -228,7 +234,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item['name']!,
+                      (item['name'] as String),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -237,7 +243,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      item['unit']!,
+                      (item['unit'] as String),
                       style: TextStyle(
                         fontSize: 12,
                         color: context.textMuted,
@@ -247,11 +253,11 @@ class _GroceryScreenState extends State<GroceryScreen> {
                 ),
               ),
               Text(
-                item['price']!,
-                style: const TextStyle(
+                (item['price'] as String),
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.accent,
+                  color: itemColor,
                 ),
               ),
             ],

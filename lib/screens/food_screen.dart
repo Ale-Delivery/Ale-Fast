@@ -9,7 +9,8 @@ import '../theme/theme_colors.dart';
 
 class FoodScreen extends StatefulWidget {
   final bool isEmbedded;
-  const FoodScreen({super.key, this.isEmbedded = false});
+  final VoidCallback? onBack;
+  const FoodScreen({super.key, this.isEmbedded = false, this.onBack});
 
   @override
   State<FoodScreen> createState() => _FoodScreenState();
@@ -114,22 +115,26 @@ class _FoodScreenState extends State<FoodScreen> {
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Row(
         children: [
-          if (!widget.isEmbedded) ...[
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: context.cardBg,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: context.cardBorder, width: 0.5),
-                ),
-                child: Icon(LucideIcons.arrowLeft, size: 18, color: context.textPrimary),
+          GestureDetector(
+            onTap: () {
+              if (widget.onBack != null) {
+                widget.onBack!();
+              } else {
+                Navigator.pop(context);
+              }
+            },
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: context.cardBg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: context.cardBorder, width: 0.5),
               ),
+              child: Icon(LucideIcons.arrowLeft, size: 18, color: context.textPrimary),
             ),
-            const SizedBox(width: 14),
-          ],
+          ),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

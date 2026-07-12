@@ -6,7 +6,8 @@ import '../theme/theme_colors.dart';
 
 class RidesScreen extends StatefulWidget {
   final bool isEmbedded;
-  const RidesScreen({super.key, this.isEmbedded = false});
+  final VoidCallback? onBack;
+  const RidesScreen({super.key, this.isEmbedded = false, this.onBack});
 
   @override
   State<RidesScreen> createState() => _RidesScreenState();
@@ -77,12 +78,17 @@ class _RidesScreenState extends State<RidesScreen> {
             ),
           ),
           // Back button
-          if (!widget.isEmbedded)
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 8,
-              left: 16,
-              child: _circleButton(LucideIcons.arrowLeft, () => Navigator.pop(context)),
-            ),
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            left: 16,
+            child: _circleButton(LucideIcons.arrowLeft, () {
+              if (widget.onBack != null) {
+                widget.onBack!();
+              } else {
+                Navigator.pop(context);
+              }
+            }),
+          ),
           // Locate button
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
@@ -155,82 +161,88 @@ class _RidesScreenState extends State<RidesScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            // Ride type cards
-            ...List.generate(_rideTypes.length, (i) {
-              final ride = _rideTypes[i];
-              final isSelected = _selectedRideIndex == i;
-              return GestureDetector(
-                onTap: () => setState(() => _selectedRideIndex = i),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.accent.withValues(alpha: 0.06)
-                        : context.surfaceColor,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: isSelected ? AppColors.accent : context.cardBorder,
-                      width: isSelected ? 1.5 : 0.5,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
+            // Ride type cards (scrollable)
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Column(
+                  children: List.generate(_rideTypes.length, (i) {
+                    final ride = _rideTypes[i];
+                    final isSelected = _selectedRideIndex == i;
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedRideIndex = i),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+                        padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppColors.accent.withValues(alpha: 0.1)
-                              : context.chipBg,
-                          borderRadius: BorderRadius.circular(14),
+                              ? AppColors.accent.withValues(alpha: 0.06)
+                              : context.surfaceColor,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: isSelected ? AppColors.accent : context.cardBorder,
+                            width: isSelected ? 1.5 : 0.5,
+                          ),
                         ),
-                        child: Icon(
-                          ride['icon'] as IconData,
-                          size: 22,
-                          color: isSelected ? AppColors.accent : context.textMuted,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
                           children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? AppColors.accent.withValues(alpha: 0.1)
+                                    : context.chipBg,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Icon(
+                                ride['icon'] as IconData,
+                                size: 22,
+                                color: isSelected ? AppColors.accent : context.textMuted,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    ride['name'] as String,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: context.textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${ride['time']} · ${ride['capacity']}',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w400,
+                                      color: context.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                             Text(
-                              ride['name'] as String,
+                              ride['fare'] as String,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
-                                color: context.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${ride['time']} · ${ride['capacity']}',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w400,
-                                color: context.textMuted,
+                                color: isSelected ? AppColors.accent : context.textPrimary,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      Text(
-                        ride['fare'] as String,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: isSelected ? AppColors.accent : context.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  }),
                 ),
-              );
-            }),
-            const Spacer(),
+              ),
+            ),
             // Book button
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
