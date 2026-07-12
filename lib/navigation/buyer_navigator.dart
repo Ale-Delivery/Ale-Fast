@@ -25,6 +25,7 @@ import '../screens/search_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/verification_screen.dart';
 import '../screens/location_picker_screen.dart';
+import '../screens/chat_screen.dart';
 import 'app_routes.dart';
 
 /// Central navigation for the buyer app final flow.
@@ -173,6 +174,15 @@ class BuyerNavigator {
       _route(
         OrderTrackingScreen(orderId: orderId),
         name: AppRoutes.orderTracking,
+      ),
+    );
+  }
+
+  static void chat(BuildContext context, String orderId, String orderName) {
+    Navigator.of(context).push(
+      _route(
+        ChatScreen(orderId: orderId, orderName: orderName),
+        name: AppRoutes.chat,
       ),
     );
   }

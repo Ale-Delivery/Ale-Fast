@@ -108,6 +108,10 @@ CREATE TABLE IF NOT EXISTS "Orders" (
   payment_method TEXT DEFAULT 'cash',
   promo_code TEXT,
   discount DECIMAL(10, 2) DEFAULT 0,
+  scheduled_at TIMESTAMPTZ,
+  driver_lat DOUBLE PRECISION,
+  driver_lng DOUBLE PRECISION,
+  driver_eta TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -242,6 +246,26 @@ ALTER TABLE "FoodFavorites" ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users manage own food favorites" ON "FoodFavorites";
 CREATE POLICY "Users manage own food favorites" ON "FoodFavorites"
   FOR ALL USING (user_id = auth.uid()::text OR true) WITH CHECK (true);
+
+-- ── Messages / Chat ────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS "Messages" (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES "Orders"(id) ON DELETE CASCADE,
+  sender_id TEXT NOT NULL,
+  sender_name TEXT DEFAULT 'User',
+  message TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_messages_order ON "Messages"(order_id);
+
+ALTER TABLE "Messages" ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can read messages" ON "Messages";
+CREATE POLICY "Anyone can read messages" ON "Messages"
+  FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Anyone can send messages" ON "Messages";
+CREATE POLICY "Anyone can send messages" ON "Messages"
+  FOR INSERT WITH CHECK (true);
 
 -- ── Notifications ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "Notifications" (

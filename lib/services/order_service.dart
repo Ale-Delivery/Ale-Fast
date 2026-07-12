@@ -15,6 +15,7 @@ class OrderService {
     String paymentMethod = 'cash',
     String? promoCode,
     double discount = 0,
+    DateTime? scheduledAt,
   }) async {
     if (cart.items.isEmpty) {
       throw Exception('Cart is empty');
@@ -46,6 +47,10 @@ class OrderService {
     if (promoCode != null) {
       orderData['promo_code'] = promoCode;
       orderData['discount'] = discount;
+    }
+
+    if (scheduledAt != null) {
+      orderData['scheduled_at'] = scheduledAt.toIso8601String();
     }
 
     final orderResponse =

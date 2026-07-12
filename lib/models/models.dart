@@ -223,6 +223,10 @@ class Order {
   final String? deliveryNotes;
   final String paymentMethod;
   final DateTime? createdAt;
+  final DateTime? scheduledAt;
+  final double? driverLat;
+  final double? driverLng;
+  final String? driverEta;
 
   const Order({
     required this.id,
@@ -238,6 +242,10 @@ class Order {
     this.deliveryNotes,
     this.paymentMethod = 'cash',
     this.createdAt,
+    this.scheduledAt,
+    this.driverLat,
+    this.driverLng,
+    this.driverEta,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
@@ -256,6 +264,12 @@ class Order {
         createdAt: json['created_at'] != null
             ? DateTime.tryParse(json['created_at'].toString())
             : null,
+        scheduledAt: json['scheduled_at'] != null
+            ? DateTime.tryParse(json['scheduled_at'].toString())
+            : null,
+        driverLat: _toDoubleOrNull(json['driver_lat']),
+        driverLng: _toDoubleOrNull(json['driver_lng']),
+        driverEta: json['driver_eta']?.toString(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -272,7 +286,17 @@ class Order {
         'delivery_notes': deliveryNotes,
         'payment_method': paymentMethod,
         'created_at': createdAt?.toIso8601String(),
+        'scheduled_at': scheduledAt?.toIso8601String(),
+        'driver_lat': driverLat,
+        'driver_lng': driverLng,
+        'driver_eta': driverEta,
       };
+}
+
+// ─── Helpers ──────────────────────────────────────────────────
+double? _toDoubleOrNull(dynamic v) {
+  if (v == null) return null;
+  return v is double ? v : v is int ? v.toDouble() : v is String ? (double.tryParse(v) ?? 0) : 0;
 }
 
 // ─── Order Item Line ───────────────────────────────────────────

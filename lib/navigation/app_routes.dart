@@ -24,4 +24,5 @@ abstract final class AppRoutes {
   static const rides = '/rides';
   static const parcel = '/parcel';
   static const grocery = '/grocery';
+  static const chat = '/chat';
 }

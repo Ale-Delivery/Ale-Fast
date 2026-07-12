@@ -33,6 +33,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   int _discountPercent = 0;
   String? _promoError;
   bool _checkingPromo = false;
+  DateTime? _scheduledTime;
+  bool _scheduleOrder = false;
 
   @override
   void dispose() {
@@ -119,6 +121,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         paymentMethod: _paymentMethod,
         promoCode: _appliedPromoCode,
         discount: _discountAmount,
+        scheduledAt: _scheduledTime,
       );
 
       cart.clearCart();
@@ -183,6 +186,72 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 _paymentTile('cash', 'Cash on delivery', Icons.payments_outlined),
                 _paymentTile('card', 'Card (coming soon)', Icons.credit_card_outlined,
                     enabled: false),
+                const SizedBox(height: 20),
+                // Schedule order
+                const Text('Schedule order',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                const SizedBox(height: 12),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Schedule for later',
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                  subtitle: _scheduledTime != null
+                      ? Text(
+                          '${_scheduledTime!.day}/${_scheduledTime!.month}/${_scheduledTime!.year} at ${_scheduledTime!.hour.toString().padLeft(2, '0')}:${_scheduledTime!.minute.toString().padLeft(2, '0')}',
+                          style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.w600))
+                      : null,
+                  value: _scheduleOrder,
+                  activeColor: AppColors.orange,
+                  onChanged: (v) async {
+                    if (v) {
+                      final now = DateTime.now();
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: now.add(const Duration(hours: 1)),
+                        firstDate: now,
+                        lastDate: now.add(const Duration(days: 7)),
+                      );
+                      if (picked == null || !mounted) return;
+                      final time = await showTimePicker(
+                        context: context,
+                        initialTime: TimeOfDay.fromDateTime(now.add(const Duration(hours: 1))),
+                      );
+                      if (time == null || !mounted) return;
+                      setState(() {
+                        _scheduledTime = DateTime(
+                          picked.year, picked.month, picked.day,
+                          time.hour, time.minute,
+                        );
+                        _scheduleOrder = true;
+                      });
+                    } else {
+                      setState(() {
+                        _scheduleOrder = false;
+                        _scheduledTime = null;
+                      });
+                    }
+                  },
+                ),
+                if (_scheduledTime != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.schedule, color: AppColors.accent, size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Your order will be delivered around the scheduled time.',
+                          style: TextStyle(fontSize: 12, color: context.textMuted),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 20),
                 const Text('Promo code',
                     style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
