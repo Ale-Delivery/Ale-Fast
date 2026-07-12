@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/models.dart';
 import '../services/database_service.dart';
+import '../services/local_storage_service.dart';
 import '../providers/cart_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
@@ -40,7 +41,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
   }
 
   Future<void> _loadFoodFavorites() async {
-    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final userId = await LocalStorageService.getUserId();
     if (userId == null) return;
     try {
       final data = await Supabase.instance.client
@@ -58,7 +59,7 @@ class _RestaurantViewScreenState extends State<RestaurantViewScreen> {
   }
 
   Future<void> _toggleFoodFavorite(String foodId) async {
-    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final userId = await LocalStorageService.getUserId();
     if (userId == null) return;
 
     final isFav = _favoriteFoodIds.contains(foodId);

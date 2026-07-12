@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../navigation/buyer_navigator.dart';
+import '../services/local_storage_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
 
@@ -74,7 +75,7 @@ class _FoodScreenState extends State<FoodScreen> {
   }
 
   Future<void> _loadFavorites() async {
-    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final userId = await LocalStorageService.getUserId();
     if (userId == null) return;
     try {
       final data = await Supabase.instance.client
@@ -92,10 +93,11 @@ class _FoodScreenState extends State<FoodScreen> {
   }
 
   Future<void> _toggleFavorite(String restaurantId) async {
-    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final userId = await LocalStorageService.getUserId();
     if (userId == null) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please sign in to save favorites')),
+        const SnackBar(content: Text('Please complete your profile first')),
       );
       return;
     }

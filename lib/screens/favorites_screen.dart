@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
+import '../services/local_storage_service.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -23,7 +24,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Future<List<Map<String, dynamic>>> _fetchFavorites() async {
-    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final userId = await LocalStorageService.getUserId();
     if (userId == null) return [];
 
     final data = await Supabase.instance.client
@@ -35,7 +36,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Future<void> _removeFavorite(String restaurantId) async {
-    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final userId = await LocalStorageService.getUserId();
     if (userId == null) return;
 
     await Supabase.instance.client
