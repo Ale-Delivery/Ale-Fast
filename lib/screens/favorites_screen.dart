@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
+import '../navigation/buyer_navigator.dart';
 import '../services/local_storage_service.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -80,7 +81,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   void _onRestaurantTap(Map<String, dynamic> favorite) {
     final restaurant = favorite['Restaurants'] as Map<String, dynamic>?;
     if (restaurant != null) {
-      Navigator.pop(context, restaurant);
+      BuyerNavigator.restaurantDetails(context, restaurant);
     }
   }
 
