@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:food_app/theme/theme_colors.dart';
-import 'package:food_app/navigation/buyer_navigator.dart';
-import 'package:food_app/services/local_storage_service.dart';
+import 'package:ale_client/theme/theme_colors.dart';
+import 'package:ale_client/navigation/buyer_navigator.dart';
+import 'package:ale_client/services/local_storage_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

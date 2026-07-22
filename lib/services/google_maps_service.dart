@@ -55,7 +55,7 @@ class GoogleMapsService {
         '&lat=6.9271&lon=79.8612'
       );
       final request = await client.getUrl(uri);
-      request.headers.set(HttpHeaders.userAgentHeader, 'aleeapp');
+      request.headers.set(HttpHeaders.userAgentHeader, 'alefast');
       final response = await request.close();
 
       if (response.statusCode == 200) {
@@ -103,7 +103,7 @@ class GoogleMapsService {
         '&addressdetails=1'
       );
       final request = await client.getUrl(uri);
-      request.headers.set(HttpHeaders.userAgentHeader, 'aleeapp');
+      request.headers.set(HttpHeaders.userAgentHeader, 'alefast');
       final response = await request.close();
 
       if (response.statusCode == 200) {
@@ -250,7 +250,7 @@ class GoogleMapsService {
         '&addressdetails=1'
       );
       final request = await client.getUrl(uri);
-      request.headers.set(HttpHeaders.userAgentHeader, 'aleeapp');
+      request.headers.set(HttpHeaders.userAgentHeader, 'alefast');
       final response = await request.close();
 
       if (response.statusCode == 200) {

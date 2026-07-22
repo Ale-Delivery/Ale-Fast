@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:food_app/theme/app_theme.dart';
-import 'package:food_app/navigation/buyer_navigator.dart';
+import 'package:ale_client/theme/app_theme.dart';
+import 'package:ale_client/navigation/buyer_navigator.dart';
 
 class OnboardingItem {
   final String emoji;

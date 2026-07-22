@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:food_app/services/auth_service.dart';
-import 'package:food_app/navigation/buyer_navigator.dart';
+import 'package:ale_client/services/auth_service.dart';
+import 'package:ale_client/navigation/buyer_navigator.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
 

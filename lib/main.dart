@@ -40,13 +40,13 @@ void main() async {
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: const FoodApp(),
+          child: const AleClientApp(),
     ),
   );
 }
 
-class FoodApp extends StatelessWidget {
-  const FoodApp({super.key});
+class AleClientApp extends StatelessWidget {
+  const AleClientApp({super.key});
 
   @override
   Widget build(BuildContext context) {
