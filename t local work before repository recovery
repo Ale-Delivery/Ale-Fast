@@ -1,0 +1,30 @@
+* [33m560a67a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;32mbackup/local-main-recovery[m[33m)[m Save latest local work before repository recovery
+* [33m0ffe111[m feat: rides screen — map moved to separate screen with 'Select on Map' button
+* [33m363e0fb[m refactor: rename project to ALE-CLIENT
+* [33me25f8c3[m feat: referral system, reorder, delivery instructions, rider tip, improved rides screen
+* [33m9c59801[m[33m ([m[1;31morigin/dev[m[33m, [m[1;32mdev[m[33m)[m feat: add schedule orders, delivery tracking map, chat with rider, driver fields
+* [33meaa5c81[m fix: move favorite button inline before rating in food restaurant cards
+* [33m22d09f9[m fix: navigate to restaurant details when tapping favorite item
+* [33m5b34cf8[m fix: fix favorites query (two-step fetch), replace all auth.currentUser with local userId
+* [33me5b6882[m fix: use local userId for favorites instead of Supabase auth (fixes sign-in dependency)
+* [33mbebae20[m fix: fix favorite button by using Stack layout to prevent gesture interception
+* [33m24839d0[m fix: fix restaurant favorite button tap conflict, add food item favorites with FoodFavorites table
+* [33mf919f8e[m feat: add favorite toggle button on restaurant cards in food screen
+* [33mb01b550[m fix: rename 'My Orders' to 'Your Activities' in activities screen
+* [33me219d7a[m feat: add back buttons to all service screens, fix rides overflow, replace red gradient icons with natural multi-color icons
+* [33m13b5a52[m fix: remove BackdropFilter causing full-screen blur, use clean nav background
+* [33mbd5d7aa[m style: premium red gradient theme - Deep Crimson #DC143C to Vibrant Red #FF3B30, glow shadows, gradient text, glassmorphism bottom nav
+* [33m0a5e6af[m feat: add theme mode switcher (Light/Dark/System) in profile preferences
+* [33mad9f23b[m feat: inline profile editing - view details, tap edit, modify fields, save to Supabase
+* [33m19350e1[m feat: persistent bottom nav across all screens - embedded views with IndexedStack, hide back buttons when embedded
+* [33mba72f9a[m style: make 4 main services prominent - 2x2 grid with accent icons, bold labels, descriptions
+* [33m2d148dd[m feat: add Grocery as 4th main service - screen, navigation, home pills
+* [33m3b329c0[m style: unify back button style across food, rides, parcel screens
+* [33m2555f0c[m feat: add back button to food screen header
+* [33m624b2d4[m style: swap accent color from Electric Blue to Premium Red #E63946
+* [33m5a7219f[m feat: complete ultra-modern minimalist UI redesign - Electric Blue accent, Inter font, glassmorphism bottom nav, spacious cards, clean typography
+* [33mc22913c[m feat: delivery address screen with quick label chips + prominent saved addresses list
+* [33mc6c2ad0[m feat: replace Material Icons with Lucide icons across home, food, rides, parcel, profile
+* [33mb4e8d32[m feat: Activities screen with Ongoing/Completed/Cancelled tabs + service type icons
+* [33m43a324c[m feat: simplified bottom nav — Home, Activities, Cart, Profile
+* [33md40ad12[m feat: all 3 tabs open dedicated screens — Food, Rides, Parcel
