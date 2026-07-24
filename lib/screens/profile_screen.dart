@@ -8,6 +8,9 @@ import '../navigation/buyer_navigator.dart';
 import '../providers/theme_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
+import 'wallet_screen.dart';
+import 'promo_codes_screen.dart';
+import 'payment_methods_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool isEmbedded;
@@ -238,6 +241,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   if (!_isEditing) ...[
                     _buildReferralSection(),
                     const SizedBox(height: 24),
+                    _buildMenuSection('Wallet & Payments', [
+                      _menuItem(LucideIcons.wallet, 'Wallet', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WalletScreen()))),
+                      _menuItem(LucideIcons.tag, 'Promo Codes', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PromoCodesScreen()))),
+                      _menuItem(LucideIcons.creditCard, 'Payment Methods', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PaymentMethodsScreen()))),
+                    ]),
+                    const SizedBox(height: 16),
                     _buildMenuSection('Preferences', [
                       _buildThemeSwitcher(),
                       _menuItem(LucideIcons.bell, 'Notifications', () => BuyerNavigator.notifications(context)),

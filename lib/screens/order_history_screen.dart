@@ -6,9 +6,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/models.dart';
 import '../providers/cart_provider.dart';
 import '../services/order_service.dart';
+import '../services/local_storage_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
 import '../navigation/buyer_navigator.dart';
+import 'live_ride_screen.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
   final bool isEmbedded;
@@ -21,6 +23,7 @@ class OrderHistoryScreen extends StatefulWidget {
 class _OrderHistoryScreenState extends State<OrderHistoryScreen>
     with SingleTickerProviderStateMixin {
   List<Order> _orders = [];
+  List<Map<String, dynamic>> _rideOrders = [];
   bool _loading = true;
   String? _cancellingId;
   late TabController _tabController;
@@ -41,11 +44,28 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
   Future<void> _load() async {
     setState(() => _loading = true);
     final orders = await OrderService.getUserOrders();
+    final rides = await _loadRideOrders();
     if (mounted) {
       setState(() {
         _orders = orders;
+        _rideOrders = rides;
         _loading = false;
       });
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _loadRideOrders() async {
+    final userId = await LocalStorageService.getUserId();
+    if (userId == null) return [];
+    try {
+      final data = await Supabase.instance.client
+          .from('Ride_Orders')
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(data);
+    } catch (_) {
+      return [];
     }
   }
 
@@ -54,6 +74,9 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
       o.status == OrderStatus.accepted ||
       o.status == OrderStatus.preparing ||
       o.status == OrderStatus.onTheWay).toList();
+
+  List<Map<String, dynamic>> _getOngoingRides() =>
+      _rideOrders.where((r) => r['status'] == 'pending' || r['status'] == 'active').toList();
 
   List<Order> _getCompleted() => _orders
       .where((o) => o.status == OrderStatus.delivered)
@@ -177,11 +200,254 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
           : TabBarView(
               controller: _tabController,
               children: [
-                _buildOrderList(_getOngoing(), isOngoing: true),
+                _buildOngoingTab(),
                 _buildOrderList(_getCompleted()),
                 _buildOrderList(_getCancelled()),
               ],
             ),
+    );
+  }
+
+  Widget _buildOngoingTab() {
+    final ongoingOrders = _getOngoing();
+    final ongoingRides = _getOngoingRides();
+    final hasAny = ongoingOrders.isNotEmpty || ongoingRides.isNotEmpty;
+
+    if (!hasAny) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(LucideIcons.clipboardList, size: 48, color: context.textHint),
+            const SizedBox(height: 16),
+            Text(
+              'No ongoing orders',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: context.textMuted,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 100),
+      children: [
+        if (ongoingRides.isNotEmpty) ...[
+          Text(
+            'Ongoing Rides',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: context.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...ongoingRides.map((ride) => _buildRideCard(ride)),
+          const SizedBox(height: 20),
+        ],
+        if (ongoingOrders.isNotEmpty) ...[
+          Text(
+            'Ongoing Orders',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: context.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...ongoingOrders.map((order) => _buildOrderCard(order, isOngoing: true)),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildRideCard(Map<String, dynamic> ride) {
+    final rideType = ride['ride_type']?.toString() ?? 'Bike';
+    final fare = ride['fare'] ?? 0;
+    final pickup = ride['pickup_name']?.toString() ?? 'Pickup';
+    final dropoff = ride['dropoff_name']?.toString() ?? 'Destination';
+    final status = ride['status']?.toString() ?? 'active';
+    final driverName = ride['driver_name']?.toString() ?? '';
+    final vehicle = ride['driver_vehicle']?.toString() ?? '';
+    final dateStr = ride['created_at'] != null
+        ? DateFormat('MMM d, h:mm a').format(DateTime.parse(ride['created_at']))
+        : '';
+
+    final isActive = status == 'active' || status == 'pending';
+
+    return GestureDetector(
+      onTap: isActive ? () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => LiveRideScreen(
+              rideData: {
+                'pickup_lat': ride['pickup_lat'],
+                'pickup_lng': ride['pickup_lng'],
+                'dropoff_lat': ride['dropoff_lat'],
+                'dropoff_lng': ride['dropoff_lng'],
+                'pickup_name': pickup,
+                'dropoff_name': dropoff,
+                'ride_type': rideType,
+                'fare': fare,
+                'distance_km': ride['distance_km'] ?? 5.0,
+                'eta_min': ride['eta_min'] ?? 10,
+                'base_fare': 0,
+                'distance_fare': 0,
+                'time_fare': 0,
+                'driver': {
+                  'name': driverName,
+                  'vehicle': vehicle,
+                  'rating': 4.8,
+                },
+                'payment': ride['payment_method'] ?? 'cash',
+              },
+            ),
+          ),
+        );
+      } : null,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: context.cardBg,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isActive ? AppColors.blue.withValues(alpha: 0.3) : context.cardBorder,
+            width: isActive ? 1 : 0.5,
+          ),
+          boxShadow: context.cardShadow,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: (isActive ? AppColors.blue : AppColors.green).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        LucideIcons.bike,
+                        size: 12,
+                        color: isActive ? AppColors.blue : AppColors.green,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        isActive ? 'Live' : 'Completed',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isActive ? AppColors.blue : AppColors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                Text(dateStr, style: TextStyle(fontSize: 12, color: context.textMuted)),
+              ],
+            ),
+            const SizedBox(height: 14),
+            // Route
+            Row(
+              children: [
+                Column(
+                  children: [
+                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
+                    Container(width: 1.5, height: 20, color: context.textHint),
+                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.red, shape: BoxShape.circle)),
+                  ],
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(pickup, maxLines: 1, overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: context.textPrimary)),
+                      const SizedBox(height: 12),
+                      Text(dropoff, maxLines: 1, overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: context.textPrimary)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Icon(LucideIcons.bike, size: 14, color: context.textMuted),
+                const SizedBox(width: 4),
+                Text(rideType, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: context.textPrimary)),
+                const SizedBox(width: 12),
+                if (driverName.isNotEmpty) ...[
+                  Icon(LucideIcons.user, size: 14, color: context.textMuted),
+                  const SizedBox(width: 4),
+                  Text('$driverName · $vehicle', style: TextStyle(fontSize: 13, color: context.textMuted)),
+                ],
+                const Spacer(),
+                Text('Rs.$fare', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.blue)),
+              ],
+            ),
+            if (isActive) ...[
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                height: 40,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => LiveRideScreen(
+                          rideData: {
+                            'pickup_lat': ride['pickup_lat'],
+                            'pickup_lng': ride['pickup_lng'],
+                            'dropoff_lat': ride['dropoff_lat'],
+                            'dropoff_lng': ride['dropoff_lng'],
+                            'pickup_name': pickup,
+                            'dropoff_name': dropoff,
+                            'ride_type': rideType,
+                            'fare': fare,
+                            'distance_km': ride['distance_km'] ?? 5.0,
+                            'eta_min': ride['eta_min'] ?? 10,
+                            'base_fare': 0,
+                            'distance_fare': 0,
+                            'time_fare': 0,
+                            'driver': {
+                              'name': driverName,
+                              'vehicle': vehicle,
+                              'rating': 4.8,
+                            },
+                            'payment': ride['payment_method'] ?? 'cash',
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(LucideIcons.navigation, size: 16),
+                  label: const Text('Track Ride', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 

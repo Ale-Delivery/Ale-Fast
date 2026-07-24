@@ -397,3 +397,200 @@ ON CONFLICT (id) DO UPDATE SET
   rating = EXCLUDED.rating, category = EXCLUDED.category,
   description = EXCLUDED.description, sizes = EXCLUDED.sizes,
   ingredients = EXCLUDED.ingredients;
+
+-- ─── GROCERY TABLES ─────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS "Grocery_Categories" (
+  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "icon" TEXT,
+  "color" TEXT DEFAULT '#22C55E',
+  "description" TEXT,
+  "sort_order" INTEGER DEFAULT 0,
+  "created_at" TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS "Grocery_Products" (
+  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  "category_id" UUID REFERENCES "Grocery_Categories"("id") ON DELETE SET NULL,
+  "name" TEXT NOT NULL,
+  "description" TEXT,
+  "price" NUMERIC(10,2) NOT NULL,
+  "unit" TEXT DEFAULT '1pc',
+  "image_url" TEXT,
+  "stock" BOOLEAN DEFAULT true,
+  "is_featured" BOOLEAN DEFAULT false,
+  "created_at" TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS "Grocery_Cart" (
+  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE,
+  "product_id" UUID REFERENCES "Grocery_Products"("id") ON DELETE CASCADE,
+  "quantity" INTEGER DEFAULT 1,
+  "created_at" TIMESTAMPTZ DEFAULT now(),
+  UNIQUE("user_id", "product_id")
+);
+
+CREATE TABLE IF NOT EXISTS "Grocery_Wishlist" (
+  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE,
+  "product_id" UUID REFERENCES "Grocery_Products"("id") ON DELETE CASCADE,
+  "created_at" TIMESTAMPTZ DEFAULT now(),
+  UNIQUE("user_id", "product_id")
+);
+
+CREATE TABLE IF NOT EXISTS "Grocery_Orders" (
+  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE,
+  "items" JSONB NOT NULL,
+  "subtotal" NUMERIC(10,2) NOT NULL,
+  "delivery_fee" NUMERIC(10,2) DEFAULT 0,
+  "total" NUMERIC(10,2) NOT NULL,
+  "status" TEXT DEFAULT 'pending',
+  "scheduled_at" TIMESTAMPTZ,
+  "delivery_address" TEXT,
+  "created_at" TIMESTAMPTZ DEFAULT now()
+);
+
+-- RLS for grocery tables
+ALTER TABLE "Grocery_Categories" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Grocery_Products" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Grocery_Cart" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Grocery_Wishlist" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Grocery_Orders" ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public read grocery categories" ON "Grocery_Categories";
+DROP POLICY IF EXISTS "Public read grocery products" ON "Grocery_Products";
+DROP POLICY IF EXISTS "Users manage own grocery cart" ON "Grocery_Cart";
+DROP POLICY IF EXISTS "Users manage own grocery wishlist" ON "Grocery_Wishlist";
+DROP POLICY IF EXISTS "Users manage own grocery orders" ON "Grocery_Orders";
+
+CREATE POLICY "Public read grocery categories" ON "Grocery_Categories" FOR SELECT USING (true);
+CREATE POLICY "Public read grocery products" ON "Grocery_Products" FOR SELECT USING (true);
+
+CREATE POLICY "Users manage own grocery cart" ON "Grocery_Cart"
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users manage own grocery wishlist" ON "Grocery_Wishlist"
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users manage own grocery orders" ON "Grocery_Orders"
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_grocery_products_category ON "Grocery_Products"("category_id");
+CREATE INDEX IF NOT EXISTS idx_grocery_cart_user ON "Grocery_Cart"("user_id");
+CREATE INDEX IF NOT EXISTS idx_grocery_wishlist_user ON "Grocery_Wishlist"("user_id");
+CREATE INDEX IF NOT EXISTS idx_grocery_orders_user ON "Grocery_Orders"("user_id");
+
+-- ─── RIDE TABLES ─────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS "Ride_Orders" (
+  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE,
+  "pickup_name" TEXT,
+  "dropoff_name" TEXT,
+  "pickup_lat" DOUBLE PRECISION,
+  "pickup_lng" DOUBLE PRECISION,
+  "dropoff_lat" DOUBLE PRECISION,
+  "dropoff_lng" DOUBLE PRECISION,
+  "ride_type" TEXT,
+  "fare" INTEGER,
+  "distance_km" DOUBLE PRECISION,
+  "eta_min" INTEGER,
+  "driver_name" TEXT,
+  "driver_vehicle" TEXT,
+  "payment_method" TEXT DEFAULT 'cash',
+  "status" TEXT DEFAULT 'pending',
+  "created_at" TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS "Ride_Ratings" (
+  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE,
+  "driver_name" TEXT,
+  "ride_type" TEXT,
+  "rating" INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  "feedback" TEXT,
+  "comment" TEXT,
+  "fare" INTEGER,
+  "pickup" TEXT,
+  "dropoff" TEXT,
+  "created_at" TIMESTAMPTZ DEFAULT now()
+);
+
+-- RLS for ride tables
+ALTER TABLE "Ride_Orders" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Ride_Ratings" ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users manage own ride orders" ON "Ride_Orders";
+DROP POLICY IF EXISTS "Users manage own ride ratings" ON "Ride_Ratings";
+
+CREATE POLICY "Users manage own ride orders" ON "Ride_Orders"
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users manage own ride ratings" ON "Ride_Ratings"
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+CREATE INDEX IF NOT EXISTS idx_ride_orders_user ON "Ride_Orders"("user_id");
+CREATE INDEX IF NOT EXISTS idx_ride_ratings_user ON "Ride_Ratings"("user_id");
+
+-- ─── WALLET & PAYMENT TABLES ───────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS "Wallet" (
+  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE UNIQUE,
+  "balance" NUMERIC(10,2) DEFAULT 0,
+  "created_at" TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS "Wallet_Transactions" (
+  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE,
+  "type" TEXT NOT NULL,
+  "amount" NUMERIC(10,2) NOT NULL,
+  "description" TEXT,
+  "created_at" TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS "Payment_Methods" (
+  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE,
+  "type" TEXT DEFAULT 'card',
+  "card_number" TEXT,
+  "card_holder" TEXT,
+  "expiry" TEXT,
+  "is_default" BOOLEAN DEFAULT false,
+  "created_at" TIMESTAMPTZ DEFAULT now()
+);
+
+-- RLS for wallet tables
+ALTER TABLE "Wallet" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Wallet_Transactions" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Payment_Methods" ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users manage own wallet" ON "Wallet";
+DROP POLICY IF EXISTS "Users manage own wallet transactions" ON "Wallet_Transactions";
+DROP POLICY IF EXISTS "Users manage own payment methods" ON "Payment_Methods";
+
+CREATE POLICY "Users manage own wallet" ON "Wallet"
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users manage own wallet transactions" ON "Wallet_Transactions"
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users manage own payment methods" ON "Payment_Methods"
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- Increment wallet balance function
+CREATE OR REPLACE FUNCTION increment_wallet_balance(p_user_id UUID, p_amount NUMERIC)
+RETURNS void AS $$
+BEGIN
+  UPDATE "Wallet" SET balance = balance + p_amount WHERE user_id = p_user_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE INDEX IF NOT EXISTS idx_wallet_user ON "Wallet"("user_id");
+CREATE INDEX IF NOT EXISTS idx_wallet_transactions_user ON "Wallet_Transactions"("user_id");
+CREATE INDEX IF NOT EXISTS idx_payment_methods_user ON "Payment_Methods"("user_id");

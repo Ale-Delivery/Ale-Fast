@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -8,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../services/google_maps_service.dart';
+import '../services/osrm_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
 
@@ -29,6 +29,12 @@ class _RideMapScreenState extends State<RideMapScreen> {
   String? _dropoffName;
 
   bool _selectingPickup = true; // true = pickup, false = dropoff
+
+  // OSRM route data
+  List<LatLng> _routePoints = [];
+  double _roadDistanceKm = 0;
+  int _roadEtaMin = 0;
+  bool _loadingRoute = false;
 
   // Search
   final _searchController = TextEditingController();
@@ -121,6 +127,7 @@ class _RideMapScreenState extends State<RideMapScreen> {
     });
 
     _fitMap();
+    _fetchOsrmRoute();
   }
 
   void _confirmLocation() {
@@ -202,6 +209,21 @@ class _RideMapScreenState extends State<RideMapScreen> {
     });
 
     HapticFeedback.lightImpact();
+    _fetchOsrmRoute();
+  }
+
+  void _fetchOsrmRoute() {
+    if (_pickupLatLng == null || _dropoffLatLng == null) return;
+    setState(() => _loadingRoute = true);
+    OsrmService.getRoute(_pickupLatLng!, _dropoffLatLng!).then((result) {
+      if (!mounted) return;
+      setState(() {
+        _routePoints = result.routePoints.isNotEmpty ? result.routePoints : [result.routePoints.first, result.routePoints.last];
+        _roadDistanceKm = result.distanceKm;
+        _roadEtaMin = result.durationMin.round();
+        _loadingRoute = false;
+      });
+    });
   }
 
   @override
@@ -233,7 +255,7 @@ class _RideMapScreenState extends State<RideMapScreen> {
                 PolylineLayer(
                   polylines: [
                     Polyline(
-                      points: _buildRoutePoints(_pickupLatLng!, _dropoffLatLng!),
+                      points: _routePoints.isNotEmpty ? _routePoints : [_pickupLatLng!, _dropoffLatLng!],
                       color: AppColors.accent,
                       strokeWidth: 4,
                     ),
@@ -456,6 +478,44 @@ class _RideMapScreenState extends State<RideMapScreen> {
                         ],
                       ),
                     ),
+                  // Distance & ETA
+                  if (_pickupLatLng != null && _dropoffLatLng != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (_loadingRoute)
+                            const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accent))
+                          else ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: AppColors.accent.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '${_roadDistanceKm.toStringAsFixed(1)} km',
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.accent),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: AppColors.green.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '$_roadEtaMin min',
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.green),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+
                   // Confirm button
                   GestureDetector(
                     onTap: _confirmLocation,
@@ -499,24 +559,5 @@ class _RideMapScreenState extends State<RideMapScreen> {
         Container(width: 4, height: 4, margin: const EdgeInsets.only(top: 2), decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
       ],
     );
-  }
-
-  List<LatLng> _buildRoutePoints(LatLng start, LatLng end) {
-    final points = <LatLng>[];
-    const steps = 30;
-    for (int i = 0; i <= steps; i++) {
-      final t = i / steps;
-      final lat = start.latitude + (end.latitude - start.latitude) * t;
-      final lng = start.longitude + (end.longitude - start.longitude) * t;
-      final offset = math.sin(t * math.pi) * 0.002;
-      final dx = end.longitude - start.longitude;
-      final dy = end.latitude - start.latitude;
-      final len = math.sqrt(dx * dx + dy * dy);
-      if (len == 0) { points.add(LatLng(lat, lng)); continue; }
-      final perpX = -dy / len;
-      final perpY = dx / len;
-      points.add(LatLng(lat + perpX * offset, lng + perpY * offset));
-    }
-    return points;
   }
 }

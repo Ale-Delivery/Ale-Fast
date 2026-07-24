@@ -8,10 +8,12 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../services/google_maps_service.dart';
+import '../services/osrm_service.dart';
 import '../services/local_storage_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
 import 'ride_map_screen.dart';
+import 'live_ride_screen.dart';
 
 class RidesScreen extends StatefulWidget {
   final bool isEmbedded;
@@ -220,11 +222,22 @@ class _RidesScreenState extends State<RidesScreen> {
       setState(() { _distanceKm = 0; _etaMinutes = 0; });
       return;
     }
-    final meters = Distance().as(LengthUnit.Meter, _pickupLatLng!, _dropoffLatLng!);
-    final km = meters / 1000;
-    setState(() {
-      _distanceKm = km;
-      _etaMinutes = (km * 2).ceil().clamp(3, 60);
+
+    OsrmService.getDistanceAndEta(_pickupLatLng!, _dropoffLatLng!).then((result) {
+      if (!mounted) return;
+      if (result != null) {
+        setState(() {
+          _distanceKm = (result['distance_km'] as num).toDouble();
+          _etaMinutes = (result['eta_min'] as num).toInt();
+        });
+      } else {
+        final meters = Distance().as(LengthUnit.Meter, _pickupLatLng!, _dropoffLatLng!);
+        final km = meters / 1000;
+        setState(() {
+          _distanceKm = km;
+          _etaMinutes = (km * 2).ceil().clamp(3, 60);
+        });
+      }
     });
   }
 
@@ -302,85 +315,60 @@ class _RidesScreenState extends State<RidesScreen> {
     final fare = _getFare(_selectedRideIndex);
     final driver = _matchedDriver;
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
-        decoration: BoxDecoration(
-          color: context.cardBg,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: context.textHint, borderRadius: BorderRadius.circular(2))),
-            const SizedBox(height: 24),
-            Container(
-              width: 72, height: 72,
-              decoration: BoxDecoration(color: AppColors.green.withValues(alpha: 0.1), shape: BoxShape.circle),
-              child: const Icon(Icons.check_circle, color: AppColors.green, size: 40),
-            ),
-            const SizedBox(height: 16),
-            Text('${ride['name']} booked!', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-            const SizedBox(height: 8),
-            Text('Fare: Rs. $fare · ETA: $_etaMinutes min', style: TextStyle(color: context.textMuted, fontSize: 15)),
-            const SizedBox(height: 24),
-            if (driver != null)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: context.surfaceColor, borderRadius: BorderRadius.circular(18)),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 48, height: 48,
-                      decoration: BoxDecoration(gradient: AppGradients.avatar, borderRadius: BorderRadius.circular(14)),
-                      child: Center(child: Text(driver['name'][0], style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700))),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(driver['name'], style: TextStyle(fontWeight: FontWeight.w700, color: context.textPrimary)),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              const Icon(Icons.star, color: Colors.amber, size: 14),
-                              const SizedBox(width: 4),
-                              Text('${driver['rating']}', style: TextStyle(fontSize: 13, color: context.textMuted)),
-                              const SizedBox(width: 8),
-                              Text(driver['vehicle'], style: TextStyle(fontSize: 13, color: context.textMuted)),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(color: AppColors.accent.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10)),
-                      child: const Icon(Icons.call, color: AppColors.accent, size: 20),
-                    ),
-                  ],
-                ),
-              ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity, height: 52,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  setState(() { _matchedDriver = null; });
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                child: const Text('Done', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-              ),
-            ),
-          ],
+    // Save ride order
+    _saveRideOrder(fare);
+
+    // Navigate to live ride
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LiveRideScreen(
+          rideData: {
+            'pickup_lat': _pickupLatLng!.latitude,
+            'pickup_lng': _pickupLatLng!.longitude,
+            'dropoff_lat': _dropoffLatLng!.latitude,
+            'dropoff_lng': _dropoffLatLng!.longitude,
+            'pickup_name': _pickupController.text,
+            'dropoff_name': _dropoffController.text,
+            'ride_type': ride['name'],
+            'fare': fare,
+            'distance_km': _distanceKm,
+            'eta_min': _etaMinutes,
+            'base_fare': ride['baseFare'],
+            'distance_fare': (ride['perKm'] * _distanceKm).round(),
+            'time_fare': (ride['perMin'] * _etaMinutes).round(),
+            'driver': driver,
+            'payment': _paymentMethod,
+          },
         ),
       ),
-    );
+    ).then((_) {
+      setState(() { _matchedDriver = null; });
+    });
+  }
+
+  Future<void> _saveRideOrder(int fare) async {
+    final userId = await LocalStorageService.getUserId();
+    if (userId == null) return;
+    try {
+      await Supabase.instance.client.from('Ride_Orders').insert({
+        'user_id': userId,
+        'pickup_name': _pickupController.text,
+        'dropoff_name': _dropoffController.text,
+        'pickup_lat': _pickupLatLng!.latitude,
+        'pickup_lng': _pickupLatLng!.longitude,
+        'dropoff_lat': _dropoffLatLng!.latitude,
+        'dropoff_lng': _dropoffLatLng!.longitude,
+        'ride_type': _rideTypes[_selectedRideIndex]['name'],
+        'fare': fare,
+        'distance_km': _distanceKm,
+        'eta_min': _etaMinutes,
+        'driver_name': _matchedDriver?['name'] ?? '',
+        'driver_vehicle': _matchedDriver?['vehicle'] ?? '',
+        'payment_method': _paymentMethod,
+        'status': 'completed',
+      });
+    } catch (_) {}
   }
 
   // ── UI ─────────────────────────────────────────────────────
