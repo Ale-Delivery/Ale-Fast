@@ -1,9 +1,9 @@
 class AppConfig {
   static const supabaseUrl = String.fromEnvironment(
-      'https://supabase.com/dashboard/project/bwilctlrsmmpyulmgoog');
+      'https://supabase.com/dashboard/project/cllzatzyqvrcxvvhyoxx');
 
   static const supabaseAnonKey = String.fromEnvironment(
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3aWxjdGxyc21tcHl1bG1nb29nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4OTY0NzgsImV4cCI6MjEwMDQ3MjQ3OH0.yUZA_y4v214yP2WQHT1Y5XfiIxcVo_qX7BFlZwkwkDA');
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsbHphdHp5cXZyY3h2dmh5b3h4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NTAwMDMsImV4cCI6MjA5ODEyNjAwM30.Ps67eDq_EwAekg22_b3zxTKUS1yUTIiB_qbb-GHDE60');
 
   static void validate() {
     if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
