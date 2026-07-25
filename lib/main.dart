@@ -40,7 +40,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-          child: const AleClientApp(),
+      child: const AleClientApp(),
     ),
   );
 }
@@ -60,22 +60,22 @@ class AleClientApp extends StatelessWidget {
           themeMode: themeProvider.themeMode,
           initialRoute: AppRoutes.splash,
           routes: {
-        // ── Parameterless screens ──────────────────────────────
-        AppRoutes.splash: (_) => const SplashScreen(),
-        AppRoutes.onboarding: (_) => const OnboardingScreen(),
-        AppRoutes.phoneAuth: (_) => const PhoneAuthScreen(),
-        AppRoutes.profileSetup: (_) => const ProfileSetupScreen(),
-        AppRoutes.home: (_) => const HomeScreen(),
-        AppRoutes.search: (_) => const SearchScreen(),
-        AppRoutes.cart: (_) => const CartScreen(),
-        AppRoutes.orderHistory: (_) => const OrderHistoryScreen(),
-        AppRoutes.profile: (_) => const ProfileScreen(),
-        AppRoutes.locationPicker: (_) => const LocationPickerScreen(),
-      },
-      onGenerateRoute: _generateRoute,
-      onUnknownRoute: (_) => MaterialPageRoute(
-        builder: (_) => const SplashScreen(),
-      ),
+            // ── Parameterless screens ──────────────────────────────
+            AppRoutes.splash: (_) => const SplashScreen(),
+            AppRoutes.onboarding: (_) => const OnboardingScreen(),
+            AppRoutes.phoneAuth: (_) => const PhoneAuthScreen(),
+            AppRoutes.profileSetup: (_) => const ProfileSetupScreen(),
+            AppRoutes.home: (_) => const HomeScreen(),
+            AppRoutes.search: (_) => const SearchScreen(),
+            AppRoutes.cart: (_) => const CartScreen(),
+            AppRoutes.orderHistory: (_) => const OrderHistoryScreen(),
+            AppRoutes.profile: (_) => const ProfileScreen(),
+            AppRoutes.locationPicker: (_) => const LocationPickerScreen(),
+          },
+          onGenerateRoute: _generateRoute,
+          onUnknownRoute: (_) => MaterialPageRoute(
+            builder: (_) => const SplashScreen(),
+          ),
         );
       },
     );
@@ -85,10 +85,10 @@ class AleClientApp extends StatelessWidget {
     switch (settings.name) {
       case AppRoutes.verification:
         final args = settings.arguments as Map<String, String>;
+
         return MaterialPageRoute(
           builder: (_) => VerificationScreen(
             phoneNumber: args['phone']!,
-            expectedOtp: args['otp']!,
           ),
         );
 

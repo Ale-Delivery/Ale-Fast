@@ -12,8 +12,8 @@ class PhoneAuthScreen extends StatefulWidget {
 }
 
 class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
-
   final TextEditingController _phoneController = TextEditingController();
+
   bool _isLoading = false;
 
   Future<void> _sendOtp() async {
@@ -30,7 +30,8 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
       return;
     }
 
-    // Add country code prefix if missing
+    // Convert Sri Lankan phone number to international format.
+    // Example: 0771234567 becomes +94771234567.
     if (!phoneNumber.startsWith('+')) {
       if (phoneNumber.startsWith('0')) {
         phoneNumber = '+94${phoneNumber.substring(1)}';
@@ -45,25 +46,28 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
 
     try {
       final authService = AuthService();
-      String expectedOtp = await authService.sendDummyOTP(phoneNumber);
 
-      if (mounted) {
-        BuyerNavigator.verification(
-          context,
-          phoneNumber: phoneNumber,
-          expectedOtp: expectedOtp,
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
+      // Send a real OTP through the Supabase Edge Function.
+      await authService.sendOtp(phoneNumber);
+
+      if (!mounted) return;
+
+      BuyerNavigator.verification(
+        context,
+        phoneNumber: phoneNumber,
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error.toString().replaceFirst('Exception: ', ''),
           ),
-        );
-      }
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -85,19 +89,25 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
       backgroundColor: context.scaffoldBg,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 30),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 28,
+            vertical: 30,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 60),
-              
-              // App Brand Logo Indicator
+
+              // App logo
               Container(
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFFFF8A00), AppColors.orange],
+                    colors: [
+                      Color(0xFFFF8A00),
+                      AppColors.orange,
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -107,8 +117,8 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                       color: AppColors.orange.withValues(alpha: 0.2),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
-                    )
-                  ]
+                    ),
+                  ],
                 ),
                 child: const Icon(
                   Icons.fastfood_rounded,
@@ -116,11 +126,11 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                   size: 30,
                 ),
               ),
+
               const SizedBox(height: 32),
-              
-              // Header Text
+
               Text(
-                "Welcome to Alee",
+                'Welcome to Alee',
                 style: TextStyle(
                   color: context.textPrimary,
                   fontSize: 32,
@@ -128,9 +138,11 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                   letterSpacing: -0.8,
                 ),
               ),
+
               const SizedBox(height: 8),
+
               Text(
-                "Enter your phone number to continue your food journey",
+                'Enter your phone number to continue your food journey',
                 style: TextStyle(
                   color: context.textMuted,
                   fontSize: 15,
@@ -138,10 +150,9 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                   height: 1.3,
                 ),
               ),
-              
+
               const SizedBox(height: 50),
 
-              // Card panel for inputs
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -152,14 +163,14 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                       color: Colors.black.withValues(alpha: 0.03),
                       blurRadius: 15,
                       offset: const Offset(0, 8),
-                    )
-                  ]
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "PHONE NUMBER",
+                      'PHONE NUMBER',
                       style: TextStyle(
                         color: context.textMuted,
                         fontSize: 11,
@@ -168,44 +179,51 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    
-                    // Phone Number Input with SL Flag / Prefix
                     TextField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) {
+                        if (!_isLoading) {
+                          _sendOtp();
+                        }
+                      },
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: context.textPrimary,
-                        letterSpacing: 1.0,
+                        letterSpacing: 1,
                       ),
                       decoration: InputDecoration(
-                        hintText: "07X XXX XXXX",
+                        hintText: '07X XXX XXXX',
                         hintStyle: TextStyle(
                           color: Colors.grey.withValues(alpha: 0.6),
                           fontWeight: FontWeight.w500,
                         ),
                         prefixIcon: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
                           margin: const EdgeInsets.only(right: 8),
                           decoration: BoxDecoration(
                             border: Border(
                               right: BorderSide(
                                 color: Colors.grey.withValues(alpha: 0.2),
                                 width: 1.5,
-                              )
-                            )
+                              ),
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Text(
-                                "🇱🇰", // Sri Lanka flag emoji
+                                '🇱🇰',
                                 style: TextStyle(fontSize: 20),
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                "+94",
+                                '+94',
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w800,
@@ -236,20 +254,22 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                             width: 1.5,
                           ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                        ),
                       ),
                     ),
-                    
                     const SizedBox(height: 36),
-
-                    // SEND OTP Button with Premium Styling
                     SizedBox(
                       width: double.infinity,
                       height: 54,
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFFFF8A00), AppColors.orange],
+                            colors: [
+                              Color(0xFFFF8A00),
+                              AppColors.orange,
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -266,6 +286,8 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             foregroundColor: Colors.white,
+                            disabledBackgroundColor: Colors.transparent,
+                            disabledForegroundColor: Colors.white,
                             shadowColor: Colors.transparent,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
@@ -282,7 +304,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                                   ),
                                 )
                               : const Text(
-                                  "SEND OTP",
+                                  'SEND OTP',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w800,

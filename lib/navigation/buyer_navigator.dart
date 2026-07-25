@@ -67,13 +67,11 @@ class BuyerNavigator {
   static void verification(
     BuildContext context, {
     required String phoneNumber,
-    required String expectedOtp,
   }) {
     Navigator.of(context).push(
       _route(
         VerificationScreen(
           phoneNumber: phoneNumber,
-          expectedOtp: expectedOtp,
         ),
         name: AppRoutes.verification,
       ),
@@ -218,7 +216,8 @@ class BuyerNavigator {
     );
   }
 
-  static void review(BuildContext context, String orderId, String restaurantId) {
+  static void review(
+      BuildContext context, String orderId, String restaurantId) {
     Navigator.of(context).push(
       _route(
         ReviewScreen(orderId: orderId, restaurantId: restaurantId),

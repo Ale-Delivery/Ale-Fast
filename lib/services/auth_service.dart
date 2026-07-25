@@ -8,10 +8,19 @@ class AuthService {
 
   static String _generateUserId() {
     final random = Random.secure();
-    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+
+    final bytes = List<int>.generate(
+      16,
+      (_) => random.nextInt(256),
+    );
+
     bytes[6] = (bytes[6] & 0x0f) | 0x40;
     bytes[8] = (bytes[8] & 0x3f) | 0x80;
-    String hex(int b) => b.toRadixString(16).padLeft(2, '0');
+
+    String hex(int byte) {
+      return byte.toRadixString(16).padLeft(2, '0');
+    }
+
     return '${bytes.sublist(0, 4).map(hex).join()}-'
         '${bytes.sublist(4, 6).map(hex).join()}-'
         '${bytes.sublist(6, 8).map(hex).join()}-'
@@ -19,29 +28,123 @@ class AuthService {
         '${bytes.sublist(10, 16).map(hex).join()}';
   }
 
-  // 1. ඇත්තටම OTP verify කරන කොටස
-  Future<void> loginWithPhone(String phone, String otp) async {
-    await _supabase.auth.verifyOTP(
-      phone: phone,
-      token: otp,
-      type: OtpType.sms,
-    );
+  // ============================================================
+  // SEND OTP
+  // ============================================================
+
+  Future<void> sendOtp(String phoneNumber) async {
+    try {
+      final response = await _supabase.functions.invoke(
+        'auth-otp',
+        body: {
+          'phone': phoneNumber,
+        },
+      );
+
+      if (response.status != 200) {
+        final data = response.data;
+
+        if (data is Map && data['error'] != null) {
+          throw Exception(
+            data['error'].toString(),
+          );
+        }
+
+        throw Exception(
+          'Failed to send OTP',
+        );
+      }
+
+      debugPrint(
+        'OTP sent successfully to $phoneNumber',
+      );
+    } catch (error) {
+      debugPrint(
+        'OTP send error: $error',
+      );
+
+      rethrow;
+    }
   }
 
-  // 2. Dummy OTP එක යවන Function එක 
-  Future<String> sendDummyOTP(String phoneNumber) async {
-    await Future.delayed(const Duration(seconds: 2));
-    
-    String dummyOtp = "1234"; 
-    
-    debugPrint("=======================================");
-    debugPrint("Mock SMS: Sent to $phoneNumber | OTP Code: $dummyOtp"); 
-    debugPrint("=======================================");
-    
-    return dummyOtp; 
+  // ============================================================
+  // VERIFY OTP
+  // ============================================================
+
+  Future<Map<String, dynamic>> verifyOtp({
+    required String phone,
+    required String otp,
+  }) async {
+    try {
+      final response = await _supabase.functions.invoke(
+        'auth-otp-verify',
+        body: {
+          'phone': phone,
+          'token': otp,
+        },
+      );
+
+      if (response.data is! Map) {
+        throw Exception(
+          'Invalid response received from server',
+        );
+      }
+
+      final data = Map<String, dynamic>.from(
+        response.data as Map,
+      );
+
+      if (response.status != 200) {
+        if (data['error'] != null) {
+          throw Exception(
+            data['error'].toString(),
+          );
+        }
+
+        throw Exception(
+          'OTP verification failed',
+        );
+      }
+
+      final sessionData = data['session'];
+
+      if (sessionData is! Map) {
+        throw Exception(
+          'Session data was not returned',
+        );
+      }
+
+      final refreshToken = sessionData['refresh_token']?.toString();
+
+      if (refreshToken == null || refreshToken.isEmpty) {
+        throw Exception(
+          'Refresh token was not returned',
+        );
+      }
+
+      await _supabase.auth.setSession(
+        refreshToken,
+      );
+
+      debugPrint(
+        'OTP verified. User ID: '
+        '${_supabase.auth.currentUser?.id}',
+      );
+
+      return data;
+    } catch (error) {
+      debugPrint(
+        'OTP verification error: $error',
+      );
+
+      rethrow;
+    }
   }
 
-  // 3. Profile save — Supabase sync is best-effort; always returns userId for local session.
+  // ============================================================
+  // SAVE OR UPDATE USER PROFILE
+  // ============================================================
+
   Future<String> saveUserProfile({
     required String name,
     String? email,
@@ -50,105 +153,152 @@ class AuthService {
     String? phone,
     String? existingUserId,
   }) async {
-    final user = _supabase.auth.currentUser;
-    final userId = existingUserId ?? user?.id ?? _generateUserId();
+    final currentUser = _supabase.auth.currentUser;
+
+    final userId = existingUserId ?? currentUser?.id ?? _generateUserId();
 
     final payload = <String, dynamic>{
       'id': userId,
-      'name': name,
+      'name': name.trim(),
     };
 
     final trimmedEmail = email?.trim();
+    final trimmedPhone = phone?.trim();
+
     if (trimmedEmail != null && trimmedEmail.isNotEmpty) {
       payload['email'] = trimmedEmail;
     }
-    if (gender != null && gender.isNotEmpty) {
-      payload['gender'] = gender;
+
+    if (gender != null && gender.trim().isNotEmpty) {
+      payload['gender'] = gender.trim();
     }
-    if (birthday != null && birthday.isNotEmpty) {
-      payload['birthday'] = birthday;
+
+    if (birthday != null && birthday.trim().isNotEmpty) {
+      payload['birthday'] = birthday.trim();
     }
-    if (phone != null && phone.isNotEmpty) {
-      payload['phone'] = phone;
+
+    if (trimmedPhone != null && trimmedPhone.isNotEmpty) {
+      payload['phone'] = trimmedPhone;
     }
 
     try {
-      await _supabase.from('Profiles').upsert(payload);
-    } catch (e) {
-      debugPrint('Profile Supabase sync error: $e');
+      await _supabase.from('Profiles').upsert(
+            payload,
+            onConflict: 'id',
+          );
+
+      debugPrint(
+        'Profile saved successfully. '
+        'User ID: $userId',
+      );
+
+      return userId;
+    } catch (error) {
+      debugPrint(
+        'Profile Supabase sync error: $error',
+      );
+
       rethrow;
     }
-
-    return userId;
   }
 
-  Future<bool> checkUserExists(String phone) async {
+  // ============================================================
+  // CHECK USER EXISTS
+  // ============================================================
+
+  Future<bool> checkUserExists(
+    String phone,
+  ) async {
     try {
+      final normalizedPhone = phone.trim();
+
       final response = await _supabase
           .from('Profiles')
           .select('id')
-          .eq('phone', phone)
-          .maybeSingle();
-      return response != null;
-    } catch (e) {
-      debugPrint('Error checking user exists: $e');
+          .eq(
+            'phone',
+            normalizedPhone,
+          )
+          .limit(1);
+
+      return response.isNotEmpty;
+    } catch (error) {
+      debugPrint(
+        'Error checking user exists: $error',
+      );
+
       return false;
     }
   }
 
-  Future<Map<String, dynamic>?> getUserProfile(String phone) async {
+  // ============================================================
+  // GET USER PROFILE BY PHONE
+  // ============================================================
+
+  Future<Map<String, dynamic>?> getUserProfile(
+    String phone,
+  ) async {
     try {
+      final normalizedPhone = phone.trim();
+
       final response = await _supabase
           .from('Profiles')
           .select()
-          .eq('phone', phone)
-          .maybeSingle();
-      return response;
-    } catch (e) {
-      debugPrint('Error fetching user profile: $e');
-      return null;
-    }
-  }
+          .eq(
+            'phone',
+            normalizedPhone,
+          )
+          .limit(1);
 
-  Future<void> saveDeliveryAddress({
-    required String userId,
-    required String label,
-    required String address,
-    required String phone,
-  }) async {
-    debugPrint('[saveDeliveryAddress] userId=$userId label=$label address=$address phone=$phone');
-    try {
-      final payload = {
-        'delivery_label': label,
-        'delivery_address': address,
-        'delivery_phone': phone,
-      };
-      final response = await _supabase
-          .from('Profiles')
-          .update(payload)
-          .eq('id', userId)
-          .select();
-      debugPrint('[saveDeliveryAddress] update response: $response');
-    } catch (e) {
-      debugPrint('[saveDeliveryAddress] error: $e');
-    }
-  }
-
-  Future<Map<String, dynamic>?> getDeliveryAddress(String userId) async {
-    try {
-      final response = await _supabase
-          .from('Profiles')
-          .select('delivery_address, delivery_label, delivery_phone')
-          .eq('id', userId)
-          .maybeSingle();
-      if (response != null &&
-          response['delivery_address'] != null &&
-          (response['delivery_address'] as String).isNotEmpty) {
-        return response;
+      if (response.isEmpty) {
+        return null;
       }
+
+      return Map<String, dynamic>.from(
+        response.first,
+      );
+    } catch (error) {
+      debugPrint(
+        'Error fetching user profile: $error',
+      );
+
       return null;
-    } catch (e) {
-      debugPrint('Error fetching delivery address: $e');
+    }
+  }
+
+  // ============================================================
+  // GET CURRENT USER PROFILE BY AUTH USER ID
+  // ============================================================
+
+  Future<Map<String, dynamic>?> getCurrentUserProfile() async {
+    try {
+      final currentUser = _supabase.auth.currentUser;
+
+      if (currentUser == null) {
+        return null;
+      }
+
+      final response = await _supabase
+          .from('Profiles')
+          .select()
+          .eq(
+            'id',
+            currentUser.id,
+          )
+          .limit(1);
+
+      if (response.isEmpty) {
+        return null;
+      }
+
+      return Map<String, dynamic>.from(
+        response.first,
+      );
+    } catch (error) {
+      debugPrint(
+        'Error fetching current user profile: $error',
+      );
+
       return null;
     }
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../services/auth_service.dart';
 import '../services/local_storage_service.dart';
+import '../services/location_service.dart';
 import '../screens/delivery_address_screen.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_colors.dart';
@@ -26,27 +28,43 @@ class ProfileSetupScreen extends StatefulWidget {
 }
 
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
-
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
+
+  final _authService = AuthService();
+  final _locationService = LocationService();
+
   String? _selectedGender;
   DateTime? _selectedDate;
-  final _authService = AuthService();
   bool _isLoading = false;
 
   bool get _isEditing => widget.existingUserId != null;
 
   final List<Map<String, dynamic>> _genderOptions = [
-    {'value': 'Male', 'icon': Icons.male_rounded, 'label': 'Male'},
-    {'value': 'Female', 'icon': Icons.female_rounded, 'label': 'Female'},
-    {'value': 'Other', 'icon': Icons.transgender_rounded, 'label': 'Other'},
+    {
+      'value': 'Male',
+      'icon': Icons.male_rounded,
+      'label': 'Male',
+    },
+    {
+      'value': 'Female',
+      'icon': Icons.female_rounded,
+      'label': 'Female',
+    },
+    {
+      'value': 'Other',
+      'icon': Icons.transgender_rounded,
+      'label': 'Other',
+    },
   ];
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)), // default 18 years ago
+      initialDate: DateTime.now().subtract(
+        const Duration(days: 365 * 18),
+      ),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) {
@@ -58,56 +76,70 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               surface: Colors.white,
               onSurface: AppColors.ink,
             ),
-            dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
+            dialogTheme: const DialogThemeData(
+              backgroundColor: Colors.white,
+            ),
           ),
           child: child!,
         );
       },
     );
+
     if (picked != null && picked != _selectedDate) {
-      setState(() => _selectedDate = picked);
+      setState(() {
+        _selectedDate = picked;
+      });
     }
   }
 
   Future<void> _saveProfile() async {
     final firstName = _firstNameController.text.trim();
     final lastName = _lastNameController.text.trim();
-    
+
     if (firstName.isEmpty || lastName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter your first and last name'),
+          content: Text(
+            'Please enter your first and last name',
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
       return;
     }
-    // Only require gender/birthday if they are shown (not editing, or editing with existing value)
+
     if ((!_isEditing || _selectedGender != null) && _selectedGender == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please select your gender'),
+          content: Text(
+            'Please select your gender',
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
       return;
     }
+
     if ((!_isEditing || _selectedDate != null) && _selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please select your birthday'),
+          content: Text(
+            'Please select your birthday',
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       final phone = await LocalStorageService.getUserPhone();
-      final fullName = "$firstName $lastName";
-      
+      final fullName = '$firstName $lastName';
+
       final userId = await _authService.saveUserProfile(
         name: fullName,
         email: _emailController.text.trim(),
@@ -123,18 +155,36 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         phone: phone,
       );
 
-      if (mounted) {
-        if (_isEditing) {
-          Navigator.pop(context);
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const DeliveryAddressScreen(proceedToCheckout: false),
-            ),
-          );
-        }
+      if (!mounted) return;
+
+      if (_isEditing) {
+        Navigator.pop(context);
+        return;
       }
+
+      LocationResult? location;
+
+      try {
+        location = await _locationService.getCurrentLocation();
+      } catch (e) {
+        debugPrint(
+          'Location detection failed: $e',
+        );
+      }
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => DeliveryAddressScreen(
+            proceedToCheckout: false,
+            initialAddress: location?.address,
+            initialLatitude: location?.latitude,
+            initialLongitude: location?.longitude,
+          ),
+        ),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -146,26 +196,39 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         );
       }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
   void initState() {
     super.initState();
+
     if (widget.existingName != null) {
       final parts = widget.existingName!.split(' ');
+
       _firstNameController.text = parts.first;
-      _lastNameController.text = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+
+      _lastNameController.text =
+          parts.length > 1 ? parts.sublist(1).join(' ') : '';
     }
+
     if (widget.existingEmail != null) {
       _emailController.text = widget.existingEmail!;
     }
+
     if (widget.existingGender != null) {
       _selectedGender = widget.existingGender!;
     }
+
     if (widget.existingBirthday != null) {
-      _selectedDate = DateTime.tryParse(widget.existingBirthday!);
+      _selectedDate = DateTime.tryParse(
+        widget.existingBirthday!,
+      );
     }
   }
 
@@ -174,6 +237,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
+
     super.dispose();
   }
 
@@ -183,35 +247,44 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       backgroundColor: context.scaffoldBg,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 30,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Back button
               GestureDetector(
-                onTap: () => Navigator.pop(context),
+                onTap: () {
+                  Navigator.pop(context);
+                },
                 child: Container(
                   decoration: BoxDecoration(
                     color: context.surfaceColor,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
+                        color: Colors.black.withValues(
+                          alpha: 0.03,
+                        ),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
-                      )
+                      ),
                     ],
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(10),
-                    child: Icon(Icons.arrow_back_ios_new_rounded, color: context.textPrimary, size: 18),
+                    child: Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: context.textPrimary,
+                      size: 18,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 24),
-              // Header
               Text(
-                _isEditing ? "Edit Profile" : "Complete Profile",
+                _isEditing ? 'Edit Profile' : 'Complete Profile',
                 style: TextStyle(
                   color: context.textPrimary,
                   fontSize: 30,
@@ -221,7 +294,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                "Let us know you better to deliver your cravings.",
+                'Let us know you better to deliver your cravings.',
                 style: TextStyle(
                   color: context.textMuted,
                   fontSize: 14,
@@ -229,18 +302,18 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 ),
               ),
               const SizedBox(height: 36),
-
-              // First Name & Last Name Row
               Row(
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildFieldLabel("FIRST NAME"),
+                        _buildFieldLabel(
+                          'FIRST NAME',
+                        ),
                         _buildTextField(
                           controller: _firstNameController,
-                          hintText: "First name",
+                          hintText: 'First name',
                           icon: Icons.person_outline_rounded,
                         ),
                       ],
@@ -251,10 +324,12 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildFieldLabel("LAST NAME"),
+                        _buildFieldLabel(
+                          'LAST NAME',
+                        ),
                         _buildTextField(
                           controller: _lastNameController,
-                          hintText: "Last name",
+                          hintText: 'Last name',
                           icon: Icons.person_outline_rounded,
                         ),
                       ],
@@ -263,135 +338,187 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 ],
               ),
               const SizedBox(height: 24),
-
-              // Email Field — show if not editing, or if editing and has value
-              if (!_isEditing || (widget.existingEmail != null && widget.existingEmail!.isNotEmpty)) ...[
-                _buildFieldLabel("EMAIL (OPTIONAL)"),
+              if (!_isEditing ||
+                  (widget.existingEmail != null &&
+                      widget.existingEmail!.isNotEmpty)) ...[
+                _buildFieldLabel(
+                  'EMAIL (OPTIONAL)',
+                ),
                 _buildTextField(
                   controller: _emailController,
-                  hintText: "Enter your email address",
+                  hintText: 'Enter your email address',
                   icon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 24),
               ],
-
-              // Gender Selector — show if not editing, or if editing and has value
               if (!_isEditing || _selectedGender != null) ...[
-                _buildFieldLabel("GENDER"),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: _genderOptions.map((opt) {
-                  final isSelected = _selectedGender == opt['value'];
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _selectedGender = opt['value']),
-                      child: Container(
-                        margin: EdgeInsets.only(
-                          left: opt['value'] == 'Male' ? 0 : 8,
-                          right: opt['value'] == 'Other' ? 0 : 8,
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          color: isSelected ? AppColors.orange.withValues(alpha: 0.08) : context.surfaceColor,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: isSelected ? AppColors.orange : Colors.grey.withValues(alpha: 0.15),
-                            width: 1.5,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              opt['icon'],
-                              color: isSelected ? AppColors.orange : context.textPrimary.withValues(alpha: 0.7),
-                              size: 24,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              opt['label'],
-                              style: TextStyle(
-                                color: isSelected ? AppColors.orange : context.textPrimary.withValues(alpha: 0.8),
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 24),
-              ], // close gender conditional
+                _buildFieldLabel('GENDER'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: _genderOptions.map((opt) {
+                    final isSelected = _selectedGender == opt['value'];
 
-              // Birthday Field — show if not editing, or if editing and has value
-              if (!_isEditing || _selectedDate != null) ...[
-                _buildFieldLabel("BIRTHDAY"),
-              GestureDetector(
-                onTap: () => _selectDate(context),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  decoration: BoxDecoration(
-                    color: context.surfaceColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.withValues(alpha: 0.15)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.02),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.cake_outlined, color: context.textMuted, size: 22),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _selectedDate == null
-                              ? "Select your birthday"
-                              : _selectedDate.toString().split(' ')[0],
-                          style: TextStyle(
-                            color: _selectedDate == null ? context.textMuted : context.textPrimary,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
+                    return Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedGender = opt['value'];
+                          });
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(
+                            left: opt['value'] == 'Male' ? 0 : 8,
+                            right: opt['value'] == 'Other' ? 0 : 8,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.orange.withValues(
+                                    alpha: 0.08,
+                                  )
+                                : context.surfaceColor,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.orange
+                                  : Colors.grey.withValues(
+                                      alpha: 0.15,
+                                    ),
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(
+                                  alpha: 0.02,
+                                ),
+                                blurRadius: 8,
+                                offset: const Offset(
+                                  0,
+                                  4,
+                                ),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                opt['icon'],
+                                color: isSelected
+                                    ? AppColors.orange
+                                    : context.textPrimary.withValues(
+                                        alpha: 0.7,
+                                      ),
+                                size: 24,
+                              ),
+                              const SizedBox(
+                                height: 8,
+                              ),
+                              Text(
+                                opt['label'],
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? AppColors.orange
+                                      : context.textPrimary.withValues(
+                                          alpha: 0.8,
+                                        ),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      const Icon(Icons.calendar_month_rounded, color: AppColors.orange, size: 20),
-                    ],
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 24),
+              ],
+              if (!_isEditing || _selectedDate != null) ...[
+                _buildFieldLabel('BIRTHDAY'),
+                GestureDetector(
+                  onTap: () {
+                    _selectDate(context);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: context.surfaceColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.grey.withValues(
+                          alpha: 0.15,
+                        ),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: 0.02,
+                          ),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.cake_outlined,
+                          color: context.textMuted,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _selectedDate == null
+                                ? 'Select your birthday'
+                                : _selectedDate.toString().split(' ')[0],
+                            style: TextStyle(
+                              color: _selectedDate == null
+                                  ? context.textMuted
+                                  : context.textPrimary,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.calendar_month_rounded,
+                          color: AppColors.orange,
+                          size: 20,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 48),
-              ], // close birthday conditional
-
-              // Submit Button
+                const SizedBox(height: 48),
+              ],
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFFF8A00), AppColors.orange],
+                      colors: [
+                        Color(0xFFFF8A00),
+                        AppColors.orange,
+                      ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.orange.withValues(alpha: 0.25),
+                        color: AppColors.orange.withValues(
+                          alpha: 0.25,
+                        ),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
@@ -403,7 +530,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       foregroundColor: Colors.white,
                       shadowColor: Colors.transparent,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(
+                          16,
+                        ),
                       ),
                     ),
                     onPressed: _isLoading ? null : _saveProfile,
@@ -417,7 +546,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                             ),
                           )
                         : const Text(
-                            "SAVE & CONTINUE",
+                            'SAVE & CONTINUE',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -436,14 +565,17 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   Widget _buildFieldLabel(String label) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
+      padding: const EdgeInsets.only(
+        bottom: 8,
+        left: 4,
+      ),
       child: Text(
         label,
         style: TextStyle(
           color: context.textMuted,
           fontSize: 11,
           fontWeight: FontWeight.w800,
-          letterSpacing: 1.0,
+          letterSpacing: 1,
         ),
       ),
     );
@@ -461,7 +593,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(
+              alpha: 0.02,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -482,26 +616,40 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
-          prefixIcon: Icon(icon, color: context.textHint, size: 22),
+          prefixIcon: Icon(
+            icon,
+            color: context.textHint,
+            size: 22,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(
-              color: Colors.grey.withValues(alpha: 0.15),
-              width: 1.0,
+              color: Colors.grey.withValues(
+                alpha: 0.15,
+              ),
+              width: 1,
             ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(
-              color: Colors.grey.withValues(alpha: 0.15),
-              width: 1.0,
+              color: Colors.grey.withValues(
+                alpha: 0.15,
+              ),
+              width: 1,
             ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: AppColors.orange, width: 1.5),
+            borderSide: const BorderSide(
+              color: AppColors.orange,
+              width: 1.5,
+            ),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
         ),
       ),
     );

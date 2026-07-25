@@ -53,22 +53,43 @@ class LocalStorageService {
     required String label,
     required String address,
     required String phone,
+    double? latitude,
+    double? longitude,
   }) async {
     final prefs = await _prefs;
     await prefs.setString(_keyDeliveryLabel, label);
     await prefs.setString(_keyDeliveryAddress, address);
     await prefs.setString(_keyDeliveryPhone, phone);
+    if (latitude != null) await prefs.setDouble(_keyDeliveryLatitude, latitude);
+    if (longitude != null)
+      await prefs.setDouble(_keyDeliveryLongitude, longitude);
   }
+
+  static const _keyDeliveryLatitude = 'delivery_latitude';
+  static const _keyDeliveryLongitude = 'delivery_longitude';
 
   static Future<Map<String, String>?> getDeliveryAddress() async {
     final prefs = await _prefs;
     final address = prefs.getString(_keyDeliveryAddress);
     if (address == null || address.isEmpty) return null;
+    final lat = prefs.getDouble(_keyDeliveryLatitude);
+    final lng = prefs.getDouble(_keyDeliveryLongitude);
     return {
       'label': prefs.getString(_keyDeliveryLabel) ?? 'Home',
       'address': address,
       'phone': prefs.getString(_keyDeliveryPhone) ?? '',
+      'latitude': lat?.toString() ?? '',
+      'longitude': lng?.toString() ?? '',
     };
+  }
+
+  static Future<void> removeDeliveryAddress() async {
+    final prefs = await _prefs;
+    await prefs.remove(_keyDeliveryAddress);
+    await prefs.remove(_keyDeliveryLabel);
+    await prefs.remove(_keyDeliveryPhone);
+    await prefs.remove(_keyDeliveryLatitude);
+    await prefs.remove(_keyDeliveryLongitude);
   }
 
   static Future<void> clearSession() async {
