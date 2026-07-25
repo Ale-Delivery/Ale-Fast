@@ -74,7 +74,7 @@ E:\Projects\Alee-App\
 ├── test/                             # Tests (currently empty)
 ├── pubspec.yaml                      # Flutter dependencies
 ├── pubspec.lock                      # Dependency lock file
-├── supabase_schema.sql               # Database schema + seed data
+├── supabase_schema.sql               # Development-only bootstrap (see warning inside)
 ├── analysis_options.yaml             # Dart lint rules
 ├── README.md                         # Setup guide
 ├── BUYER_FLOW.md                     # UX flow + navigation map
@@ -435,7 +435,7 @@ class CartProvider extends ChangeNotifier {
 | 📝 Empty assets | `assets/images/` | All images come from Unsplash CDN URLs |
 | 🔑 Hardcoded Supabase keys | `app_constants.dart` | Anon key is public (fine), but should use env vars for production |
 | 🔑 Missing Google Maps key | `app_constants.dart:6` | Falls back to OSM Nominatim + mock data |
-| ⚠️ RLS open policies | `supabase_schema.sql` | All tables have "Allow all" — production needs proper policies |
+| ✅ RLS policies fixed | `supabase_schema.sql` | All insecure bypasses removed — scoped owner/user policies implemented. See Ale-Backend P0 migration for production source of truth |
 | 📝 No error handling on Supabase connect failure | Various services | Try-catch exists but no user-facing error UI |
 
 ---
@@ -451,10 +451,10 @@ class CartProvider extends ChangeNotifier {
 
 ```bash
 # 1. Clone & get dependencies
-cd E:\Projects\Alee-App
+cd E:\Projects\Ale-Fast
 flutter pub get
 
-# 2. Supabase setup
+# 2. Local Supabase setup (development only)
 #    • Go to https://supabase.com → Create project
 #    • SQL Editor → New Query → Paste supabase_schema.sql → Run
 #    • Project Settings → API → Copy URL + anon key
@@ -462,6 +462,24 @@ flutter pub get
 
 # 3. Run
 flutter run
+```
+
+### Database Ownership and Deployment
+
+**Production source of truth:** `Ale-Backend/supabase/migrations/`
+
+**Ale-Fast:**
+- Does NOT own production database migrations
+- Must NOT initialize or reset production Supabase
+- Contains `supabase_schema.sql` for local development bootstrap only
+- Must NOT overwrite backend RLS policies
+
+**Safe deployment order:**
+1. Back up the Supabase database
+2. Apply Ale-Backend migrations in order
+3. Validate RLS policies via `pg_policies`
+4. Deploy Ale-Fast application
+5. Never run Ale-Fast bootstrap SQL against production
 ```
 
 ### Dummy OTP

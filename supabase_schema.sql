@@ -1,5 +1,22 @@
--- Run this in Supabase SQL Editor (buyer + seller production setup)
--- Safe to re-run: uses IF NOT EXISTS / ON CONFLICT where possible
+-- =============================================================
+-- DEVELOPMENT / LOCAL BOOTSTRAP ONLY
+-- =============================================================
+-- DO NOT RUN THIS FILE AGAINST STAGING OR PRODUCTION.
+--
+-- Production database migrations are managed only in Ale-Backend.
+-- Source of truth:
+--   E:\Projects\Ale-Backend\supabase\migrations
+--
+-- Running this file against production will:
+--   • DROP and recreate all tables (data loss)
+--   • Overwrite secure RLS policies
+--
+-- Development use only:
+--   • local testing
+--   • disposable development projects
+--   • fresh non-production environments
+-- =============================================================
+-- Safe to re-run locally: uses IF NOT EXISTS / ON CONFLICT where possible
 
 -- Clean up old tables with mismatched schemas
 DROP TABLE IF EXISTS "Order_Items" CASCADE;
@@ -9,6 +26,21 @@ DROP TABLE IF EXISTS "Restaurants" CASCADE;
 DROP TABLE IF EXISTS "Reviews" CASCADE;
 DROP TABLE IF EXISTS "Saved_Addresses" CASCADE;
 DROP TABLE IF EXISTS "Profiles" CASCADE;
+
+-- ── ROW LEVEL SECURITY ─────────────────────────────────────────
+-- SECURITY WARNING:
+-- Do not weaken these policies with:
+--   • OR true bypasses
+--   • WITH CHECK (true) on write operations
+--   • unrestricted FOR ALL USING (true)
+--   • broad authenticated write access
+--
+-- Public SELECT USING (true) policies are intentional for
+-- customer-facing read access and should remain unchanged.
+--
+-- If you need to modify any policy, first verify the change
+-- against Ale-Backend's migration policies for consistency.
+-- ───────────────────────────────────────────────────────────────
 
 -- ── Profiles ───────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "Profiles" (
@@ -24,13 +56,13 @@ CREATE TABLE IF NOT EXISTS "Profiles" (
 ALTER TABLE "Profiles" ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users read own profile" ON "Profiles";
 CREATE POLICY "Users read own profile" ON "Profiles"
-  FOR SELECT USING (id = auth.uid()::text OR true);
+  FOR SELECT USING (id = auth.uid()::text);
 DROP POLICY IF EXISTS "Users update own profile" ON "Profiles";
 CREATE POLICY "Users update own profile" ON "Profiles"
-  FOR UPDATE USING (id = auth.uid()::text OR true) WITH CHECK (true);
+  FOR UPDATE USING (id = auth.uid()::text);
 DROP POLICY IF EXISTS "Users insert own profile" ON "Profiles";
 CREATE POLICY "Users insert own profile" ON "Profiles"
-  FOR INSERT WITH CHECK (true);
+  FOR INSERT WITH CHECK (id = auth.uid()::text);
 
 -- ── Restaurants ────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "Restaurants" (
@@ -60,8 +92,12 @@ CREATE POLICY "Anyone can read restaurants" ON "Restaurants"
   FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Owner manages own restaurant" ON "Restaurants";
 CREATE POLICY "Owner manages own restaurant" ON "Restaurants"
-  FOR ALL USING (owner_id = auth.uid()::text OR true)
-  WITH CHECK (owner_id = auth.uid()::text OR true);
+  FOR INSERT WITH CHECK (owner_id = auth.uid()::text);
+CREATE POLICY "Owner updates own restaurant" ON "Restaurants"
+  FOR UPDATE USING (owner_id = auth.uid()::text)
+  WITH CHECK (owner_id = auth.uid()::text);
+CREATE POLICY "Owner deletes own restaurant" ON "Restaurants"
+  FOR DELETE USING (owner_id = auth.uid()::text);
 
 -- ── Menu Items ─────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "Menu_Items" (
@@ -86,11 +122,24 @@ DROP POLICY IF EXISTS "Anyone can read menu" ON "Menu_Items";
 CREATE POLICY "Anyone can read menu" ON "Menu_Items"
   FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Owner manages menu" ON "Menu_Items";
-CREATE POLICY "Owner manages menu" ON "Menu_Items"
-  FOR ALL USING (
-    EXISTS (SELECT 1 FROM "Restaurants" WHERE id = "Menu_Items".restaurant_id AND owner_id = auth.uid()::text)
-    OR true
-  ) WITH CHECK (true);
+CREATE POLICY "Owner inserts menu items" ON "Menu_Items"
+  FOR INSERT WITH CHECK (EXISTS (
+    SELECT 1 FROM "Restaurants"
+    WHERE id = "Menu_Items".restaurant_id AND owner_id = auth.uid()::text
+  ));
+CREATE POLICY "Owner updates menu items" ON "Menu_Items"
+  FOR UPDATE USING (EXISTS (
+    SELECT 1 FROM "Restaurants"
+    WHERE id = "Menu_Items".restaurant_id AND owner_id = auth.uid()::text
+  )) WITH CHECK (EXISTS (
+    SELECT 1 FROM "Restaurants"
+    WHERE id = "Menu_Items".restaurant_id AND owner_id = auth.uid()::text
+  ));
+CREATE POLICY "Owner deletes menu items" ON "Menu_Items"
+  FOR DELETE USING (EXISTS (
+    SELECT 1 FROM "Restaurants"
+    WHERE id = "Menu_Items".restaurant_id AND owner_id = auth.uid()::text
+  ));
 
 -- ── Orders ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "Orders" (
@@ -140,26 +189,32 @@ ALTER TABLE "Order_Items" ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Buyers read own orders" ON "Orders";
 CREATE POLICY "Buyers read own orders" ON "Orders"
-  FOR SELECT USING (user_id = auth.uid()::text OR true);
+  FOR SELECT USING (user_id = auth.uid()::text);
 DROP POLICY IF EXISTS "Buyers insert orders" ON "Orders";
 CREATE POLICY "Buyers insert orders" ON "Orders"
-  FOR INSERT WITH CHECK (true);
+  FOR INSERT WITH CHECK (user_id = auth.uid()::text);
 DROP POLICY IF EXISTS "Buyers update own orders" ON "Orders";
 CREATE POLICY "Buyers update own orders" ON "Orders"
-  FOR UPDATE USING (user_id = auth.uid()::text OR true);
+  FOR UPDATE USING (user_id = auth.uid()::text);
 DROP POLICY IF EXISTS "Sellers read restaurant orders" ON "Orders";
 CREATE POLICY "Sellers read restaurant orders" ON "Orders"
-  FOR SELECT USING (true);
+  FOR SELECT USING (
+    restaurant_id IN (SELECT id FROM "Restaurants" WHERE owner_id = auth.uid()::text)
+  );
 DROP POLICY IF EXISTS "Sellers update restaurant orders" ON "Orders";
 CREATE POLICY "Sellers update restaurant orders" ON "Orders"
-  FOR UPDATE USING (true);
+  FOR UPDATE USING (
+    restaurant_id IN (SELECT id FROM "Restaurants" WHERE owner_id = auth.uid()::text)
+  );
 
 DROP POLICY IF EXISTS "Anyone read order items" ON "Order_Items";
 CREATE POLICY "Anyone read order items" ON "Order_Items"
   FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Anyone insert order items" ON "Order_Items";
 CREATE POLICY "Anyone insert order items" ON "Order_Items"
-  FOR INSERT WITH CHECK (true);
+  FOR INSERT WITH CHECK (
+    order_id IN (SELECT id FROM "Orders" WHERE user_id = auth.uid()::text)
+  );
 
 -- ── Saved Addresses (buyer) ─────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "Saved_Addresses" (
@@ -175,8 +230,15 @@ CREATE INDEX IF NOT EXISTS idx_saved_addresses_user ON "Saved_Addresses"(user_id
 
 ALTER TABLE "Saved_Addresses" ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users manage own addresses" ON "Saved_Addresses";
-CREATE POLICY "Users manage own addresses" ON "Saved_Addresses"
-  FOR ALL USING (user_id = auth.uid()::text OR true) WITH CHECK (true);
+CREATE POLICY "Users read own addresses" ON "Saved_Addresses"
+  FOR SELECT USING (user_id = auth.uid()::text);
+CREATE POLICY "Users insert own addresses" ON "Saved_Addresses"
+  FOR INSERT WITH CHECK (user_id = auth.uid()::text);
+CREATE POLICY "Users update own addresses" ON "Saved_Addresses"
+  FOR UPDATE USING (user_id = auth.uid()::text)
+  WITH CHECK (user_id = auth.uid()::text);
+CREATE POLICY "Users delete own addresses" ON "Saved_Addresses"
+  FOR DELETE USING (user_id = auth.uid()::text);
 
 -- ── Reviews ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "Reviews" (
@@ -197,8 +259,8 @@ DROP POLICY IF EXISTS "Anyone can read reviews" ON "Reviews";
 CREATE POLICY "Anyone can read reviews" ON "Reviews"
   FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Buyers create reviews for own orders" ON "Reviews";
-CREATE POLICY "Buyers create reviews for own orders" ON "Reviews"
-  FOR INSERT WITH CHECK (user_id = auth.uid()::text OR true);
+CREATE POLICY "Buyers insert own reviews" ON "Reviews"
+  FOR INSERT WITH CHECK (user_id = auth.uid()::text);
 
 -- ── Offers / Promo Codes ───────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "Offers" (
@@ -230,8 +292,12 @@ CREATE INDEX IF NOT EXISTS idx_favorites_user ON "Favorites"(user_id);
 
 ALTER TABLE "Favorites" ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users manage own favorites" ON "Favorites";
-CREATE POLICY "Users manage own favorites" ON "Favorites"
-  FOR ALL USING (user_id = auth.uid()::text OR true) WITH CHECK (true);
+CREATE POLICY "Users read own favorites" ON "Favorites"
+  FOR SELECT USING (user_id = auth.uid()::text);
+CREATE POLICY "Users insert own favorites" ON "Favorites"
+  FOR INSERT WITH CHECK (user_id = auth.uid()::text);
+CREATE POLICY "Users delete own favorites" ON "Favorites"
+  FOR DELETE USING (user_id = auth.uid()::text);
 
 -- ── Food Favorites (buyer) ───────────────────────────────────
 CREATE TABLE IF NOT EXISTS "FoodFavorites" (
@@ -246,8 +312,12 @@ CREATE INDEX IF NOT EXISTS idx_food_favorites_user ON "FoodFavorites"(user_id);
 
 ALTER TABLE "FoodFavorites" ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users manage own food favorites" ON "FoodFavorites";
-CREATE POLICY "Users manage own food favorites" ON "FoodFavorites"
-  FOR ALL USING (user_id = auth.uid()::text OR true) WITH CHECK (true);
+CREATE POLICY "Users read own food favorites" ON "FoodFavorites"
+  FOR SELECT USING (user_id = auth.uid()::text);
+CREATE POLICY "Users insert own food favorites" ON "FoodFavorites"
+  FOR INSERT WITH CHECK (user_id = auth.uid()::text);
+CREATE POLICY "Users delete own food favorites" ON "FoodFavorites"
+  FOR DELETE USING (user_id = auth.uid()::text);
 
 -- ── Messages / Chat ────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "Messages" (
@@ -267,7 +337,7 @@ CREATE POLICY "Anyone can read messages" ON "Messages"
   FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Anyone can send messages" ON "Messages";
 CREATE POLICY "Anyone can send messages" ON "Messages"
-  FOR INSERT WITH CHECK (true);
+  FOR INSERT WITH CHECK (sender_id = auth.uid()::text);
 
 -- ── Referrals ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "Referrals" (
@@ -284,8 +354,10 @@ CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON "Referrals"(referrer_id);
 
 ALTER TABLE "Referrals" ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Anyone can manage referrals" ON "Referrals";
-CREATE POLICY "Anyone can manage referrals" ON "Referrals"
-  FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Anyone can read referrals" ON "Referrals"
+  FOR SELECT USING (true);
+CREATE POLICY "Users insert own referrals" ON "Referrals"
+  FOR INSERT WITH CHECK (referrer_id = auth.uid()::text);
 
 -- ── Notifications ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "Notifications" (
@@ -302,8 +374,10 @@ CREATE INDEX IF NOT EXISTS idx_notifications_user ON "Notifications"(user_id);
 
 ALTER TABLE "Notifications" ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users manage own notifications" ON "Notifications";
-CREATE POLICY "Users manage own notifications" ON "Notifications"
-  FOR ALL USING (user_id = auth.uid()::text OR true) WITH CHECK (true);
+CREATE POLICY "Users read own notifications" ON "Notifications"
+  FOR SELECT USING (user_id = auth.uid()::text);
+CREATE POLICY "Users update own notifications" ON "Notifications"
+  FOR UPDATE USING (user_id = auth.uid()::text);
 
 -- ── Realtime ───────────────────────────────────────────────────
 DO $$
@@ -357,39 +431,39 @@ INSERT INTO "Menu_Items" (
 ) VALUES
   ('menu-bh-classic', 'rest-burger-house', 'Classic Smash Burger',
    'https://images.unsplash.com/photo-1550547660-d9450f859349?w=600',
-   1290, 4.8, 'Burger', 'Double patty, cheddar, house sauce.',
+    1290, 4.8, 'Burger', 'Double patty, cheddar, house sauce.',
    '["Regular", "Large"]'::jsonb, '["Beef", "Cheddar", "Lettuce", "Tomato"]'::jsonb, true),
   ('menu-bh-chicken', 'rest-burger-house', 'Crispy Chicken Burger',
    'https://images.unsplash.com/photo-1606755962773-d324e788a531?w=600',
-   1190, 4.6, 'Burger', 'Fried chicken fillet with spicy mayo.',
+    1190, 4.6, 'Burger', 'Fried chicken fillet with spicy mayo.',
    '["Regular", "Large"]'::jsonb, '["Chicken", "Mayo", "Pickles"]'::jsonb, true),
   ('menu-bh-fries', 'rest-burger-house', 'Loaded Fries',
    'https://images.unsplash.com/photo-1573080496219-b080abfdc174?w=600',
-   690, 4.5, 'Sides', 'Cheese sauce, spring onion, bacon bits.',
+    690, 4.5, 'Sides', 'Cheese sauce, spring onion, bacon bits.',
    '["Regular"]'::jsonb, '["Potato", "Cheese", "Bacon"]'::jsonb, true),
   ('menu-pp-margherita', 'rest-pizza-palace', 'Margherita Pizza',
    'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600',
-   1890, 4.7, 'Pizza', 'Tomato, mozzarella, basil.',
+    1890, 4.7, 'Pizza', 'Tomato, mozzarella, basil.',
    '["10\"","14\"","16\""]'::jsonb, '["Tomato", "Mozzarella", "Basil"]'::jsonb, true),
   ('menu-pp-pepperoni', 'rest-pizza-palace', 'Pepperoni Feast',
    'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=600',
-   2190, 4.9, 'Pizza', 'Extra pepperoni and cheese blend.',
+    2190, 4.9, 'Pizza', 'Extra pepperoni and cheese blend.',
    '["10\"","14\"","16\""]'::jsonb, '["Pepperoni", "Mozzarella", "Tomato sauce"]'::jsonb, true),
   ('menu-pp-garlic', 'rest-pizza-palace', 'Garlic Bread',
    'https://images.unsplash.com/photo-1619535857770-99f9c2b7c4b0?w=600',
-   590, 4.4, 'Sides', 'Butter garlic bread with herbs.',
+    590, 4.4, 'Sides', 'Butter garlic bread with herbs.',
    '["Regular"]'::jsonb, '["Bread", "Garlic", "Butter"]'::jsonb, true),
   ('menu-gb-buddha', 'rest-green-bowl', 'Buddha Bowl',
    'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600',
-   1490, 4.8, 'Bowl', 'Quinoa, roasted veggies, tahini dressing.',
+    1490, 4.8, 'Bowl', 'Quinoa, roasted veggies, tahini dressing.',
    '["Regular", "Large"]'::jsonb, '["Quinoa", "Chickpeas", "Avocado", "Tahini"]'::jsonb, true),
   ('menu-gb-wrap', 'rest-green-bowl', 'Grilled Chicken Wrap',
    'https://images.unsplash.com/photo-1626700051175-6818036a40a5?w=600',
-   1290, 4.6, 'Sandwich', 'Whole wheat wrap with yogurt sauce.',
+    1290, 4.6, 'Sandwich', 'Whole wheat wrap with yogurt sauce.',
    '["Regular"]'::jsonb, '["Chicken", "Lettuce", "Yogurt sauce"]'::jsonb, true),
   ('menu-gb-smoothie', 'rest-green-bowl', 'Berry Smoothie',
    'https://images.unsplash.com/photo-1505252585461-04db1eb84665?w=600',
-   790, 4.7, 'Coffee', 'Mixed berries, yogurt, honey.',
+    790, 4.7, 'Coffee', 'Mixed berries, yogurt, honey.',
    '["Regular", "Large"]'::jsonb, '["Berries", "Yogurt", "Honey"]'::jsonb, true)
 ON CONFLICT (id) DO UPDATE SET
   restaurant_id = EXCLUDED.restaurant_id, name = EXCLUDED.name,
@@ -397,200 +471,3 @@ ON CONFLICT (id) DO UPDATE SET
   rating = EXCLUDED.rating, category = EXCLUDED.category,
   description = EXCLUDED.description, sizes = EXCLUDED.sizes,
   ingredients = EXCLUDED.ingredients;
-
--- ─── GROCERY TABLES ─────────────────────────────────────────────
-
-CREATE TABLE IF NOT EXISTS "Grocery_Categories" (
-  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  "name" TEXT NOT NULL,
-  "icon" TEXT,
-  "color" TEXT DEFAULT '#22C55E',
-  "description" TEXT,
-  "sort_order" INTEGER DEFAULT 0,
-  "created_at" TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS "Grocery_Products" (
-  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  "category_id" UUID REFERENCES "Grocery_Categories"("id") ON DELETE SET NULL,
-  "name" TEXT NOT NULL,
-  "description" TEXT,
-  "price" NUMERIC(10,2) NOT NULL,
-  "unit" TEXT DEFAULT '1pc',
-  "image_url" TEXT,
-  "stock" BOOLEAN DEFAULT true,
-  "is_featured" BOOLEAN DEFAULT false,
-  "created_at" TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS "Grocery_Cart" (
-  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE,
-  "product_id" UUID REFERENCES "Grocery_Products"("id") ON DELETE CASCADE,
-  "quantity" INTEGER DEFAULT 1,
-  "created_at" TIMESTAMPTZ DEFAULT now(),
-  UNIQUE("user_id", "product_id")
-);
-
-CREATE TABLE IF NOT EXISTS "Grocery_Wishlist" (
-  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE,
-  "product_id" UUID REFERENCES "Grocery_Products"("id") ON DELETE CASCADE,
-  "created_at" TIMESTAMPTZ DEFAULT now(),
-  UNIQUE("user_id", "product_id")
-);
-
-CREATE TABLE IF NOT EXISTS "Grocery_Orders" (
-  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE,
-  "items" JSONB NOT NULL,
-  "subtotal" NUMERIC(10,2) NOT NULL,
-  "delivery_fee" NUMERIC(10,2) DEFAULT 0,
-  "total" NUMERIC(10,2) NOT NULL,
-  "status" TEXT DEFAULT 'pending',
-  "scheduled_at" TIMESTAMPTZ,
-  "delivery_address" TEXT,
-  "created_at" TIMESTAMPTZ DEFAULT now()
-);
-
--- RLS for grocery tables
-ALTER TABLE "Grocery_Categories" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "Grocery_Products" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "Grocery_Cart" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "Grocery_Wishlist" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "Grocery_Orders" ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Public read grocery categories" ON "Grocery_Categories";
-DROP POLICY IF EXISTS "Public read grocery products" ON "Grocery_Products";
-DROP POLICY IF EXISTS "Users manage own grocery cart" ON "Grocery_Cart";
-DROP POLICY IF EXISTS "Users manage own grocery wishlist" ON "Grocery_Wishlist";
-DROP POLICY IF EXISTS "Users manage own grocery orders" ON "Grocery_Orders";
-
-CREATE POLICY "Public read grocery categories" ON "Grocery_Categories" FOR SELECT USING (true);
-CREATE POLICY "Public read grocery products" ON "Grocery_Products" FOR SELECT USING (true);
-
-CREATE POLICY "Users manage own grocery cart" ON "Grocery_Cart"
-  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
-
-CREATE POLICY "Users manage own grocery wishlist" ON "Grocery_Wishlist"
-  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
-
-CREATE POLICY "Users manage own grocery orders" ON "Grocery_Orders"
-  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
-
--- Indexes
-CREATE INDEX IF NOT EXISTS idx_grocery_products_category ON "Grocery_Products"("category_id");
-CREATE INDEX IF NOT EXISTS idx_grocery_cart_user ON "Grocery_Cart"("user_id");
-CREATE INDEX IF NOT EXISTS idx_grocery_wishlist_user ON "Grocery_Wishlist"("user_id");
-CREATE INDEX IF NOT EXISTS idx_grocery_orders_user ON "Grocery_Orders"("user_id");
-
--- ─── RIDE TABLES ─────────────────────────────────────────────
-
-CREATE TABLE IF NOT EXISTS "Ride_Orders" (
-  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE,
-  "pickup_name" TEXT,
-  "dropoff_name" TEXT,
-  "pickup_lat" DOUBLE PRECISION,
-  "pickup_lng" DOUBLE PRECISION,
-  "dropoff_lat" DOUBLE PRECISION,
-  "dropoff_lng" DOUBLE PRECISION,
-  "ride_type" TEXT,
-  "fare" INTEGER,
-  "distance_km" DOUBLE PRECISION,
-  "eta_min" INTEGER,
-  "driver_name" TEXT,
-  "driver_vehicle" TEXT,
-  "payment_method" TEXT DEFAULT 'cash',
-  "status" TEXT DEFAULT 'pending',
-  "created_at" TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS "Ride_Ratings" (
-  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE,
-  "driver_name" TEXT,
-  "ride_type" TEXT,
-  "rating" INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
-  "feedback" TEXT,
-  "comment" TEXT,
-  "fare" INTEGER,
-  "pickup" TEXT,
-  "dropoff" TEXT,
-  "created_at" TIMESTAMPTZ DEFAULT now()
-);
-
--- RLS for ride tables
-ALTER TABLE "Ride_Orders" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "Ride_Ratings" ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Users manage own ride orders" ON "Ride_Orders";
-DROP POLICY IF EXISTS "Users manage own ride ratings" ON "Ride_Ratings";
-
-CREATE POLICY "Users manage own ride orders" ON "Ride_Orders"
-  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
-
-CREATE POLICY "Users manage own ride ratings" ON "Ride_Ratings"
-  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
-
-CREATE INDEX IF NOT EXISTS idx_ride_orders_user ON "Ride_Orders"("user_id");
-CREATE INDEX IF NOT EXISTS idx_ride_ratings_user ON "Ride_Ratings"("user_id");
-
--- ─── WALLET & PAYMENT TABLES ───────────────────────────────────
-
-CREATE TABLE IF NOT EXISTS "Wallet" (
-  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE UNIQUE,
-  "balance" NUMERIC(10,2) DEFAULT 0,
-  "created_at" TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS "Wallet_Transactions" (
-  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE,
-  "type" TEXT NOT NULL,
-  "amount" NUMERIC(10,2) NOT NULL,
-  "description" TEXT,
-  "created_at" TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS "Payment_Methods" (
-  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  "user_id" UUID REFERENCES auth.users("id") ON DELETE CASCADE,
-  "type" TEXT DEFAULT 'card',
-  "card_number" TEXT,
-  "card_holder" TEXT,
-  "expiry" TEXT,
-  "is_default" BOOLEAN DEFAULT false,
-  "created_at" TIMESTAMPTZ DEFAULT now()
-);
-
--- RLS for wallet tables
-ALTER TABLE "Wallet" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "Wallet_Transactions" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "Payment_Methods" ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Users manage own wallet" ON "Wallet";
-DROP POLICY IF EXISTS "Users manage own wallet transactions" ON "Wallet_Transactions";
-DROP POLICY IF EXISTS "Users manage own payment methods" ON "Payment_Methods";
-
-CREATE POLICY "Users manage own wallet" ON "Wallet"
-  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
-
-CREATE POLICY "Users manage own wallet transactions" ON "Wallet_Transactions"
-  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
-
-CREATE POLICY "Users manage own payment methods" ON "Payment_Methods"
-  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
-
--- Increment wallet balance function
-CREATE OR REPLACE FUNCTION increment_wallet_balance(p_user_id UUID, p_amount NUMERIC)
-RETURNS void AS $$
-BEGIN
-  UPDATE "Wallet" SET balance = balance + p_amount WHERE user_id = p_user_id;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE INDEX IF NOT EXISTS idx_wallet_user ON "Wallet"("user_id");
-CREATE INDEX IF NOT EXISTS idx_wallet_transactions_user ON "Wallet_Transactions"("user_id");
-CREATE INDEX IF NOT EXISTS idx_payment_methods_user ON "Payment_Methods"("user_id");

@@ -1,120 +1,87 @@
-# 🍔 Food App V2 — Flutter + Supabase
+# Ale Fast — Flutter + Supabase Customer App
+
+> **IMPORTANT: Database Security**
+>
+> `supabase_schema.sql` is for **LOCAL DEVELOPMENT BOOTSTRAP ONLY**.
+> Production schema changes must be managed through **Ale-Backend** Supabase migrations.
+> Running `supabase_schema.sql` against production will overwrite secure RLS policies.
+>
+> See `tools/check_rls_security.ps1` to validate SQL files for unsafe patterns.
 
 ## Screens included
 
 | Screen | File |
 |--------|------|
-| Splash | `splash_screen.dart` (Part 1 ekn copy karanna) |
-| Onboarding | `onboarding_screen.dart` (Part 1 ekn copy karanna) |
-| Login | `login_screen.dart` (Part 1 ekn copy karanna) |
-| Sign Up | `signup_screen.dart` (Part 1 ekn copy karanna) |
-| Verification OTP | `verification_screen.dart` (Part 1 ekn copy karanna) |
-| Forgot Password | `forgot_password_screen.dart` (Part 1 ekn copy karanna) |
-| **Home** | `home_screen.dart` ✅ |
-| **Search** | `search_screen.dart` ✅ |
-| **Food Detail** | `food_detail_screen.dart` ✅ |
-| **Restaurant View** | `restaurant_view_screen.dart` ✅ |
-| **Cart** | `cart_screen.dart` ✅ |
-
-## Project Structure
-
-```
-lib/
-├── main.dart
-├── theme/
-│   └── app_theme.dart         # Colors, theme, constants
-├── models/
-│   └── models.dart            # Restaurant, FoodItem, CartItem, Offer
-├── services/
-│   └── database_service.dart  # Supabase queries + mock fallback
-├── providers/
-│   └── cart_provider.dart     # Cart state management
-├── widgets/
-│   └── common_widgets.dart    # Reusable UI components
-└── screens/
-    ├── home_screen.dart
-    ├── search_screen.dart
-    ├── food_detail_screen.dart
-    ├── restaurant_view_screen.dart
-    └── cart_screen.dart
-```
-
----
+| Splash | `splash_screen.dart` |
+| Onboarding | `onboarding_screen.dart` |
+| Login | `phone_auth_screen.dart` |
+| Verification OTP | `verification_screen.dart` |
+| Home | `home_screen.dart` |
+| Search | `search_screen.dart` |
+| Food Detail | `food_detail_screen.dart` |
+| Restaurant View | `restaurant_view_screen.dart` |
+| Cart | `cart_screen.dart` |
 
 ## Setup — Step by Step
 
-### Step 1: Full project create karanna
-```bash
-flutter create food_app
-cd food_app
-```
-
-### Step 2: Part 1 + Part 2 files copy karanna
-`lib/` folder ekata files copy karanna. `pubspec.yaml` replace karanna.
-
-### Step 3: Dependencies install karanna
+### Step 1: Get dependencies
 ```bash
 flutter pub get
 ```
 
-### Step 4: Supabase setup karanna
+### Step 2: Local Supabase setup (development only)
+1. Create a Supabase project at https://supabase.com
+2. Open **SQL Editor** → **New Query**
+3. Paste and run `supabase_schema.sql`
+4. Copy your **Project URL** and **anon public key**
 
-1. **https://supabase.com** gihilla free account hadanna
-2. "New project" click karanna
-3. Project create unama → **SQL Editor** → **New Query**
-4. `supabase_schema.sql` file eke SQL eka paste karala **Run** karanna
-5. **Project Settings → API** gihilla:
-   - `Project URL` copy karanna
-   - `anon public` key copy karanna
-
-### Step 5: App ekata add karanna
-`lib/theme/app_theme.dart` file eke:
+### Step 3: Configure credentials
+Update `lib/constants/app_constants.dart`:
 ```dart
-static const String supabaseUrl = 'https://xxxx.supabase.co';  // ← oya url
-static const String supabaseAnonKey = 'eyJhbGc...';             // ← oya key
+static const String supabaseUrl = 'https://xxxx.supabase.co';
+static const String supabaseAnonKey = 'eyJhbGc...';
 ```
 
-### Step 6: Run!
+### Step 4: Run
 ```bash
 flutter run
 ```
-
----
-
-## Features
-
-- ✅ **Mock data fallback** — Supabase connect nathnam local data use karanawa
-- ✅ **Cart state** — Provider pakagaya use karala real-time cart
-- ✅ **Shimmer loading** — Images load wenakan skeleton animation
-- ✅ **Offer popup** — Auto-shows on home screen after 2 seconds
-- ✅ **Category filter** — Click karala restaurants/food filter karana
-- ✅ **Search** — Real-time Supabase search with suggestions
-- ✅ **Cached images** — Once loaded images re-download wenne na
-- ✅ **Size selector** — Food detail screen eke size choose karana
 
 ## Supabase Tables
 
 | Table | Purpose |
 |-------|---------|
-| `restaurants` | Restaurant data |
-| `food_items` | Menu items |
-| `offers` | Promo codes & discounts |
-| `Orders` | User orders (status: `pending` → seller accepts) |
+| `Restaurants` | Restaurant data |
+| `Menu_Items` | Menu items |
+| `Orders` | User orders |
 | `Order_Items` | Items per order |
+| `Reviews` | Customer reviews |
+| `Saved_Addresses` | User delivery addresses |
 
-Run `supabase_schema.sql` in Supabase SQL Editor to create order tables.
+## RLS Security
 
----
+All tables have Row Level Security enabled with scoped policies.
+
+**Principle of least privilege:**
+- Customers can read public data (restaurants, menu items, reviews)
+- Customers can write only their own orders, profiles, addresses, and reviews
+- Merchants can write only their own restaurant and menu items
+- No `OR true` bypasses exist in any policy
+- Reviews are immutable after creation (no UPDATE/DELETE)
+
+Run `tools/check_rls_security.ps1` to validate SQL policies.
 
 ## Dependencies
 
 ```yaml
-supabase_flutter: ^2.3.4       # Database
-cached_network_image: ^3.3.1   # Image caching
-provider: ^6.1.1               # State management
-shimmer: ^3.0.0                # Loading animation
-google_fonts: ^6.1.0           # Nunito font
-smooth_page_indicator: ^1.1.0  # Onboarding dots
-flutter_rating_bar: ^4.0.1     # Star ratings
-shared_preferences: ^2.2.2     # Local storage
+supabase_flutter: ^2.12.4
+cached_network_image: ^3.3.1
+provider: ^6.1.1
+shimmer: ^3.0.0
+google_fonts: ^6.1.0
+intl: ^0.19.0
+flutter_map: ^6.1.0
+geolocator: ^14.0.2
+geocoding: ^4.0.0
+lucide_icons_flutter: ^3.1.15
 ```

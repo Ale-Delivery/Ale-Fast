@@ -45,13 +45,16 @@ Splash
 
 Use `BuyerNavigator` from `lib/navigation/buyer_navigator.dart` for all screen changes.
 
-## Supabase setup
+## Supabase setup (development only)
 
-1. Supabase project → **SQL Editor** → New query  
+> ⚠️ `supabase_schema.sql` is for **local development bootstrapping only**.
+> Production databases must use Ale-Backend Supabase migrations only.
+
+1. Create a Supabase project → **SQL Editor** → New query  
 2. Paste and **Run** all of `supabase_schema.sql`  
 3. Creates: `Profiles`, `Restaurants`, `Menu_Items`, `Orders`, `Order_Items` + sample data  
 4. **Database → Replication** → confirm `Orders` is enabled for Realtime (for track order)  
-5. `lib/theme/app_theme.dart` — set your `supabaseUrl` and `supabaseAnonKey`
+5. `lib/constants/app_constants.dart` — set your `supabaseUrl` and `supabaseAnonKey`
 
 ## Test order (buyer → seller)
 
