@@ -217,17 +217,27 @@ class Order {
   final OrderStatus status;
   final double subtotal;
   final double deliveryFee;
+  final double serviceFee;
   final double total;
   final String deliveryAddress;
   final String deliveryPhone;
   final String? deliveryNotes;
   final String paymentMethod;
+  final String? paymentStatus;
+  final double? deliveryLatitude;
+  final double? deliveryLongitude;
+  final String? savedAddressId;
+  final String? orderNumber;
   final DateTime? createdAt;
+  final DateTime? updatedAt;
   final DateTime? scheduledAt;
   final double? driverLat;
   final double? driverLng;
   final String? driverEta;
+  final String? driverName;
   final double tip;
+  final String? promoCode;
+  final double discount;
 
   const Order({
     required this.id,
@@ -237,17 +247,27 @@ class Order {
     required this.status,
     required this.subtotal,
     required this.deliveryFee,
+    this.serviceFee = 0,
     required this.total,
     required this.deliveryAddress,
     required this.deliveryPhone,
     this.deliveryNotes,
     this.paymentMethod = 'cash',
+    this.paymentStatus,
+    this.deliveryLatitude,
+    this.deliveryLongitude,
+    this.savedAddressId,
+    this.orderNumber,
     this.createdAt,
+    this.updatedAt,
     this.scheduledAt,
     this.driverLat,
     this.driverLng,
     this.driverEta,
+    this.driverName,
     this.tip = 0,
+    this.promoCode,
+    this.discount = 0,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
@@ -258,13 +278,22 @@ class Order {
         status: OrderStatus.fromString(json['status']?.toString()),
         subtotal: _toDouble(json['subtotal']),
         deliveryFee: _toDouble(json['delivery_fee']),
+        serviceFee: _toDouble(json['service_fee']),
         total: _toDouble(json['total']),
         deliveryAddress: json['delivery_address'] ?? '',
         deliveryPhone: json['delivery_phone'] ?? '',
         deliveryNotes: json['delivery_notes']?.toString(),
         paymentMethod: json['payment_method'] ?? 'cash',
+        paymentStatus: json['payment_status']?.toString(),
+        deliveryLatitude: _toDoubleOrNull(json['delivery_latitude']),
+        deliveryLongitude: _toDoubleOrNull(json['delivery_longitude']),
+        savedAddressId: json['saved_address_id']?.toString(),
+        orderNumber: json['order_number']?.toString(),
         createdAt: json['created_at'] != null
             ? DateTime.tryParse(json['created_at'].toString())
+            : null,
+        updatedAt: json['updated_at'] != null
+            ? DateTime.tryParse(json['updated_at'].toString())
             : null,
         scheduledAt: json['scheduled_at'] != null
             ? DateTime.tryParse(json['scheduled_at'].toString())
@@ -272,7 +301,10 @@ class Order {
         driverLat: _toDoubleOrNull(json['driver_lat']),
         driverLng: _toDoubleOrNull(json['driver_lng']),
         driverEta: json['driver_eta']?.toString(),
+        driverName: json['driver_name']?.toString(),
         tip: _toDouble(json['tip']),
+        promoCode: json['promo_code']?.toString(),
+        discount: _toDouble(json['discount']),
       );
 
   Map<String, dynamic> toJson() => {
@@ -283,24 +315,44 @@ class Order {
         'status': status.value,
         'subtotal': subtotal,
         'delivery_fee': deliveryFee,
+        'service_fee': serviceFee,
         'total': total,
         'delivery_address': deliveryAddress,
         'delivery_phone': deliveryPhone,
         'delivery_notes': deliveryNotes,
         'payment_method': paymentMethod,
+        'payment_status': paymentStatus,
+        'delivery_latitude': deliveryLatitude,
+        'delivery_longitude': deliveryLongitude,
+        'saved_address_id': savedAddressId,
+        'order_number': orderNumber,
         'created_at': createdAt?.toIso8601String(),
+        'updated_at': updatedAt?.toIso8601String(),
         'scheduled_at': scheduledAt?.toIso8601String(),
         'driver_lat': driverLat,
         'driver_lng': driverLng,
         'driver_eta': driverEta,
+        'driver_name': driverName,
         'tip': tip,
+        'promo_code': promoCode,
+        'discount': discount,
       };
+
+  String get displayOrderNumber =>
+      orderNumber ??
+      '#${id.length >= 8 ? id.substring(0, 8).toUpperCase() : id.toUpperCase()}';
 }
 
 // ─── Helpers ──────────────────────────────────────────────────
 double? _toDoubleOrNull(dynamic v) {
   if (v == null) return null;
-  return v is double ? v : v is int ? v.toDouble() : v is String ? (double.tryParse(v) ?? 0) : 0;
+  return v is double
+      ? v
+      : v is int
+          ? v.toDouble()
+          : v is String
+              ? (double.tryParse(v) ?? 0)
+              : 0;
 }
 
 // ─── Order Item Line ───────────────────────────────────────────
@@ -313,6 +365,8 @@ class OrderItemLine {
   final int quantity;
   final String? selectedSize;
   final String? imageUrl;
+  final double? lineTotal;
+  final DateTime? createdAt;
 
   const OrderItemLine({
     required this.id,
@@ -323,9 +377,11 @@ class OrderItemLine {
     required this.quantity,
     this.selectedSize,
     this.imageUrl,
+    this.lineTotal,
+    this.createdAt,
   });
 
-  double get lineTotal => price * quantity;
+  double get computedLineTotal => lineTotal ?? price * quantity;
 
   factory OrderItemLine.fromJson(Map<String, dynamic> json) => OrderItemLine(
         id: json['id']?.toString() ?? '',
@@ -336,6 +392,10 @@ class OrderItemLine {
         quantity: _toInt(json['quantity'], fallback: 1),
         selectedSize: json['selected_size']?.toString(),
         imageUrl: json['image_url']?.toString(),
+        lineTotal: _toDoubleOrNull(json['line_total']),
+        createdAt: json['created_at'] != null
+            ? DateTime.tryParse(json['created_at'].toString())
+            : null,
       );
 }
 

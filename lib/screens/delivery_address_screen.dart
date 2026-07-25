@@ -635,12 +635,19 @@ class _DeliveryAddressScreenState extends State<DeliveryAddressScreen> {
         return;
       }
 
+      final savedId = _selectedAddressId;
+      final defaultAddr = await _addressService.getDefaultAddress();
+      final effectiveSavedId = savedId ?? defaultAddr?.id;
+
       BuyerNavigator.checkout(
         context,
         deliveryAddress: savedAddress.address,
         deliveryPhone: savedAddress.phone,
         deliveryNotes: notes.isEmpty ? null : notes,
         addressLabel: savedAddress.label,
+        deliveryLatitude: savedAddress.latitude,
+        deliveryLongitude: savedAddress.longitude,
+        savedAddressId: effectiveSavedId,
       );
     } catch (error) {
       if (mounted) {

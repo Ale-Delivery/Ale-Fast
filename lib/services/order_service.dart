@@ -1,72 +1,58 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/models.dart';
 import '../providers/cart_provider.dart';
-import 'local_storage_service.dart';
 
 class OrderService {
   static final SupabaseClient _client = Supabase.instance.client;
 
-  /// Places order with status `pending` so seller app can accept.
+  static String _getUserId() {
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      throw Exception('Please sign in to place an order.');
+    }
+    return user.id;
+  }
+
   static Future<Order> placeOrder({
     required CartProvider cart,
     required String deliveryAddress,
     required String deliveryPhone,
     String? deliveryNotes,
+    double? deliveryLatitude,
+    double? deliveryLongitude,
+    String? savedAddressId,
     String paymentMethod = 'cash',
     String? promoCode,
     double discount = 0,
     DateTime? scheduledAt,
     double tip = 0,
+    double deliveryFee = 0,
   }) async {
-    if (cart.items.isEmpty) {
-      throw Exception('Cart is empty');
-    }
+    _getUserId();
 
-    final userId = await LocalStorageService.getUserId();
-    if (userId == null || userId.isEmpty) {
-      throw Exception('Please complete your profile first');
+    if (cart.items.isEmpty) {
+      throw Exception('Your cart is empty.');
     }
 
     final firstItem = cart.items.first.food;
     final restaurantId = firstItem.restaurantId;
     final restaurantName = firstItem.restaurantName;
 
-    final orderData = {
-      'user_id': userId,
-      'restaurant_id': restaurantId,
-      'restaurant_name': restaurantName,
-      'status': OrderStatus.pending.value,
-      'subtotal': cart.subtotal,
-      'delivery_fee': cart.deliveryFee,
-      'total': cart.total - discount,
-      'delivery_address': deliveryAddress,
-      'delivery_phone': deliveryPhone,
-      'delivery_notes': deliveryNotes,
-      'payment_method': paymentMethod,
-    };
-
-    if (promoCode != null) {
-      orderData['promo_code'] = promoCode;
-      orderData['discount'] = discount;
+    if (restaurantId.isEmpty) {
+      throw Exception('Restaurant information is missing.');
     }
 
-    if (scheduledAt != null) {
-      orderData['scheduled_at'] = scheduledAt.toIso8601String();
+    if (deliveryAddress.trim().isEmpty) {
+      throw Exception('Delivery address is required.');
     }
 
-    if (tip > 0) {
-      orderData['tip'] = tip;
-      orderData['total'] = (orderData['total'] as double) + tip;
+    if (deliveryPhone.trim().isEmpty) {
+      throw Exception('Delivery phone number is required.');
     }
 
-    final orderResponse =
-        await _client.from('Orders').insert(orderData).select().single();
-
-    final orderId = orderResponse['id']?.toString() ?? '';
-
-    final orderItems = cart.items
+    final items = cart.items
         .map((item) => {
-              'order_id': orderId,
               'food_item_id': item.food.id,
               'name': item.food.name,
               'price': item.food.price,
@@ -76,48 +62,110 @@ class OrderService {
             })
         .toList();
 
-    await _client.from('Order_Items').insert(orderItems);
+    try {
+      final params = <String, dynamic>{
+        'p_restaurant_id': restaurantId,
+        'p_restaurant_name': restaurantName,
+        'p_items': items,
+        'p_delivery_address': deliveryAddress.trim(),
+        'p_delivery_phone': deliveryPhone.trim(),
+        'p_delivery_latitude': deliveryLatitude,
+        'p_delivery_longitude': deliveryLongitude,
+        'p_delivery_notes': deliveryNotes?.trim(),
+        'p_payment_method': paymentMethod,
+        'p_saved_address_id': savedAddressId,
+        'p_delivery_fee': deliveryFee,
+        'p_promo_code': promoCode,
+        'p_discount': discount,
+        'p_scheduled_at': scheduledAt?.toUtc().toIso8601String(),
+        'p_tip': tip,
+      };
 
-    return Order.fromJson(Map<String, dynamic>.from(orderResponse));
+      params.removeWhere((key, value) => value == null);
+
+      final response =
+          await _client.rpc('create_customer_order', params: params);
+
+      if (response == null) {
+        throw Exception('The order could not be created. Please try again.');
+      }
+
+      Order order;
+
+      if (response is Map) {
+        order = Order.fromJson(Map<String, dynamic>.from(response));
+      } else {
+        throw Exception('Invalid response from server.');
+      }
+
+      debugPrint('[OrderService] Order placed: ${order.id}');
+      return order;
+    } on PostgrestException catch (e) {
+      debugPrint('[OrderService] Database error: ${e.message}');
+      throw Exception(_friendlyError(e.message));
+    } catch (e) {
+      debugPrint('[OrderService] Error: $e');
+      rethrow;
+    }
   }
 
-  static Future<List<Order>> getUserOrders() async {
-    final userId = await LocalStorageService.getUserId();
-    if (userId == null) return [];
+  static Future<List<Order>> getUserOrders({int limit = 50}) async {
+    final userId = _getUserId();
+    try {
+      final response = await _client
+          .from('Orders')
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: false)
+          .limit(limit);
 
-    final response = await _client
-        .from('Orders')
-        .select()
-        .eq('user_id', userId)
-        .order('created_at', ascending: false);
-
-    return (response as List)
-        .map((o) => Order.fromJson(Map<String, dynamic>.from(o)))
-        .toList();
+      return (response as List)
+          .map((o) => Order.fromJson(Map<String, dynamic>.from(o)))
+          .toList();
+    } catch (e) {
+      debugPrint('[OrderService] getUserOrders error: $e');
+      return [];
+    }
   }
 
   static Future<Order?> getOrder(String orderId) async {
-    final response =
-        await _client.from('Orders').select().eq('id', orderId).maybeSingle();
-    if (response == null) return null;
-    return Order.fromJson(Map<String, dynamic>.from(response));
+    try {
+      final response =
+          await _client.from('Orders').select().eq('id', orderId).maybeSingle();
+      if (response == null) return null;
+      return Order.fromJson(Map<String, dynamic>.from(response));
+    } catch (e) {
+      debugPrint('[OrderService] getOrder error: $e');
+      return null;
+    }
   }
 
   static Future<List<OrderItemLine>> getOrderItems(String orderId) async {
-    final response =
-        await _client.from('Order_Items').select().eq('order_id', orderId);
+    try {
+      final response =
+          await _client.from('Order_Items').select().eq('order_id', orderId);
 
-    return (response as List)
-        .map((i) => OrderItemLine.fromJson(Map<String, dynamic>.from(i)))
-        .toList();
+      return (response as List)
+          .map((i) => OrderItemLine.fromJson(Map<String, dynamic>.from(i)))
+          .toList();
+    } catch (e) {
+      debugPrint('[OrderService] getOrderItems error: $e');
+      return [];
+    }
   }
 
-  /// Buyer can cancel if order is pending or accepted (before restaurant starts preparing).
   static Future<void> cancelOrder(String orderId) async {
-    await _client
-        .from('Orders')
-        .update({'status': OrderStatus.cancelled.value})
-        .eq('id', orderId);
+    try {
+      await _client.rpc('cancel_customer_order', params: {
+        'p_order_id': orderId,
+      });
+      debugPrint('[OrderService] Order cancelled: $orderId');
+    } on PostgrestException catch (e) {
+      throw Exception(_friendlyError(e.message));
+    } catch (e) {
+      debugPrint('[OrderService] cancelOrder error: $e');
+      rethrow;
+    }
   }
 
   static Stream<Order?> watchOrder(String orderId) {
@@ -129,5 +177,26 @@ class OrderService {
           if (rows.isEmpty) return null;
           return Order.fromJson(Map<String, dynamic>.from(rows.first));
         });
+  }
+
+  static String _friendlyError(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('authentication required')) {
+      return 'Please sign in to continue.';
+    }
+    if (lower.contains('cart is empty')) {
+      return 'Your cart is empty. Add items before placing an order.';
+    }
+    if (lower.contains('duplicate') || lower.contains('already exists')) {
+      return 'This order was already submitted.';
+    }
+    if (lower.contains('not found')) {
+      return 'Order not found. It may have been removed.';
+    }
+    if (lower.contains('permission denied') ||
+        lower.contains('violates row-level security')) {
+      return 'You do not have permission to perform this action.';
+    }
+    return 'Something went wrong. Please try again.';
   }
 }

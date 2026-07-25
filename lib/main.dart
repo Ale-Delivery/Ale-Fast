@@ -119,6 +119,9 @@ class AleClientApp extends StatelessWidget {
             deliveryPhone: args['deliveryPhone'] as String,
             deliveryNotes: args['deliveryNotes'] as String?,
             addressLabel: args['addressLabel'] as String? ?? 'Home',
+            deliveryLatitude: args['deliveryLatitude'] as double?,
+            deliveryLongitude: args['deliveryLongitude'] as double?,
+            savedAddressId: args['savedAddressId'] as String?,
           ),
         );
 

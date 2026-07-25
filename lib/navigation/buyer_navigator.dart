@@ -146,6 +146,9 @@ class BuyerNavigator {
     required String deliveryPhone,
     String? deliveryNotes,
     String addressLabel = 'Home',
+    double? deliveryLatitude,
+    double? deliveryLongitude,
+    String? savedAddressId,
   }) {
     Navigator.of(context).push(
       _route(
@@ -154,6 +157,9 @@ class BuyerNavigator {
           deliveryPhone: deliveryPhone,
           deliveryNotes: deliveryNotes,
           addressLabel: addressLabel,
+          deliveryLatitude: deliveryLatitude,
+          deliveryLongitude: deliveryLongitude,
+          savedAddressId: savedAddressId,
         ),
         name: AppRoutes.checkout,
       ),

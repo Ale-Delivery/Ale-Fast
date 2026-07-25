@@ -470,13 +470,13 @@ CREATE POLICY "Public read grocery categories" ON "Grocery_Categories" FOR SELEC
 CREATE POLICY "Public read grocery products" ON "Grocery_Products" FOR SELECT USING (true);
 
 CREATE POLICY "Users manage own grocery cart" ON "Grocery_Cart"
-  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
 
 CREATE POLICY "Users manage own grocery wishlist" ON "Grocery_Wishlist"
-  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
 
 CREATE POLICY "Users manage own grocery orders" ON "Grocery_Orders"
-  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_grocery_products_category ON "Grocery_Products"("category_id");
@@ -528,10 +528,10 @@ DROP POLICY IF EXISTS "Users manage own ride orders" ON "Ride_Orders";
 DROP POLICY IF EXISTS "Users manage own ride ratings" ON "Ride_Ratings";
 
 CREATE POLICY "Users manage own ride orders" ON "Ride_Orders"
-  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
 
 CREATE POLICY "Users manage own ride ratings" ON "Ride_Ratings"
-  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
 
 CREATE INDEX IF NOT EXISTS idx_ride_orders_user ON "Ride_Orders"("user_id");
 CREATE INDEX IF NOT EXISTS idx_ride_ratings_user ON "Ride_Ratings"("user_id");
@@ -575,13 +575,13 @@ DROP POLICY IF EXISTS "Users manage own wallet transactions" ON "Wallet_Transact
 DROP POLICY IF EXISTS "Users manage own payment methods" ON "Payment_Methods";
 
 CREATE POLICY "Users manage own wallet" ON "Wallet"
-  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
 
 CREATE POLICY "Users manage own wallet transactions" ON "Wallet_Transactions"
-  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
 
 CREATE POLICY "Users manage own payment methods" ON "Payment_Methods"
-  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR ALL USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
 
 -- Increment wallet balance function
 CREATE OR REPLACE FUNCTION increment_wallet_balance(p_user_id UUID, p_amount NUMERIC)
